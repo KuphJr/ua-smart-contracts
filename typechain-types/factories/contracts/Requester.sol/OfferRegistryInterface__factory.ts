@@ -14,7 +14,12 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
-        name: "requester",
+        name: "offerer",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "offeree",
         type: "address",
       },
       {

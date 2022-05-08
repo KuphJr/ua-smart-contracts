@@ -15,9 +15,10 @@ interface DirectRequestAggregatorInterface {
 
 interface OfferRegistryInterface {
   function registerOffer(
-    address requester,
+    address offerer,
+    address offeree,
     string calldata scriptIpfsHash,
-    uint256 maxOfferValue
+    uint maxOfferValue
   ) external;
 }
 
@@ -89,7 +90,9 @@ contract Requester {
     );
     linkTokenContract.transferFrom(offerer, address(this), balance);
     registryContract.registerOffer(
-      offerer, scriptIpfsHash,
+      offerer,
+      offeree,
+      scriptIpfsHash,
       linkTokenContract.allowance(offerer, address(this)) - 1000000000000000000
     );
   }

@@ -2,3 +2,4 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as requesterSol from "./Requester.sol";
+export { OfferRegistry__factory } from "./OfferRegistry__factory";

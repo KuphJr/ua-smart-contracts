@@ -24,14 +24,14 @@ import type {
 
 export interface OfferRegistryInterfaceInterface extends utils.Interface {
   functions: {
-    "registerOffer(address,string,uint256)": FunctionFragment;
+    "registerOffer(address,address,string,uint256)": FunctionFragment;
   };
 
   getFunction(nameOrSignatureOrTopic: "registerOffer"): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "registerOffer",
-    values: [string, string, BigNumberish]
+    values: [string, string, string, BigNumberish]
   ): string;
 
   decodeFunctionResult(
@@ -70,7 +70,8 @@ export interface OfferRegistryInterface extends BaseContract {
 
   functions: {
     registerOffer(
-      requester: string,
+      offerer: string,
+      offeree: string,
       scriptIpfsHash: string,
       maxOfferValue: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -78,7 +79,8 @@ export interface OfferRegistryInterface extends BaseContract {
   };
 
   registerOffer(
-    requester: string,
+    offerer: string,
+    offeree: string,
     scriptIpfsHash: string,
     maxOfferValue: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -86,7 +88,8 @@ export interface OfferRegistryInterface extends BaseContract {
 
   callStatic: {
     registerOffer(
-      requester: string,
+      offerer: string,
+      offeree: string,
       scriptIpfsHash: string,
       maxOfferValue: BigNumberish,
       overrides?: CallOverrides
@@ -97,7 +100,8 @@ export interface OfferRegistryInterface extends BaseContract {
 
   estimateGas: {
     registerOffer(
-      requester: string,
+      offerer: string,
+      offeree: string,
       scriptIpfsHash: string,
       maxOfferValue: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -106,7 +110,8 @@ export interface OfferRegistryInterface extends BaseContract {
 
   populateTransaction: {
     registerOffer(
-      requester: string,
+      offerer: string,
+      offeree: string,
       scriptIpfsHash: string,
       maxOfferValue: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }

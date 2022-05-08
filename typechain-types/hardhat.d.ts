@@ -17,6 +17,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.LinkTokenInterface__factory>;
     getContractFactory(
+      name: "OfferRegistry",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.OfferRegistry__factory>;
+    getContractFactory(
       name: "DirectRequestAggregatorInterface",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.DirectRequestAggregatorInterface__factory>;
@@ -34,6 +38,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.LinkTokenInterface>;
+    getContractAt(
+      name: "OfferRegistry",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.OfferRegistry>;
     getContractAt(
       name: "DirectRequestAggregatorInterface",
       address: string,

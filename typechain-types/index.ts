@@ -8,6 +8,8 @@ export type { contracts };
 export * as factories from "./factories";
 export type { LinkTokenInterface } from "./@chainlink/contracts/src/v0.7/interfaces/LinkTokenInterface";
 export { LinkTokenInterface__factory } from "./factories/@chainlink/contracts/src/v0.7/interfaces/LinkTokenInterface__factory";
+export type { OfferRegistry } from "./contracts/OfferRegistry";
+export { OfferRegistry__factory } from "./factories/contracts/OfferRegistry__factory";
 export type { DirectRequestAggregatorInterface } from "./contracts/Requester.sol/DirectRequestAggregatorInterface";
 export { DirectRequestAggregatorInterface__factory } from "./factories/contracts/Requester.sol/DirectRequestAggregatorInterface__factory";
 export type { OfferRegistryInterface } from "./contracts/Requester.sol/OfferRegistryInterface";
