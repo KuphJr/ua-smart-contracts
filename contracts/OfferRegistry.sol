@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
 contract OfferRegistry {
 
   struct Offer {
+    address offerContractAddress;
     address offerer;
     address offeree;
     string scriptIpfsHash;
@@ -29,7 +30,9 @@ contract OfferRegistry {
     string calldata scriptIpfsHash,
     uint maxOfferValue
   ) external onlyRequester {
-    offers.push(Offer(offerer, offeree, scriptIpfsHash, maxOfferValue));
+    offers.push(
+      Offer(msg.sender, offerer, offeree, scriptIpfsHash, maxOfferValue)
+    );
   }
 
   function getRegistryLength() public view returns (uint length) {

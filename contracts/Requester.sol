@@ -38,11 +38,6 @@ contract Requester {
   address public offeree;
   string public scriptIpfsHash;
   uint public expirationTime;
-  
-  /*
-   * The variable below is used to prevent multiple concurrent Universal Adapter direct requests.
-   */
-  uint public lastBlockFulfillOfferWasCalled;
 
   /**
    * @dev A brand deploys a separate instance of this contract for each individual sponsorship
@@ -74,32 +69,25 @@ contract Requester {
   }
 
   /**
-   * @dev This function is called by a brand to add LINK to the contract to pay an influencer and
-   * fund the Universal Adapter direct request.  It also registers with the registry contract.
-   * @notice This function must be called AFTER the brand approves an allowance for this contract
-   * that has a value equal to the maximum value an influencer can earn + 1 LINK.
-   * The additional 1 LINK is used to pay for the Universal Adapter direct request.
+   * @dev This function is called by a brand to add LINK to the contract to pay an influencer.
+   * It also registers with the registry contract.
    */
   function initalizeOffer() public onlyOfferer {
-    // The brand must fund the contract with more than 1 LINK in order to pay for the
-    // direct request and have funds left to pay the influencer.
     uint balance = linkTokenContract.allowance(offerer, address(this));
-    require(
-      balance > 1000000000000000000,
-      "Fund with > 1 LINK"
-    );
     linkTokenContract.transferFrom(offerer, address(this), balance);
     registryContract.registerOffer(
       offerer,
       offeree,
       scriptIpfsHash,
-      linkTokenContract.allowance(offerer, address(this)) - 1000000000000000000
+      balance
     );
   }
 
   /**
     @dev This function is called by the influencer to fulfill a brand integration offer and
     initiate the Universal Adapter direct request to calculate and send the amount earned.
+    @notice This function must be called AFTER the influencer approves 1 LINK to be spend
+    * by this contract in order to pay for the request.
     @param url The URL of the sponsored Tweet
     @param apiKey A functioning Twitter API key
   */
@@ -107,15 +95,14 @@ contract Requester {
     string calldata url,
     string calldata apiKey
   ) public onlyOfferee {
+    require(
+      linkTokenContract.allowance(msg.sender, address(this)) > 1000000000000000000,
+      "Must approve 1 LINK"
+    );
     require(block.timestamp <= expirationTime, "Offer expired");
-    // This logic allows a "retry" to fulfill the offer.
-    // If the direct request isn't fulfilled within 128 blocks, it has failed and will never be
-    // fulfilled. This logic is handled in the DirectRequestAggregator contract.
-    require(block.number - lastBlockFulfillOfferWasCalled > 128, "Still waiting for response");
-    lastBlockFulfillOfferWasCalled = block.number;
     // the `vars` object must be a JSON formatted string
     string memory vars = string(abi.encodePacked('{"tweetUrl":"', url, '","apiKey":"', apiKey, '"}'));
-    linkTokenContract.transferFrom(address(this), address(aggregatorContract), 1000000000000000000);
+    linkTokenContract.transferFrom(msg.sender, address(aggregatorContract), 1000000000000000000);
     aggregatorContract.makeRequest("", scriptIpfsHash, vars, "", "uint");
   }
 
