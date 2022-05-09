@@ -31,13 +31,14 @@ contract Requester {
   DirectRequestAggregatorInterface public aggregatorContract;
   OfferRegistryInterface public registryContract;
 
-  /*
-   * The 3 variables below will be set when this contract is deployed and initalized.
-   */
+  // The 3 variables below will be set when this contract is deployed and initalized.
   address public offerer;
   address public offeree;
   string public scriptIpfsHash;
   uint public expirationTime;
+
+  // Holds the state of the contract.  Either "pending", "fulfilled" or "expired"
+  bytes32 public state;
 
   /**
    * @dev A brand deploys a separate instance of this contract for each individual sponsorship
@@ -124,6 +125,7 @@ contract Requester {
       offerer,
       linkTokenContract.balanceOf(address(this))
     );
+    state = "fulfilled";
   }
 
   /**
@@ -137,6 +139,19 @@ contract Requester {
       offerer,
       linkTokenContract.balanceOf(address(this))
     );
+  }
+
+  /**
+   * @dev Gets the current state of a contract ("pending", "fulfilled" or "expired")
+   */
+  function getState() external view returns (bytes32 state) {
+    if (state == bytes32("fulfilled")) {
+      return "fulfilled";
+    }
+    if (block.timestamp > expirationTime) {
+      return "expired";
+    }
+    return "pending";
   }
 
   modifier onlyOfferer {

@@ -2,6 +2,10 @@
 pragma solidity >=0.7.0;
 pragma experimental ABIEncoderV2;
 
+interface RequesterInterface {
+  function getState() external view returns (bytes32 state);
+}
+
 contract OfferRegistry {
 
   struct Offer {
@@ -71,6 +75,10 @@ contract OfferRegistry {
 
   function getOfferInfo(uint offerIndex) public view returns (Offer memory offer) {
     return offers[offerIndex];
+  }
+
+  function getOfferState(uint offerIndex) public view returns (bytes32 state) {
+    return RequesterInterface(offers[offerIndex].contractAddress).getState();
   }
 
   //
