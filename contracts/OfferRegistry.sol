@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 contract OfferRegistry {
 
   struct Offer {
-    address offerContractAddress;
+    address contractAddress;
     address offerer;
     address offeree;
     string scriptIpfsHash;
@@ -37,6 +37,12 @@ contract OfferRegistry {
 
   function getRegistryLength() public view returns (uint length) {
     return offers.length;
+  }
+
+  function getOfferContractAddress(
+    uint offerIndex
+  ) public view returns (address contractAddress) {
+    return offers[offerIndex].contractAddress;
   }
 
   function getOfferOfferer(
