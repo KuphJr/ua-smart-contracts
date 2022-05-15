@@ -5,11 +5,12 @@ import "@chainlink/contracts/src/v0.7/interfaces/LinkTokenInterface.sol";
 
 interface DirectRequestAggregatorInterface {
   function makeRequest(
+    address callbackAddress,
+    bytes4 callbackFunctionId,
     string calldata js,
     string calldata cid,
     string calldata vars,
-    bytes32 ref,
-    bytes32 returnType
+    bytes32 ref
   ) external;
 }
 
@@ -100,11 +101,23 @@ contract Requester {
       linkTokenContract.allowance(msg.sender, address(this)) > 1000000000000000000,
       "Must approve 1 LINK"
     );
+    // solhint-disable-next-line not-rely-on-time
     require(block.timestamp <= expirationTime, "Offer expired");
     // the `vars` object must be a JSON formatted string
-    string memory vars = string(abi.encodePacked('{"tweetUrl":"', url, '","apiKey":"', apiKey, '"}'));
-    linkTokenContract.transferFrom(msg.sender, address(aggregatorContract), 1000000000000000000);
-    aggregatorContract.makeRequest("", scriptIpfsHash, vars, "", "uint");
+    string memory vars = string(abi.encodePacked('{"tweetUrl":"', url, '","apiKey":"', apiKey, '"}')); // solhint-disable-line
+    linkTokenContract.transferFrom(
+      msg.sender,
+      address(aggregatorContract),
+      1000000000000000000
+    );
+    aggregatorContract.makeRequest(
+      address(this),
+      this.fulfillDirectRequest.selector,
+      "",
+      scriptIpfsHash,
+      vars,
+      ""
+    );
   }
 
   /**
@@ -113,13 +126,21 @@ contract Requester {
   */
   function fulfillDirectRequest(
     uint amountOwed
-  ) public onlyDON {
+  ) public onlyDirectRequestAggregator {
     uint balance = linkTokenContract.balanceOf(address(this));
     if (balance <= amountOwed) {
-      linkTokenContract.transferFrom(address(this), offeree, balance);
+      linkTokenContract.transferFrom(
+        address(this),
+        offeree,
+        balance
+      );
       return;
     }
-    linkTokenContract.transferFrom(address(this), offeree, amountOwed);
+    linkTokenContract.transferFrom(
+      address(this),
+      offeree,
+      amountOwed
+    );
     linkTokenContract.transferFrom(
       address(this),
       offerer,
@@ -133,6 +154,7 @@ contract Requester {
     the brand can recover their locked funds.
   */
   function recoverFunds() public {
+    // solhint-disable-next-line not-rely-on-time
     require(block.timestamp > expirationTime, "Offer not expired");
     linkTokenContract.transferFrom(
       address(this),
@@ -148,6 +170,7 @@ contract Requester {
     if (state == bytes32("fulfilled")) {
       return "fulfilled";
     }
+    // solhint-disable-next-line not-rely-on-time
     if (block.timestamp > expirationTime) {
       return "expired";
     }
@@ -168,8 +191,8 @@ contract Requester {
    * @dev A modifier that only allows a function to be called by the direct request
    * aggregator contract.
    */
-  modifier onlyDON {
-    require(msg.sender == address(aggregatorContract), "Only DON");
+  modifier onlyDirectRequestAggregator {
+    require(msg.sender == address(aggregatorContract), "Not aggregator");
     _;
   }
 }

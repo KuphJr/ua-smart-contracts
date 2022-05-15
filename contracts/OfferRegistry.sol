@@ -85,6 +85,7 @@ contract OfferRegistry {
   modifier onlyRequester {
     bytes32 codeHash;
     address requester = msg.sender;
+    // solhint-disable-next-line no-inline-assembly
     assembly { codeHash := extcodehash(requester) }
     require(codeHash == requesterContractHash, "Invalid contract hash");
     _;
