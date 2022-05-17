@@ -98,7 +98,7 @@ contract Requester {
     string calldata apiKey
   ) public onlyOfferee {
     require(
-      linkTokenContract.allowance(msg.sender, address(this)) > 1000000000000000000,
+      linkTokenContract.allowance(msg.sender, address(this)) >= 1000000000000000000,
       "Must approve 1 LINK"
     );
     // solhint-disable-next-line not-rely-on-time
@@ -107,6 +107,10 @@ contract Requester {
     string memory vars = string(abi.encodePacked('{"tweetUrl":"', url, '","apiKey":"', apiKey, '"}')); // solhint-disable-line
     linkTokenContract.transferFrom(
       msg.sender,
+      address(this),
+      1000000000000000000
+    );
+    linkTokenContract.approve(
       address(aggregatorContract),
       1000000000000000000
     );
@@ -125,8 +129,9 @@ contract Requester {
     to send the tokens owed to the influencer and send the remaining balance back to the brand
   */
   function fulfillDirectRequest(
+    bytes32 requestId,
     uint amountOwed
-  ) public onlyDirectRequestAggregator {
+  ) public onlyDirectRequestAggregator returns (bytes32 requestId) {
     uint balance = linkTokenContract.balanceOf(address(this));
     if (balance <= amountOwed) {
       linkTokenContract.transferFrom(
@@ -147,6 +152,7 @@ contract Requester {
       linkTokenContract.balanceOf(address(this))
     );
     state = "fulfilled";
+    return requestId;
   }
 
   /**
