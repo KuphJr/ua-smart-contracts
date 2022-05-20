@@ -42,7 +42,7 @@ async function main() {
   )
 
   const DirectRequestAggregator = await ethers.getContractFactory("DirectRequestAggregator")
-  const directRequestAggregatorAddress = '0x4B8c80d74eE64dB986D02AEb40025D9dBa49d65c'
+  const directRequestAggregatorAddress = '0x6e137e45892E1B16d01f6d09E6074D0701c4d334'
   const directRequestAggregator = await DirectRequestAggregator.attach(directRequestAggregatorAddress)
 
   // const directRequestAggregator = await DirectRequestAggregator.deploy(

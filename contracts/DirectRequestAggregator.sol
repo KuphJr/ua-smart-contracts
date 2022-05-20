@@ -190,6 +190,7 @@ contract DirectRequestAggregator is ChainlinkClient{
         this.respondWithUnhashedAnswer.selector
       );
       console.log("bytes32ToHexString");
+      console.logBytes32(rounds[roundId].hashedAnswers[responder]);
       console.log(bytes32ToHexString(rounds[roundId].hashedAnswers[responder]));
       request.add("hash",
         bytes32ToHexString(rounds[roundId].hashedAnswers[responder])
@@ -207,9 +208,9 @@ contract DirectRequestAggregator is ChainlinkClient{
     for (i = 0; i < bytesArray.length; i++) {
       uint8 _f = uint8(_bytes32[i/2] & 0x0f);
       uint8 _l = uint8(_bytes32[i/2] >> 4);
-      bytesArray[i] = toByte(_f);
-      i = i + 1;
       bytesArray[i] = toByte(_l);
+      i = i + 1;
+      bytesArray[i] = toByte(_f);
     }
     return string(bytesArray);
   }
