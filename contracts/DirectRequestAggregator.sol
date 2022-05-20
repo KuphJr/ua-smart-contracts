@@ -1,23 +1,22 @@
 // "SPDX-License-Identifier: MIT"
-pragma solidity >=0.7.0;
-
-import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
-import "@chainlink/contracts/src/v0.6/LinkTokenReceiver.sol";
-import "@chainlink/contracts/src/v0.6/vendor/SafeMathChainlink.sol";
+pragma solidity <=0.8.0;
+import "hardhat/console.sol";
+import "@chainlink/contracts/src/v0.7/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.7/interfaces/LinkTokenInterface.sol";
-import "@chainlink/contracts/src/v0.6/interfaces/WithdrawalInterface.sol";
 
-contract DirectRequestAggregator is ChainlinkClient {
-  using SafeMathChainlink for uint256;
+pragma experimental ABIEncoderV2;
+
+contract DirectRequestAggregator is ChainlinkClient{
   using Chainlink for Chainlink.Request;
+  LinkTokenInterface internal immutable linkToken;
 
-  uint public minGasForCallback = 400000;
+  uint public minGasForCallback;
 
   bytes32 public hashedResponseJobspec;
   bytes32 public unhashedResponseJobspec;
   address[] public oracles;
-  uint8 public minResponses;
-  uint public linkCostInJules = 1000000000000000000;
+  uint public minResponses;
+  uint public linkCostInJules;
   uint public expirationTimeInSeconds;
   uint public roundNum = 1;
 
@@ -54,17 +53,21 @@ contract DirectRequestAggregator is ChainlinkClient {
     address _link,
     bytes32 _hashedResponseJobspec,
     bytes32 _unhashedResponseJobspec,
-    address[] _oracles,
+    address[] memory _oracles,
     uint _linkCostInJules,
     uint _expirationTimeInSeconds,
     uint _minGasForCallback
   ) {
     require(
-      _oracles.length <= 255,
+      _oracles.length < 128,
       "Invalid initialization"
     );
-    linkTokenContract = LinkTokenInterface(_link);
-    minResponses = _oracles.length.mul(2).div(3);
+    setChainlinkToken(_link);
+    linkToken = LinkTokenInterface(_link);
+    minResponses = uint(_oracles.length * 2) / uint(3);
+    if (minResponses == 0) {
+      minResponses = 1;
+    }
     hashedResponseJobspec = _hashedResponseJobspec;
     unhashedResponseJobspec =_unhashedResponseJobspec;
     oracles = _oracles;
@@ -80,53 +83,63 @@ contract DirectRequestAggregator is ChainlinkClient {
     string calldata cid,
     string calldata vars,
     bytes32 ref
-  ) external {
+  ) external returns (uint roundId) {
     // get payment
     require(
-      linkTokenContract.allowance(msg.sender, address(this)) >= linkCostInJules,
+      linkToken.allowance(msg.sender, address(this)) >= linkCostInJules,
       "Not enough LINK"
     );
-    linkTokenContract.transferFrom(
+    linkToken.transferFrom(
       msg.sender,
       address(this),
       linkCostInJules
     );
     Chainlink.Request memory request;
     request = buildChainlinkRequest(
-      hashedResponseJobSpec,
-      this,
+      hashedResponseJobspec,
+      address(this),
       this.respondWithHashedAnswer.selector
     );
-    request.add(req, msg.sender);
-    if (js != "" ) {
+    request.add("req", addressToString(msg.sender));
+    if (bytes(js).length != 0) {
       request.add("js", js);
     }
-    else if (cid != "") {
+    else if (bytes(cid).length != 0) {
       request.add("cid", cid);
     }
-    if (vars != "") {
+    if (bytes(vars).length != 0) {
       request.add("vars", vars);
     }
     if (ref != "") {
-      request.add("ref", ref);
+      request.add("ref", string(abi.encodePacked(ref)));
     }
-    rounds[roundNum] = Round({
-      // solhint-disable-next-line not-rely-on-time
-      expiration: block.timestamp.add(expirationTimeInSeconds),
-      callbackAddress: callbackAddress,
-      callbackFunctionId: callbackFunctionId,
-      request: request
-    });
+    roundNum++;
+    // solhint-disable-next-line not-rely-on-time
+    rounds[roundNum].expiration = block.timestamp + expirationTimeInSeconds;
+    rounds[roundNum].callbackAddress = callbackAddress;
+    rounds[roundNum].callbackFunctionId = callbackFunctionId;
+    rounds[roundNum].request = request;
     bytes32 requestId;
-    for (uint8 i = 0; i < oracles.length; i++) {
+    for (uint i = 0; i < oracles.length; i++) {
       requestId = sendChainlinkRequestTo(oracles[i], request, 0);
       roundIds[requestId] = roundNum;
       rounds[roundNum].requestIds.push(requestId);
-      rounds[roundNum].hashedOracleRequests[requestId] = OracleRequest({
-        oracle: oracles[i]
-      });
+      rounds[roundNum].hashedOracleRequests[requestId].oracle = oracles[i];
     }
-    roundNum++;
+    return roundNum;
+  }
+
+  function addressToString(address _address) public pure returns(string memory) {
+    bytes32 _bytes = bytes32(uint256(_address));
+    bytes memory hexRep = "0123456789abcdef";
+    bytes memory _string = new bytes(42);
+    _string[0] = "0";
+    _string[1] = "x";
+    for(uint i = 0; i < 20; i++) {
+        _string[2+i*2] = hexRep[uint8(_bytes[i + 12] >> 4)];
+        _string[3+i*2] = hexRep[uint8(_bytes[i + 12] & 0x0f)];
+    }
+    return string(_string);
   }
 
   function respondWithHashedAnswer(
@@ -141,16 +154,17 @@ contract DirectRequestAggregator is ChainlinkClient {
     rounds[roundId].hashedOracleRequests[requestId].hasResponded = true;
     rounds[roundId].hashedAnswers[msg.sender] = hashedAnswer;
     rounds[roundId].hashedResponders.push(msg.sender);
-    if (rounds[roundId].hashedResponders.length >= minResponses) {
-      requestUnhashedResponses(roundIds);
+    if (rounds[roundId].hashedResponders.length == minResponses) {
+      requestUnhashedResponses(roundId);
     }
+    console.log("Hashed answer recorded");
   }
 
   modifier ensureAuthorizedHashedResponse(
     bytes32 requestId
   ) {
     uint roundId = roundIds[requestId];
-    require(rounds[roundId].unhashedResponses.length == 0, "Too late");
+    require(rounds[roundId].unhashedResponses.length < minResponses, "Too late");
     require(
       rounds[roundId].hashedOracleRequests[requestId].oracle == msg.sender,
       "Incorrect requestId"
@@ -166,18 +180,45 @@ contract DirectRequestAggregator is ChainlinkClient {
     uint roundId
   ) internal {
     Chainlink.Request memory request;
+    uint baseReward = uint(linkCostInJules) / uint(minResponses * 2);
     // send request to get a hashed response from all nodes
-    for (uint8 i = 0; i < rounds[roundId].hashedResponders.length; i++) {
+    for (uint i = 0; i < rounds[roundId].hashedResponders.length; i++) {
       address responder = rounds[roundId].hashedResponders[i];
       request = buildChainlinkRequest(
-        jobSpec,
-        this,
+        unhashedResponseJobspec,
+        address(this),
         this.respondWithUnhashedAnswer.selector
       );
-      request.add("hash", rounds[roundId].hashedAnswers[responder]);
-      requestId = sendChainlinkRequestTo(responder, request, 0);
+      console.log("bytes32ToHexString");
+      console.log(bytes32ToHexString(rounds[roundId].hashedAnswers[responder]));
+      request.add("hash",
+        bytes32ToHexString(rounds[roundId].hashedAnswers[responder])
+      );
+      bytes32 requestId = sendChainlinkRequestTo(responder, request, baseReward);
       roundIds[requestId] = roundId;
-      round.requestIds.push(requestId);
+      rounds[roundId].requestIds.push(requestId);
+    }
+    console.log("Unhashed request sent");
+  }
+
+  function bytes32ToHexString(bytes32 _bytes32) public pure returns (string memory) {
+    uint8 i = 0;
+    bytes memory bytesArray = new bytes(64);
+    for (i = 0; i < bytesArray.length; i++) {
+      uint8 _f = uint8(_bytes32[i/2] & 0x0f);
+      uint8 _l = uint8(_bytes32[i/2] >> 4);
+      bytesArray[i] = toByte(_f);
+      i = i + 1;
+      bytesArray[i] = toByte(_l);
+    }
+    return string(bytesArray);
+  }
+
+  function toByte(uint8 _uint8) public pure returns (bytes1 b) {
+    if(_uint8 < 10) {
+      return bytes1(_uint8 + 48);
+    } else {
+      return bytes1(_uint8 + 87);
     }
   }
 
@@ -191,13 +232,14 @@ contract DirectRequestAggregator is ChainlinkClient {
   checkExpiration(requestId)
   {
     uint roundId = roundIds[requestId];
-    rounds[roundId].oracleRequests[requestId].hasAnswered = true;
+    rounds[roundId].unhashedOracleRequests[requestId].hasResponded = true;
     // add responses in order
-    uint8 initalLength = rounds[roundId].unhashedResponses.length;
-    for (uint8 i = 0; i < length; i++) {
+    uint initalLength = rounds[roundId].unhashedResponses.length;
+    uint i = 0;
+    for (; i < initalLength; i++) {
       if (unhashedAnswer < rounds[roundId].unhashedResponses[i].unhashedAnswer) {
         rounds[roundId].unhashedResponses.push(
-          rounds[roundId].unhashedResponses[oracleResponses.length-1]
+          rounds[roundId].unhashedResponses[rounds[roundId].unhashedResponses.length-1]
         );
         for (uint j = i; j < initalLength; j++) {
           rounds[roundId].unhashedResponses[j+1] = rounds[roundId].unhashedResponses[j];
@@ -221,116 +263,114 @@ contract DirectRequestAggregator is ChainlinkClient {
     }
     // If the response threshold is reached, distribute rewards
     // and call the callback function of the requester
-    if (round.unhashedResponses.length >= minResponses) {
-      completeRequest(rounds[roundIds[requestId]]);
+    if (rounds[roundId].unhashedResponses.length >= minResponses) {
+      completeRequest(roundIds[requestId]);
     }
   }
 
   modifier ensureAuthorizedUnhashedResponse(
     bytes32 requestId,
-    uint8 salt,
+    bytes8 salt,
     bytes32 unhashedAnswer
   ) {
     uint roundId = roundIds[requestId];
-    require(rounds[roundId].hashedResponders.length >= minResponses, "Too soon");
-    require(rounds[roundId].unhashedOracleRequest.oracle == msg.sender, "Incorrect requestId");
-    require(rounds[roundId].unhashedOracleRequest.hasResponded == false, "Already responded");
+    require(rounds[roundId].hashedResponders.length == minResponses, "Too soon");
+    require(rounds[roundId].unhashedOracleRequests[requestId].oracle == msg.sender, "Incorrect requestId");
+    require(rounds[roundId].unhashedOracleRequests[requestId].hasResponded == false, "Already responded");
     require(
-      keccak256(uint(unhashedAnswer).div(2).add(salt)) == round.hashedAnswers[msg.sender],
+      keccak256(abi.encodePacked((uint256(unhashedAnswer) / 2) + uint256(bytes32(salt)))) == rounds[roundId].hashedAnswers[msg.sender],
       "Hash doesn't match"
     );
+    _;
   }
 
   function completeRequest(
     uint roundId
-  ) internal {
-    (address[] oraclesToGetExtraReward, bytes32 answer) = getAggregatedAnswer(roundId);
-    distributeRewards(roundId, oraclesToGetExtraReward);
-    cleanUpRequest();
+  ) internal returns (bool isSuccessful) {
+    (address[] memory oraclesToGetMedianReward, bytes32 answer) = getMedianAnswer(roundId);
+    distributeMedianRewards(oraclesToGetMedianReward);
+    address callbackAddress = rounds[roundId].callbackAddress;
+    bytes4 callbackFunctionId = rounds[roundId].callbackFunctionId;
+    cleanUpRequest(roundId);
     require(gasleft() >= minGasForCallback, "Not enough gas");
-    (bool success, ) = rounds[roundId].callbackAddress.call( // solhint-disable-line avoid-low-level-calls
+    (bool success, ) = callbackAddress.call( // solhint-disable-line avoid-low-level-calls
       abi.encodeWithSelector(
-        rounds[roundId].callbackFunctionId,
+        callbackFunctionId,
+        roundId,
         answer
       )
     );
     return success;
   }
 
-  // TO REVIEW!!!
-  function getAggregatedAnswer(
+  function getMedianAnswer(
     uint roundId
-  ) internal
-  returns (
-    address[] oraclesToGetExtraReward,
+  ) internal returns (
+    address[] memory oraclesToGetExtraReward,
     bytes32 answer
   ) {
-    OracleResponse[] oracleResponses =  rounds[roundId].oracleResponses;
-    uint medianIndex = rounds[roundId].oracleResponses.length.div(2);
-    OracleResponse medianAnswer = oracleResponses[medianIndex].answer;
-    address[] oraclesToGetExtraReward = [ oracleResponses[medianIndex].oracle ];
+    uint medianIndex = rounds[roundId].unhashedResponses.length / 2;
+    bytes32 medianAnswer = rounds[roundId].unhashedResponses[medianIndex].unhashedAnswer;
+    address[] memory oraclesToGetMedianReward = new address[](rounds[roundId].unhashedResponses.length);
+    oraclesToGetMedianReward[0] = rounds[roundId].unhashedResponses[medianIndex].oracle;
     bool contLeft = true;
     bool contRight = true;
-    uint leftIndex = medianIndex.sub(1);
-    uint rightIndex = medianIndex.add(1);
+    uint leftIndex = medianIndex - 1;
+    uint rightIndex = medianIndex + 1;
+    uint i = 1;
     while (contLeft || contRight) {
       if (
         contLeft &&
         leftIndex >= 0 &&
-        oracleResponses[leftIndex].answer == medianAnswer
+        rounds[roundId].unhashedResponses[leftIndex].unhashedAnswer == medianAnswer
       ) {
-        oraclesToGetExtraReward.push(oracleResponses[leftIndex].oracle);
-        leftIndex.sub(1);
+        oraclesToGetMedianReward[i] = rounds[roundId].unhashedResponses[leftIndex].oracle;
+        i++;
+        leftIndex - 1;
         contLeft = true;
       } else {
         contLeft = false;
       }
       if (
         contRight &&
-        rightIndex < oracleResponses.length &&
-        oracleResponses[rightIndex].answer == medianAnswer
+        rightIndex < rounds[roundId].unhashedResponses.length &&
+        rounds[roundId].unhashedResponses[rightIndex].unhashedAnswer == medianAnswer
       ) {
-        oraclesToGetExtraReward.push(oracleResponses[rightIndex].oracle);
-        rightIndex.add(1);
+        oraclesToGetMedianReward[i] = rounds[roundId].unhashedResponses[rightIndex].oracle;
+        i++;
+        rightIndex + 1;
         contRight = true;
       } else {
         contRight = false;
       }
     }
-    return (oraclesToReward, medianAnswer);
+    address[] memory shortList = new address[](i);
+    for (uint j = 0; j < i; j++) {
+      shortList[j] = oraclesToGetMedianReward[j];
+    }
+    return (shortList, medianAnswer);
   }
 
-  // TO REVIEW!!!
-  function distributeRewards(
-    uint roundId,
-    address[] oraclesToGetExtraReward
+  function distributeMedianRewards(
+    address[] memory oraclesToGetMedianReward
   ) internal {
-    mapping(address => uint) rewardAmount;
-    OracleResponse[] oracleResponses =  rounds[roundId].oracleResponses;
-    uint baseReward = linkCostInJules.div(2).div(oracleResponses.length);
-    for (uint i = 0; i < oracleResponses.length; i++) {
-      rewardAmount[oracleResponses[i].oracle] = baseReward;
-    }
-    uint extraReward = linkCostInJules.div(2).div(oraclesToGetExtraReward.length);
-    for (uint i = 0; i < oraclesToGetExtraReward.length; i++) {
-      rewardAmount[oraclesToGetExtraReward[i].oracle].add(extraReward);
-    }
-    for (uint i = 0; i < oracleResponses.length; i++) {
-      LinkTokenInterface.transferFrom(
+    uint extraReward = linkCostInJules / (2 * oraclesToGetMedianReward.length);
+    for (uint i = 0; i < oraclesToGetMedianReward.length; i++) {
+      linkToken.transferFrom(
         address(this),
-        oracleResponses[i].oracle,
-        rewardAmount[oracleResponses[i].oracle]
+        oraclesToGetMedianReward[i],
+        extraReward
       );
     }
   }
 
   function cleanUpRequest(
-    bytes32 requestId
+    uint roundId
   ) internal {
-    for (uint8 i = 0; i < rounds[roundIds[requestId]].requestIds; i++) {
-      delete roundIds[rounds[roundIds[requestId]].requestIds[i]];
+    for (uint i = 0; i < rounds[roundId].requestIds.length; i++) {
+      delete roundIds[rounds[roundId].requestIds[i]];
     }
-    delete rounds[roundIds[requestId]];
+    delete rounds[roundId];
   }
 
   modifier checkExpiration(
@@ -338,7 +378,7 @@ contract DirectRequestAggregator is ChainlinkClient {
   ) {
     // solhint-disable-next-line not-rely-on-time
     if (block.timestamp > rounds[roundIds[requestId]].expiration) {
-      cleanUpRequest(requestId);
+      cleanUpRequest(roundIds[requestId]);
       return;
     }
     _;

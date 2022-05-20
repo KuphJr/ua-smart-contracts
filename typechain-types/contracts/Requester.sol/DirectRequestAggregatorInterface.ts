@@ -24,14 +24,14 @@ import type {
 export interface DirectRequestAggregatorInterfaceInterface
   extends utils.Interface {
   functions: {
-    "makeRequest(string,string,string,bytes32,bytes32)": FunctionFragment;
+    "makeRequest(address,bytes4,string,string,string,bytes32)": FunctionFragment;
   };
 
   getFunction(nameOrSignatureOrTopic: "makeRequest"): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "makeRequest",
-    values: [string, string, string, BytesLike, BytesLike]
+    values: [string, BytesLike, string, string, string, BytesLike]
   ): string;
 
   decodeFunctionResult(
@@ -70,55 +70,60 @@ export interface DirectRequestAggregatorInterface extends BaseContract {
 
   functions: {
     makeRequest(
+      callbackAddress: string,
+      callbackFunctionId: BytesLike,
       js: string,
       cid: string,
       vars: string,
       ref: BytesLike,
-      returnType: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
 
   makeRequest(
+    callbackAddress: string,
+    callbackFunctionId: BytesLike,
     js: string,
     cid: string,
     vars: string,
     ref: BytesLike,
-    returnType: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
     makeRequest(
+      callbackAddress: string,
+      callbackFunctionId: BytesLike,
       js: string,
       cid: string,
       vars: string,
       ref: BytesLike,
-      returnType: BytesLike,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<BigNumber>;
   };
 
   filters: {};
 
   estimateGas: {
     makeRequest(
+      callbackAddress: string,
+      callbackFunctionId: BytesLike,
       js: string,
       cid: string,
       vars: string,
       ref: BytesLike,
-      returnType: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     makeRequest(
+      callbackAddress: string,
+      callbackFunctionId: BytesLike,
       js: string,
       cid: string,
       vars: string,
       ref: BytesLike,
-      returnType: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };

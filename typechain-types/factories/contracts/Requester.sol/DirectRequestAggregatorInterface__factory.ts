@@ -13,6 +13,16 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "address",
+        name: "callbackAddress",
+        type: "address",
+      },
+      {
+        internalType: "bytes4",
+        name: "callbackFunctionId",
+        type: "bytes4",
+      },
+      {
         internalType: "string",
         name: "js",
         type: "string",
@@ -32,14 +42,15 @@ const _abi = [
         name: "ref",
         type: "bytes32",
       },
-      {
-        internalType: "bytes32",
-        name: "returnType",
-        type: "bytes32",
-      },
     ],
     name: "makeRequest",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "roundId",
+        type: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },

@@ -34,7 +34,13 @@ const _abi = [
       },
     ],
     name: "registerOffer",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "registryNumber",
+        type: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },

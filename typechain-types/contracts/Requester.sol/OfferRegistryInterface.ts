@@ -93,7 +93,7 @@ export interface OfferRegistryInterface extends BaseContract {
       scriptIpfsHash: string,
       maxOfferValue: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<BigNumber>;
   };
 
   filters: {};

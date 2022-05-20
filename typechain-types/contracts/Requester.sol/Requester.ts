@@ -13,7 +13,11 @@ import type {
   Signer,
   utils,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type {
+  FunctionFragment,
+  Result,
+  EventFragment,
+} from "@ethersproject/abi";
 import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
@@ -26,15 +30,18 @@ export interface RequesterInterface extends utils.Interface {
   functions: {
     "aggregatorContract()": FunctionFragment;
     "expirationTime()": FunctionFragment;
-    "fulfillDirectRequest(uint256)": FunctionFragment;
+    "fulfillDirectRequest(uint256,uint256)": FunctionFragment;
     "fulfillOffer(string,string)": FunctionFragment;
-    "initalizeOffer()": FunctionFragment;
-    "lastBlockFulfillOfferWasCalled()": FunctionFragment;
+    "getState()": FunctionFragment;
+    "initalizeOffer(uint256)": FunctionFragment;
+    "isFulfilled()": FunctionFragment;
     "linkTokenContract()": FunctionFragment;
     "offeree()": FunctionFragment;
     "offerer()": FunctionFragment;
     "recoverFunds()": FunctionFragment;
     "registryContract()": FunctionFragment;
+    "registryIndex()": FunctionFragment;
+    "requestNumber()": FunctionFragment;
     "scriptIpfsHash()": FunctionFragment;
   };
 
@@ -44,13 +51,16 @@ export interface RequesterInterface extends utils.Interface {
       | "expirationTime"
       | "fulfillDirectRequest"
       | "fulfillOffer"
+      | "getState"
       | "initalizeOffer"
-      | "lastBlockFulfillOfferWasCalled"
+      | "isFulfilled"
       | "linkTokenContract"
       | "offeree"
       | "offerer"
       | "recoverFunds"
       | "registryContract"
+      | "registryIndex"
+      | "requestNumber"
       | "scriptIpfsHash"
   ): FunctionFragment;
 
@@ -64,18 +74,19 @@ export interface RequesterInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "fulfillDirectRequest",
-    values: [BigNumberish]
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "fulfillOffer",
     values: [string, string]
   ): string;
+  encodeFunctionData(functionFragment: "getState", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initalizeOffer",
-    values?: undefined
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "lastBlockFulfillOfferWasCalled",
+    functionFragment: "isFulfilled",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -93,6 +104,14 @@ export interface RequesterInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "registryIndex",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "requestNumber",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "scriptIpfsHash",
     values?: undefined
   ): string;
@@ -113,12 +132,13 @@ export interface RequesterInterface extends utils.Interface {
     functionFragment: "fulfillOffer",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getState", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "initalizeOffer",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "lastBlockFulfillOfferWasCalled",
+    functionFragment: "isFulfilled",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -136,12 +156,70 @@ export interface RequesterInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "registryIndex",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "requestNumber",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "scriptIpfsHash",
     data: BytesLike
   ): Result;
 
-  events: {};
+  events: {
+    "ExpiredOfferFulfilled(uint256,uint256,uint256)": EventFragment;
+    "OfferFulfilled(uint256,uint256,uint256)": EventFragment;
+    "RequestSent(address,bytes4,string,string,string,bytes32,uint256,uint256)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "ExpiredOfferFulfilled"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OfferFulfilled"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "RequestSent"): EventFragment;
 }
+
+export interface ExpiredOfferFulfilledEventObject {
+  expiredPaymentAmount: BigNumber;
+  registryIndex: BigNumber;
+  requestNumber: BigNumber;
+}
+export type ExpiredOfferFulfilledEvent = TypedEvent<
+  [BigNumber, BigNumber, BigNumber],
+  ExpiredOfferFulfilledEventObject
+>;
+
+export type ExpiredOfferFulfilledEventFilter =
+  TypedEventFilter<ExpiredOfferFulfilledEvent>;
+
+export interface OfferFulfilledEventObject {
+  paymentAmount: BigNumber;
+  registryIndex: BigNumber;
+  requestNumber: BigNumber;
+}
+export type OfferFulfilledEvent = TypedEvent<
+  [BigNumber, BigNumber, BigNumber],
+  OfferFulfilledEventObject
+>;
+
+export type OfferFulfilledEventFilter = TypedEventFilter<OfferFulfilledEvent>;
+
+export interface RequestSentEventObject {
+  callbackAddress: string;
+  callbackFunctionId: string;
+  js: string;
+  cid: string;
+  vars: string;
+  ref: string;
+  registryIndex: BigNumber;
+  requestNumber: BigNumber;
+}
+export type RequestSentEvent = TypedEvent<
+  [string, string, string, string, string, string, BigNumber, BigNumber],
+  RequestSentEventObject
+>;
+
+export type RequestSentEventFilter = TypedEventFilter<RequestSentEvent>;
 
 export interface Requester extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -175,6 +253,7 @@ export interface Requester extends BaseContract {
     expirationTime(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     fulfillDirectRequest(
+      _requestNumber: BigNumberish,
       amountOwed: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -185,13 +264,14 @@ export interface Requester extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    getState(overrides?: CallOverrides): Promise<[string] & { state: string }>;
+
     initalizeOffer(
+      maxOfferValue: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    lastBlockFulfillOfferWasCalled(
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+    isFulfilled(overrides?: CallOverrides): Promise<[boolean]>;
 
     linkTokenContract(overrides?: CallOverrides): Promise<[string]>;
 
@@ -205,6 +285,10 @@ export interface Requester extends BaseContract {
 
     registryContract(overrides?: CallOverrides): Promise<[string]>;
 
+    registryIndex(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    requestNumber(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     scriptIpfsHash(overrides?: CallOverrides): Promise<[string]>;
   };
 
@@ -213,6 +297,7 @@ export interface Requester extends BaseContract {
   expirationTime(overrides?: CallOverrides): Promise<BigNumber>;
 
   fulfillDirectRequest(
+    _requestNumber: BigNumberish,
     amountOwed: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -223,11 +308,14 @@ export interface Requester extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  getState(overrides?: CallOverrides): Promise<string>;
+
   initalizeOffer(
+    maxOfferValue: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  lastBlockFulfillOfferWasCalled(overrides?: CallOverrides): Promise<BigNumber>;
+  isFulfilled(overrides?: CallOverrides): Promise<boolean>;
 
   linkTokenContract(overrides?: CallOverrides): Promise<string>;
 
@@ -241,6 +329,10 @@ export interface Requester extends BaseContract {
 
   registryContract(overrides?: CallOverrides): Promise<string>;
 
+  registryIndex(overrides?: CallOverrides): Promise<BigNumber>;
+
+  requestNumber(overrides?: CallOverrides): Promise<BigNumber>;
+
   scriptIpfsHash(overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
@@ -249,6 +341,7 @@ export interface Requester extends BaseContract {
     expirationTime(overrides?: CallOverrides): Promise<BigNumber>;
 
     fulfillDirectRequest(
+      _requestNumber: BigNumberish,
       amountOwed: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -259,11 +352,14 @@ export interface Requester extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    initalizeOffer(overrides?: CallOverrides): Promise<void>;
+    getState(overrides?: CallOverrides): Promise<string>;
 
-    lastBlockFulfillOfferWasCalled(
+    initalizeOffer(
+      maxOfferValue: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    ): Promise<void>;
+
+    isFulfilled(overrides?: CallOverrides): Promise<boolean>;
 
     linkTokenContract(overrides?: CallOverrides): Promise<string>;
 
@@ -275,10 +371,57 @@ export interface Requester extends BaseContract {
 
     registryContract(overrides?: CallOverrides): Promise<string>;
 
+    registryIndex(overrides?: CallOverrides): Promise<BigNumber>;
+
+    requestNumber(overrides?: CallOverrides): Promise<BigNumber>;
+
     scriptIpfsHash(overrides?: CallOverrides): Promise<string>;
   };
 
-  filters: {};
+  filters: {
+    "ExpiredOfferFulfilled(uint256,uint256,uint256)"(
+      expiredPaymentAmount?: null,
+      registryIndex?: null,
+      requestNumber?: null
+    ): ExpiredOfferFulfilledEventFilter;
+    ExpiredOfferFulfilled(
+      expiredPaymentAmount?: null,
+      registryIndex?: null,
+      requestNumber?: null
+    ): ExpiredOfferFulfilledEventFilter;
+
+    "OfferFulfilled(uint256,uint256,uint256)"(
+      paymentAmount?: null,
+      registryIndex?: null,
+      requestNumber?: null
+    ): OfferFulfilledEventFilter;
+    OfferFulfilled(
+      paymentAmount?: null,
+      registryIndex?: null,
+      requestNumber?: null
+    ): OfferFulfilledEventFilter;
+
+    "RequestSent(address,bytes4,string,string,string,bytes32,uint256,uint256)"(
+      callbackAddress?: null,
+      callbackFunctionId?: null,
+      js?: null,
+      cid?: null,
+      vars?: null,
+      ref?: null,
+      registryIndex?: null,
+      requestNumber?: null
+    ): RequestSentEventFilter;
+    RequestSent(
+      callbackAddress?: null,
+      callbackFunctionId?: null,
+      js?: null,
+      cid?: null,
+      vars?: null,
+      ref?: null,
+      registryIndex?: null,
+      requestNumber?: null
+    ): RequestSentEventFilter;
+  };
 
   estimateGas: {
     aggregatorContract(overrides?: CallOverrides): Promise<BigNumber>;
@@ -286,6 +429,7 @@ export interface Requester extends BaseContract {
     expirationTime(overrides?: CallOverrides): Promise<BigNumber>;
 
     fulfillDirectRequest(
+      _requestNumber: BigNumberish,
       amountOwed: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -296,13 +440,14 @@ export interface Requester extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    getState(overrides?: CallOverrides): Promise<BigNumber>;
+
     initalizeOffer(
+      maxOfferValue: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    lastBlockFulfillOfferWasCalled(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    isFulfilled(overrides?: CallOverrides): Promise<BigNumber>;
 
     linkTokenContract(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -316,6 +461,10 @@ export interface Requester extends BaseContract {
 
     registryContract(overrides?: CallOverrides): Promise<BigNumber>;
 
+    registryIndex(overrides?: CallOverrides): Promise<BigNumber>;
+
+    requestNumber(overrides?: CallOverrides): Promise<BigNumber>;
+
     scriptIpfsHash(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
@@ -327,6 +476,7 @@ export interface Requester extends BaseContract {
     expirationTime(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     fulfillDirectRequest(
+      _requestNumber: BigNumberish,
       amountOwed: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
@@ -337,13 +487,14 @@ export interface Requester extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    getState(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     initalizeOffer(
+      maxOfferValue: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    lastBlockFulfillOfferWasCalled(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    isFulfilled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     linkTokenContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -356,6 +507,10 @@ export interface Requester extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     registryContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    registryIndex(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    requestNumber(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     scriptIpfsHash(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
