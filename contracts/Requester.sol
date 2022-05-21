@@ -115,15 +115,17 @@ contract Requester {
     initiate the Universal Adapter direct request to calculate and send the amount earned.
     @notice This function must be called AFTER the influencer approves 1 LINK to be spend
     * by this contract in order to pay for the request.
-    @param url The URL of the sponsored Tweet
+    @param tweetId The id of the sponsored tweet
     @param apiKey A functioning Twitter API key
   */
   function fulfillOffer(
-    string calldata url,
+    string calldata tweetId,
     string calldata apiKey
   ) public onlyOfferee {
     // solhint-disable-next-line not-rely-on-time
     require(block.timestamp < expirationTime, "Offer expired");
+    // future optimization note: have the offeree approve tokens directly to the 
+    // aggregatorContract and just pass along the caller's address
     linkTokenContract.transferFrom(
       msg.sender,
       address(this),
@@ -135,8 +137,7 @@ contract Requester {
     );
     // the `vars` object must be a JSON formatted string
     // solhint-disable-next-line
-    string memory vars = string('{"b":5}');
-    //string memory vars = string(abi.encodePacked('{"tweetUrl":"', url, '","apiKey":"', apiKey, '"}')); // solhint-disable-line
+    string memory vars = string(abi.encodePacked('{"tweetId":"', tweetId, '","apiKey":"', apiKey, '"}')); // solhint-disable-line
     requestNumber = aggregatorContract.makeRequest(
       address(this),
       this.fulfillDirectRequest.selector,

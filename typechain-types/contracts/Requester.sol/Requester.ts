@@ -259,7 +259,7 @@ export interface Requester extends BaseContract {
     ): Promise<ContractTransaction>;
 
     fulfillOffer(
-      url: string,
+      tweetId: string,
       apiKey: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -303,7 +303,7 @@ export interface Requester extends BaseContract {
   ): Promise<ContractTransaction>;
 
   fulfillOffer(
-    url: string,
+    tweetId: string,
     apiKey: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -347,7 +347,7 @@ export interface Requester extends BaseContract {
     ): Promise<void>;
 
     fulfillOffer(
-      url: string,
+      tweetId: string,
       apiKey: string,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -435,7 +435,7 @@ export interface Requester extends BaseContract {
     ): Promise<BigNumber>;
 
     fulfillOffer(
-      url: string,
+      tweetId: string,
       apiKey: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -482,7 +482,7 @@ export interface Requester extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     fulfillOffer(
-      url: string,
+      tweetId: string,
       apiKey: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
