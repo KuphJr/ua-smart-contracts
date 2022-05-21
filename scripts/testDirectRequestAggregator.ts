@@ -47,7 +47,7 @@ async function main() {
           callbackAddr,
           callbackFunctionId,
           cancelExpiration,
-          '0xc95daa6e5dca71d7400941ae7e45cdc58d06532c036b0f93bee39d886ffbf0ab'
+          '0x2e835cc9e6cbd60ca1eb1007660b5a14145c20c353f31f29f90c64355fc470c5'
         )
         await ethers.provider.waitForTransaction(fulfillTx.hash)
       }
@@ -58,8 +58,12 @@ async function main() {
           callbackAddr,
           callbackFunctionId,
           cancelExpiration,
-          requestId + '0000000000000000000000000000000000000000000000000000f74628a555c20000000000000000000000000000000000000000000000000000000000000005'
+          requestId + '0000000000000000000000000000000000000000000000000000ff549f85dd990000000000000000000000000000000000000000000000000000000000000005',
+          {
+            gasLimit: 1000000
+          }
         )
+        console.log('TX result: ' + JSON.stringify(fulfillTx))
         console.log(`tx result: ${JSON.stringify(await ethers.provider.waitForTransaction(fulfillTx.hash))}`)
       }
       console.log(`Fulfill ${requestNumber} tx complete`)
@@ -132,7 +136,7 @@ async function main() {
   )
   
   requester.on('OfferFulfilled',
-    (
+    async (
       amountOwed: any,
       registryIndex: any,
       _requestNumber: any
@@ -148,6 +152,7 @@ async function main() {
     ethers.utils.getAddress(requesterContract.contractAddress),
     BigInt(100)
   )
+  console.log("did apprvoe work??")
   await ethers.provider.waitForTransaction(tokenTx.hash)
   const initTx = await requester.initalizeOffer(
     BigInt(100)

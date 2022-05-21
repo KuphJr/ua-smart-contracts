@@ -1,5 +1,6 @@
 // "SPDX-License-Identifier: MIT"
 pragma solidity <=0.8.0;
+
 import "hardhat/console.sol";
 import "@chainlink/contracts/src/v0.7/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.7/interfaces/LinkTokenInterface.sol";
@@ -275,7 +276,6 @@ contract DirectRequestAggregator is ChainlinkClient{
     require(rounds[roundId].unhashedOracleRequests[requestId].oracle == msg.sender, "Incorrect requestId");
     require(rounds[roundId].unhashedOracleRequests[requestId].hasResponded == false, "Already responded");
     bytes32 keck = keccak256(abi.encodePacked((uint(unhashedAnswer) / uint(2)) + salt));
-    console.logBytes32(rounds[roundId].hashedAnswers[msg.sender]);
     require(
       keccak256(abi.encodePacked((uint(unhashedAnswer) / uint(2)) + salt)) == rounds[roundId].hashedAnswers[msg.sender],
       "Hash doesn't match"
@@ -286,20 +286,12 @@ contract DirectRequestAggregator is ChainlinkClient{
   function completeRequest(
     uint roundId
   ) internal returns (bool isSuccessful) {
-    console.log("starting complete request");
     (address[] memory oraclesToGetMedianReward, bytes32 answer) = getMedianAnswer(roundId);
-    console.log("got median answer");
     distributeMedianRewards(oraclesToGetMedianReward);
-    console.log("distributed rewards");
     address callbackAddress = rounds[roundId].callbackAddress;
     bytes4 callbackFunctionId = rounds[roundId].callbackFunctionId;
     cleanUpRequest(roundId);
-    console.log("Cleaned up request");
-    console.log("remaining gas");
-    console.logUint(gasleft());
-    console.logUint(minGasForCallback);
     require(gasleft() >= minGasForCallback, "Not enough gas");
-    console.log("Got enough gas");
     (bool success, ) = callbackAddress.call( // solhint-disable-line avoid-low-level-calls
       abi.encodeWithSelector(
         callbackFunctionId,
@@ -307,7 +299,6 @@ contract DirectRequestAggregator is ChainlinkClient{
         answer
       )
     );
-    console.log("called callback");
     return success;
   }
 
@@ -351,7 +342,6 @@ contract DirectRequestAggregator is ChainlinkClient{
       } else {
         contRight = false;
       }
-      console.logUint(i);
     }
     address[] memory shortList = new address[](i);
     for (uint j = 0; j < i; j++) {
@@ -365,13 +355,10 @@ contract DirectRequestAggregator is ChainlinkClient{
   ) internal {
     uint extraReward = linkCostInJules / (2 * oraclesToGetMedianReward.length);
     for (uint i = 0; i < oraclesToGetMedianReward.length; i++) {
-      console.logAddress(oraclesToGetMedianReward[i]);
-      console.log("trying transfer");
       linkToken.transfer(
         oraclesToGetMedianReward[i],
         extraReward
       );
-      console.log("transferFrom success");
     }
   }
 

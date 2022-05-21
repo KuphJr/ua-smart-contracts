@@ -23,7 +23,11 @@ const config: HardhatUserConfig = {
   networks: {
     mumbai: {
       url: process.env.MUMBAI_URL || "",
-      accounts: [process.env.PRIVATE_KEY as string]
+      accounts: [
+        process.env.PRIVATE_KEY as string,
+        process.env.PRIVATE_KEY_2 as string
+      ],
+      gasMultiplier: 4
     },
     hardhat: {
       accounts: [
