@@ -4,7 +4,6 @@ async function main() {
   const LinkToken = await ethers.getContractFactory('LinkToken')
   const linkToken = await LinkToken.attach('0x326C977E6efc84E512bB9C30f76E30c160eD06FB')
 
-
   const Requester = await ethers.getContractFactory("Requester");
   const requester = await Requester.deploy(
     // LINK token address
@@ -31,7 +30,7 @@ async function main() {
   // Initalize offer
   const tokenTx = await linkToken.approve(
     ethers.utils.getAddress(txReceipt.contractAddress),
-    BigInt(100)
+    BigInt(200)
   )
   await ethers.provider.waitForTransaction(tokenTx.hash)
   const initTx = await requester.initalizeOffer(
