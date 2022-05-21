@@ -2,7 +2,7 @@ import { ethers } from 'hardhat'
 
 const main = async () => {
   // ENTER THE ADDRESS OF THE DEPLOYED REQUESTER BELOW
-  const requesterContractAddress = '0x40025e6cB25e043fA5ff38732B9ED074577C15Ab'
+  const requesterContractAddress = '0xb69cec366e4e114dc1ddf31ba9606a8282047970'
 
   const accounts = await ethers.getSigners()
 
@@ -68,7 +68,7 @@ const main = async () => {
     'Balance of offeree before calling fulfillOffer: ' +
     await linkToken.balanceOf('0x981FC7F035AD33181eD7604f0708c05674395574')
   )
-  const fulfillTx = await requester.connect(accounts[1]).fulfillOffer('tweetId', 'apiKey')
+  const fulfillTx = await requester.connect(accounts[1]).fulfillOffer('1528029598088368129', 'AAAAAAAAAAAAAAAAAAAAAKK6VAEAAAAAwWz%2FuM2jqPaw3VzR2C9O0xzz6T0%3DQvUwRrwhmPQtAgzEv35hGIRJqRJgtY6lwF2P00aVgnl07nmo3J')
   await ethers.provider.waitForTransaction(fulfillTx.hash)
   console.log(
     'Balance of offeree after calling fulfillOffer: ' +
