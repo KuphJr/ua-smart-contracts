@@ -30,6 +30,10 @@ const config: HardhatUserConfig = {
         {
           privateKey: process.env.PRIVATE_KEY as string,
           balance: '99999999999999999999'
+        },
+        {
+          privateKey: process.env.PRIVATE_KEY_2 as string,
+          balance: '99999999999999999999'
         }
        ],
       forking: {

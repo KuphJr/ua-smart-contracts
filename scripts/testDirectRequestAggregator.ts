@@ -1,10 +1,10 @@
 import { providers } from "ethers"
 import { ethers } from "hardhat"
 
-const RequesterABIhash = "0x901a72aebf086d84830aab9aaf55b1ecea823af9e1d2723e25852c86ec6f5e9b";
+const RequesterABIhash = "0xf3d19818214c83f5243efc55578a35407094bcf89b52af961955e87d8db9a6f9";
 
 async function main() {
-
+  const accounts = await ethers.getSigners();
 
   const LinkToken = await ethers.getContractFactory('LinkToken')
   const linkToken = await LinkToken.attach('0x326C977E6efc84E512bB9C30f76E30c160eD06FB')
@@ -24,6 +24,7 @@ async function main() {
 
   await aggregatorOperator.setAuthorizedSenders(["0xB7aB5555BB8927BF16F8496da338a3033c12F8f3"]);
 
+  let requestNumber = 0
   aggregatorOperator.on('OracleRequest',
     async (
       specId,
@@ -36,18 +37,32 @@ async function main() {
       dataVersion,
       data
     ) => {
-      console.log('Logging OracleRequest')
+      requestNumber++
+      console.log(`Logging OracleRequest ${requestNumber}`)
       console.log({ specId, requester, requestId, payment, callbackAddr, callbackFunctionId, cancelExpiration, dataVersion, data })
-      const fulfillTx = await aggregatorOperator.fulfillOracleRequest(
-        requestId,
-        payment,
-        callbackAddr,
-        callbackFunctionId,
-        cancelExpiration,
-        '0x86efa457076a333ed9ee527cf3307d0b7d32720e3081dc0df4eb53d9e09c63ee'
-      )
-      await ethers.provider.waitForTransaction(fulfillTx.hash)
-      console.log('Fulfill successful')
+      if (requestNumber == 1) {
+        const fulfillTx = await aggregatorOperator.fulfillOracleRequest(
+          requestId,
+          payment,
+          callbackAddr,
+          callbackFunctionId,
+          cancelExpiration,
+          '0xc95daa6e5dca71d7400941ae7e45cdc58d06532c036b0f93bee39d886ffbf0ab'
+        )
+        await ethers.provider.waitForTransaction(fulfillTx.hash)
+      }
+      if (requestNumber == 2) {
+        const fulfillTx = await aggregatorOperator.fulfillOracleRequest2(
+          requestId,
+          payment,
+          callbackAddr,
+          callbackFunctionId,
+          cancelExpiration,
+          requestId + '0000000000000000000000000000000000000000000000000000f74628a555c20000000000000000000000000000000000000000000000000000000000000005'
+        )
+        console.log(`tx result: ${JSON.stringify(await ethers.provider.waitForTransaction(fulfillTx.hash))}`)
+      }
+      console.log(`Fulfill ${requestNumber} tx complete`)
     }
   )
 
@@ -90,7 +105,7 @@ async function main() {
     ethers.utils.getAddress('0x326C977E6efc84E512bB9C30f76E30c160eD06FB'),
     ethers.utils.getAddress(directRequestAggregatorAddress),
     ethers.utils.getAddress(offerRegistryAddress),
-    ethers.utils.getAddress('0xB7aB5555BB8927BF16F8496da338a3033c12F8f3'),
+    ethers.utils.getAddress('0x981FC7F035AD33181eD7604f0708c05674395574'),
     'bafybeieomwdf37r6nooiyeoxhoovn3hfob2xfjwch4wy3rj6l5dojeuqle',
     999999
   )
@@ -115,6 +130,17 @@ async function main() {
       console.log({ address, functionSelector, javaScript, scriptIpfsHash, vars, ref, registryIndex, requestNumber })
     }
   )
+  
+  requester.on('OfferFulfilled',
+    (
+      amountOwed: any,
+      registryIndex: any,
+      _requestNumber: any
+    ) => {
+      console.log('Offer Fulfilled!')
+      console.log({ amountOwed, registryIndex, _requestNumber })
+    }
+  )
 
   console.log(await linkToken.balanceOf('0xB7aB5555BB8927BF16F8496da338a3033c12F8f3'))
   // Initalize offer
@@ -130,14 +156,14 @@ async function main() {
   const roundNum = await directRequestAggregator.roundNum()
   console.log(`Round Id: ${roundNum}`)
 
-  const approveTx = await linkToken.approve(
+  const approveTx = await linkToken.connect(accounts[1]).approve(
     ethers.utils.getAddress(requesterContract.contractAddress),
     BigInt(100)
   )
   await ethers.provider.waitForTransaction(approveTx.hash)
   console.log('called approve')
-  console.log(await linkToken.balanceOf('0xB7aB5555BB8927BF16F8496da338a3033c12F8f3'))
-  const tx3 = await requester.fulfillOffer('', '')
+  console.log(await linkToken.balanceOf('0x981FC7F035AD33181eD7604f0708c05674395574'))
+  const tx3 = await requester.connect(accounts[1]).fulfillOffer('', '')
   console.log('fulfilled')
   const txReceipt3 = await ethers.provider.waitForTransaction(tx3.hash)
 }

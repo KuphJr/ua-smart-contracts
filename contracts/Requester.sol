@@ -1,6 +1,5 @@
 // "SPDX-License-Identifier: MIT"
 pragma solidity >=0.8.0;
-import "hardhat/console.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 
 interface DirectRequestAggregatorInterface {
@@ -175,20 +174,17 @@ contract Requester {
     isFulfilled = true;
     uint balance = linkTokenContract.balanceOf(address(this));
     if (balance <= amountOwed) {
-      linkTokenContract.transferFrom(
-        address(this),
+      linkTokenContract.transfer(
         offeree,
         balance
       );
       return;
     }
-    linkTokenContract.transferFrom(
-      address(this),
+    linkTokenContract.transfer(
       offeree,
       amountOwed
     );
-    linkTokenContract.transferFrom(
-      address(this),
+    linkTokenContract.transfer(
       offerer,
       linkTokenContract.balanceOf(address(this))
     );

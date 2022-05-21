@@ -71,7 +71,7 @@ export interface DirectRequestAggregatorInterface extends utils.Interface {
     "minResponses()": FunctionFragment;
     "oracles(uint256)": FunctionFragment;
     "respondWithHashedAnswer(bytes32,bytes32)": FunctionFragment;
-    "respondWithUnhashedAnswer(bytes32,bytes8,bytes32)": FunctionFragment;
+    "respondWithUnhashedAnswer(bytes32,uint256,bytes32)": FunctionFragment;
     "roundIds(bytes32)": FunctionFragment;
     "roundNum()": FunctionFragment;
     "rounds(uint256)": FunctionFragment;
@@ -141,7 +141,7 @@ export interface DirectRequestAggregatorInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "respondWithUnhashedAnswer",
-    values: [BytesLike, BytesLike, BytesLike]
+    values: [BytesLike, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "roundIds", values: [BytesLike]): string;
   encodeFunctionData(functionFragment: "roundNum", values?: undefined): string;
@@ -319,7 +319,7 @@ export interface DirectRequestAggregator extends BaseContract {
 
     respondWithUnhashedAnswer(
       requestId: BytesLike,
-      salt: BytesLike,
+      salt: BigNumberish,
       unhashedAnswer: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -385,7 +385,7 @@ export interface DirectRequestAggregator extends BaseContract {
 
   respondWithUnhashedAnswer(
     requestId: BytesLike,
-    salt: BytesLike,
+    salt: BigNumberish,
     unhashedAnswer: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -451,7 +451,7 @@ export interface DirectRequestAggregator extends BaseContract {
 
     respondWithUnhashedAnswer(
       requestId: BytesLike,
-      salt: BytesLike,
+      salt: BigNumberish,
       unhashedAnswer: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -535,7 +535,7 @@ export interface DirectRequestAggregator extends BaseContract {
 
     respondWithUnhashedAnswer(
       requestId: BytesLike,
-      salt: BytesLike,
+      salt: BigNumberish,
       unhashedAnswer: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -599,7 +599,7 @@ export interface DirectRequestAggregator extends BaseContract {
 
     respondWithUnhashedAnswer(
       requestId: BytesLike,
-      salt: BytesLike,
+      salt: BigNumberish,
       unhashedAnswer: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
