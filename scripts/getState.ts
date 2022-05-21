@@ -5,7 +5,7 @@ import { ethers } from "hardhat"
 
 async function main() {
   const Requester = await ethers.getContractFactory("Requester")
-  const requester = await Requester.attach('0xe22f3522E281EFfdc60593343417E2f319378be7')
+  const requester = await Requester.attach('0xf473c82cbCd340B729F9d32507DE91c6457308Ad')
   console.log(await requester.getState())
 
   const accounts = await ethers.getSigners();

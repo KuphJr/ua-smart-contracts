@@ -38,7 +38,8 @@ const config: HardhatUserConfig = {
           privateKey: process.env.PRIVATE_KEY_2 as string,
           balance: '99999999999999999999'
         }
-       ],
+      ],
+      gasMultiplier: 4,
       forking: {
         url: process.env.MUMBAI_URL || "",
         enabled: true

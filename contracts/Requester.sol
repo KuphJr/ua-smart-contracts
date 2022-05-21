@@ -179,16 +179,16 @@ contract Requester {
         offeree,
         balance
       );
-      return;
+    } else {
+      linkTokenContract.transfer(
+        offeree,
+        amountOwed
+      );
+      linkTokenContract.transfer(
+        offerer,
+        linkTokenContract.balanceOf(address(this))
+      );
     }
-    linkTokenContract.transfer(
-      offeree,
-      amountOwed
-    );
-    linkTokenContract.transfer(
-      offerer,
-      linkTokenContract.balanceOf(address(this))
-    );
     emit OfferFulfilled(amountOwed, registryIndex, _requestNumber);
   }
 

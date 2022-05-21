@@ -1,20 +1,18 @@
 import { ethers } from 'hardhat'
 
 const main = async () => {
+  // ENTER THE ADDRESS OF THE DEPLOYED REQUESTER BELOW
+  const requesterContractAddress = '0x40025e6cB25e043fA5ff38732B9ED074577C15Ab'
 
-
-  const accounts = await ethers.getSigners();
+  const accounts = await ethers.getSigners()
 
   const LinkToken = await ethers.getContractFactory('LinkToken')
   const linkToken = await LinkToken.attach('0x326C977E6efc84E512bB9C30f76E30c160eD06FB')
 
   const Requester = await ethers.getContractFactory("Requester");
-  const requester = await Requester.attach(
-    // ENTER THE ADDRESS OF THE DEPLOYED REQUESTER BELOW
-    '0xfADE4779cE51a5bb0Ea4D98174440a5B7325B67e'
-  )
+  const requester = await Requester.attach(requesterContractAddress)
   const AggregatorOperator = await ethers.getContractFactory('AggregatorOperator')
-  const aggregatorOperator = AggregatorOperator.attach('0x543838263CD6a67E3836eB3BC8f45cfB6c09CD19')
+  const aggregatorOperator = AggregatorOperator.attach('0xA0B18C7363989Ac72eAb8C778aE1f6De67802700')
   
   // event logging
   requester.on('RequestSent',
@@ -62,15 +60,20 @@ const main = async () => {
   )
 
   const approveTx = await linkToken.connect(accounts[1]).approve(
-    ethers.utils.getAddress('0xAC9e210c2A8557EaF87Da3aBda53Fa0999575316'),
+    ethers.utils.getAddress(requesterContractAddress),
     BigInt(100)
   )
   await ethers.provider.waitForTransaction(approveTx.hash)
-  console.log('Balance of offeree')
-  console.log(await linkToken.balanceOf('0x981FC7F035AD33181eD7604f0708c05674395574'))
-  const fulfillTx = await await requester.connect(accounts[1]).fulfillOffer('tweetId', 'apiKey')
-  console.log('fulfilled')
+  console.log(
+    'Balance of offeree before calling fulfillOffer: ' +
+    await linkToken.balanceOf('0x981FC7F035AD33181eD7604f0708c05674395574')
+  )
+  const fulfillTx = await requester.connect(accounts[1]).fulfillOffer('tweetId', 'apiKey')
   const txReceipt3 = await ethers.provider.waitForTransaction(fulfillTx.hash)
+  console.log(
+    'Balance of offeree after calling fulfillOffer: ' +
+    await linkToken.balanceOf('0x981FC7F035AD33181eD7604f0708c05674395574')
+  )
 }
 
 main()

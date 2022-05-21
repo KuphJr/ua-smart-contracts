@@ -1,7 +1,7 @@
 import { providers } from "ethers"
 import { ethers } from "hardhat"
 
-const RequesterABIhash = "0x076bc06e4ca58a241853d26ef44328752b51d4262d2a0ebde7964d7831fc6c2d";
+const RequesterABIhash = "0xfa56076c58bdf71bf6a7dbdd505b4a7ce7ec551e4b0215e2cb98f902fce90f5e";
 
 async function main() {
   const accounts = await ethers.getSigners();
@@ -64,7 +64,7 @@ async function main() {
 
   await aggregatorOperator.setAggregatorContract(directRequestAggregatorAddress)
 
-  const offerRegistryAddress = '0xe62b71D706302C49aeb371e48C12368DE02e6A1a'
+  const offerRegistryAddress = '0xb9a8e44D214E30004c54D253ed484A13Fb5381b5'
   const OfferRegistry = await ethers.getContractFactory("OfferRegistry")
   const offerRegistry = await OfferRegistry.attach(offerRegistryAddress)
 
@@ -139,9 +139,8 @@ async function main() {
   await ethers.provider.waitForTransaction(approveTx.hash)
   console.log('called approve')
   const tx3 = await requester.connect(accounts[1]).fulfillOffer('tweetId', 'apiKey')
-  console.log('called fulfill')
   const txReceipt3 = await ethers.provider.waitForTransaction(tx3.hash)
-  console.log('balance of offeree: ' + await linkToken.balanceOf('0x981FC7F035AD33181eD7604f0708c05674395574'))
+  console.log('balance of offeree after calling fulfillOffer: ' + await linkToken.balanceOf('0x981FC7F035AD33181eD7604f0708c05674395574'))
 }
 
 main().catch((error) => {
