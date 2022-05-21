@@ -69,7 +69,7 @@ const main = async () => {
     await linkToken.balanceOf('0x981FC7F035AD33181eD7604f0708c05674395574')
   )
   const fulfillTx = await requester.connect(accounts[1]).fulfillOffer('tweetId', 'apiKey')
-  const txReceipt3 = await ethers.provider.waitForTransaction(fulfillTx.hash)
+  await ethers.provider.waitForTransaction(fulfillTx.hash)
   console.log(
     'Balance of offeree after calling fulfillOffer: ' +
     await linkToken.balanceOf('0x981FC7F035AD33181eD7604f0708c05674395574')
