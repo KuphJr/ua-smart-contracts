@@ -44,23 +44,23 @@ async function main() {
   )
 
   const DirectRequestAggregator = await ethers.getContractFactory("DirectRequestAggregator")
-  // const directRequestAggregatorAddress = '0x068582D81EA8479dc49C9E6bdef290eE725E2480'
-  // const directRequestAggregator = await DirectRequestAggregator.attach(directRequestAggregatorAddress)
+  const directRequestAggregatorAddress = '0x543838263CD6a67E3836eB3BC8f45cfB6c09CD19'
+  const directRequestAggregator = await DirectRequestAggregator.attach(directRequestAggregatorAddress)
 
-  const directRequestAggregator = await DirectRequestAggregator.deploy(
-    ethers.utils.getAddress('0x326C977E6efc84E512bB9C30f76E30c160eD06FB'),
-    '0x3363313763343939373562353432323038613864376539636133333430386531',
-    '0x6339653230663039656138373432393462316166396533666233613338313739',
-    [ ethers.utils.getAddress("0xA0B18C7363989Ac72eAb8C778aE1f6De67802700") ],
-    BigInt(100),
-    BigInt(120),
-    BigInt(400000)
-  )
-  await directRequestAggregator.deployed()
-  const directRequestAggregatorDeployment = directRequestAggregator.deployTransaction.hash
-  const aggregatorContract = await ethers.provider.waitForTransaction(directRequestAggregatorDeployment)
-  console.log("DirectRequestAggregator contract deployed to:", aggregatorContract.contractAddress)
-  const directRequestAggregatorAddress = aggregatorContract.contractAddress
+  // const directRequestAggregator = await DirectRequestAggregator.deploy(
+  //   ethers.utils.getAddress('0x326C977E6efc84E512bB9C30f76E30c160eD06FB'),
+  //   '0x3363313763343939373562353432323038613864376539636133333430386531',
+  //   '0x6339653230663039656138373432393462316166396533666233613338313739',
+  //   [ ethers.utils.getAddress("0xA0B18C7363989Ac72eAb8C778aE1f6De67802700") ],
+  //   BigInt(100),
+  //   BigInt(120),
+  //   BigInt(100000)
+  // )
+  // await directRequestAggregator.deployed()
+  // const directRequestAggregatorDeployment = directRequestAggregator.deployTransaction.hash
+  // const aggregatorContract = await ethers.provider.waitForTransaction(directRequestAggregatorDeployment)
+  // console.log("DirectRequestAggregator contract deployed to:", aggregatorContract.contractAddress)
+  // const directRequestAggregatorAddress = aggregatorContract.contractAddress
 
   await aggregatorOperator.setAggregatorContract(directRequestAggregatorAddress)
 

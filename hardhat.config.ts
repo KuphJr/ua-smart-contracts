@@ -26,8 +26,7 @@ const config: HardhatUserConfig = {
       accounts: [
         process.env.PRIVATE_KEY as string,
         process.env.PRIVATE_KEY_2 as string
-      ],
-      gasMultiplier: 4
+      ]
     },
     hardhat: {
       accounts: [

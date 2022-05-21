@@ -58,8 +58,8 @@ async function main() {
           callbackAddr,
           callbackFunctionId,
           cancelExpiration,
-          requestId + '0000000000000000000000000000000000000000000000000000ff549f85dd990000000000000000000000000000000000000000000000000000000000000005',
-          {
+          requestId + '0000000000000000000000000000000000000000000000000000ff549f85dd990000000000000000000000000000000000000000000000000000000000000005'
+          ,{
             gasLimit: 1000000
           }
         )
@@ -81,7 +81,7 @@ async function main() {
     [ ethers.utils.getAddress(operator.contractAddress) ],
     BigInt(100),
     BigInt(120),
-    BigInt(400000)
+    BigInt(100000)
   )
   await directRequestAggregator.deployed()
   const directRequestAggregatorDeployment = directRequestAggregator.deployTransaction.hash
