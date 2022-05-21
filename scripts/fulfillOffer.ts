@@ -11,7 +11,7 @@ const main = async () => {
   const Requester = await ethers.getContractFactory("Requester");
   const requester = await Requester.attach(
     // ENTER THE ADDRESS OF THE DEPLOYED REQUESTER BELOW
-    '0xAC9e210c2A8557EaF87Da3aBda53Fa0999575316'
+    '0xfADE4779cE51a5bb0Ea4D98174440a5B7325B67e'
   )
   const AggregatorOperator = await ethers.getContractFactory('AggregatorOperator')
   const aggregatorOperator = AggregatorOperator.attach('0x543838263CD6a67E3836eB3BC8f45cfB6c09CD19')
@@ -68,7 +68,7 @@ const main = async () => {
   await ethers.provider.waitForTransaction(approveTx.hash)
   console.log('Balance of offeree')
   console.log(await linkToken.balanceOf('0x981FC7F035AD33181eD7604f0708c05674395574'))
-  const fulfillTx = await requester.connect(accounts[1]).fulfillOffer('', '')
+  const fulfillTx = await await requester.connect(accounts[1]).fulfillOffer('tweetId', 'apiKey')
   console.log('fulfilled')
   const txReceipt3 = await ethers.provider.waitForTransaction(fulfillTx.hash)
 }

@@ -1,0 +1,45 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "OfferRegistryInterface",
+  "sourceName": "contracts/Requester.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "offerer",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "offeree",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "scriptIpfsHash",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "maxOfferValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "registerOffer",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "registryNumber",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
