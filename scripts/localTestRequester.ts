@@ -64,18 +64,18 @@ async function main() {
 
   await aggregatorOperator.setAggregatorContract(directRequestAggregatorAddress)
 
-  // const offerRegistryAddress = "0x7EC339e8E24D1B227D0430de9B1c695c192A8582"
+  const offerRegistryAddress = '0xe62b71D706302C49aeb371e48C12368DE02e6A1a'
   const OfferRegistry = await ethers.getContractFactory("OfferRegistry")
-  // const offerRegistry = await OfferRegistry.attach(offerRegistryAddress)
+  const offerRegistry = await OfferRegistry.attach(offerRegistryAddress)
 
-  const offerRegistry = await OfferRegistry.deploy(
-    RequesterABIhash
-  )
-  await offerRegistry.deployed()
-  const txHash1 = offerRegistry.deployTransaction.hash
-  const txReceipt1 = await ethers.provider.waitForTransaction(txHash1)
-  console.log("OfferRegistry contract deployed to:", txReceipt1.contractAddress);
-  const offerRegistryAddress = txReceipt1.contractAddress
+  // const offerRegistry = await OfferRegistry.deploy(
+  //   RequesterABIhash
+  // )
+  // await offerRegistry.deployed()
+  // const txHash1 = offerRegistry.deployTransaction.hash
+  // const txReceipt1 = await ethers.provider.waitForTransaction(txHash1)
+  // console.log("OfferRegistry contract deployed to:", txReceipt1.contractAddress);
+  // const offerRegistryAddress = txReceipt1.contractAddress
 
   const Requester = await ethers.getContractFactory("Requester")
   const requester = await Requester.deploy(
@@ -83,7 +83,7 @@ async function main() {
     ethers.utils.getAddress(directRequestAggregatorAddress),
     ethers.utils.getAddress(offerRegistryAddress),
     ethers.utils.getAddress('0x981FC7F035AD33181eD7604f0708c05674395574'),
-    'bafybeieomwdf37r6nooiyeoxhoovn3hfob2xfjwch4wy3rj6l5dojeuqle',
+    'bafybeibugaf5qybcpg3z3la665lhbvcrcdzh2bj2zktmue7uvrvachdhxq',
     999999
   )
   await requester.deployed()
@@ -109,17 +109,18 @@ async function main() {
   )
 
   requester.on('OfferFulfilled',
-  (
-    amountOwed: any,
-    registryIndex: any,
-    _requestNumber: any
-  ) => {
-    console.log('🎉 Offer Fulfilled! 🎉')
-    console.log({ amountOwed, registryIndex, _requestNumber })
-  }
-)
+    (
+      amountOwed: any,
+      registryIndex: any,
+      _requestNumber: any
+    ) => {
+      console.log('🎉 Offer Fulfilled! 🎉')
+      console.log({ amountOwed, registryIndex, _requestNumber })
+    }
+  )
 
   // Initalize offer
+  console.log('Trying to init')
   const tokenTx = await linkToken.approve(
     ethers.utils.getAddress(requesterContract.contractAddress),
     BigInt(100)
@@ -137,10 +138,10 @@ async function main() {
   )
   await ethers.provider.waitForTransaction(approveTx.hash)
   console.log('called approve')
-  console.log(await linkToken.balanceOf('0x981FC7F035AD33181eD7604f0708c05674395574'))
-  const tx3 = await requester.connect(accounts[1]).fulfillOffer('', '')
-  console.log('fulfilled')
+  const tx3 = await requester.connect(accounts[1]).fulfillOffer('tweetId', 'apiKey')
+  console.log('called fulfill')
   const txReceipt3 = await ethers.provider.waitForTransaction(tx3.hash)
+  console.log('balance of offeree: ' + await linkToken.balanceOf('0x981FC7F035AD33181eD7604f0708c05674395574'))
 }
 
 main().catch((error) => {

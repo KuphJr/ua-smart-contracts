@@ -1,8 +1,6 @@
 import { ethers } from "hardhat"
 
 async function main() {
-  const accounts = await ethers.getSigners();
-
   const LinkToken = await ethers.getContractFactory('LinkToken')
   const linkToken = await LinkToken.attach('0x326C977E6efc84E512bB9C30f76E30c160eD06FB')
 
