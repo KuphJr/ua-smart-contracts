@@ -1,46 +1,17 @@
-# Advanced Sample Hardhat Project
+# [Check out the demo!](https://adapter-ui.vercel.app/)  Judges and Chainlink Labs team members, DM me via Slack or @KuphJr#5887 on Discord.
 
-This project demonstrates an advanced Hardhat use case, integrating other tools commonly used alongside Hardhat in the ecosystem.
+Currently, only a single Chainlink node is fulfilling requests for the Universal Adapter, however adding additional nodes is simply a matter of infrastructure (and having the dough to rent more than one virtual machine).  You can test out the direct request aggregator contract locally, which simulates the response of Chainlink nodes to test the logic of the smart contract.  In the root directory, run
+`npx hardhat run ./scripts/localTestDirectRequestAggregator.ts`
 
-The project comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts. It also comes with a variety of other tools, preconfigured to work with the project code.
+## Example Contract
 
-Try running some of the following tasks:
+Check out the ExampleRequester.sol contract to see a basic example of how to make a request to the Universal Adapter DirectRequestAggregator.sol contract.  Requests can be sent to the DirectRequestAggregator contract deployed on Polygon Mumbai at the address 0x543838263CD6a67E3836eB3BC8f45cfB6c09CD19.
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-npx hardhat help
-REPORT_GAS=true npx hardhat test
-npx hardhat coverage
-npx hardhat run scripts/deploy.ts
-TS_NODE_FILES=true npx ts-node scripts/deploy.ts
-npx eslint '**/*.{js,ts}'
-npx eslint '**/*.{js,ts}' --fix
-npx prettier '**/*.{json,sol,md}' --check
-npx prettier '**/*.{json,sol,md}' --write
-npx solhint 'contracts/**/*.sol'
-npx solhint 'contracts/**/*.sol' --fix
-```
+See the files `./scripts/deployExampleRequester.sol` and `./scripts/callExampleRequester.sol` for examples of how to work with the `ExampleRequester.sol` contract.
 
-# Etherscan verification
+For simulating a request, uploading JavaScript code to IPFS or uploading private variables to the Chainlink node's database, check out [AdapterJS.link](https://adapterjs.link/simulator.html).
 
-To try out Etherscan verification, you first need to deploy a contract to an Ethereum network that's supported by Etherscan, such as Ropsten.
-
-In this project, copy the .env.example file to a file named .env, and then edit it to fill in the details. Enter your Etherscan API key, your Ropsten node URL (eg from Alchemy), and the private key of the account which will send the deployment transaction. With a valid .env file in place, first deploy your contract:
-
-```shell
-hardhat run --network ropsten scripts/deploy.ts
-```
-
-Then, copy the deployment address and paste it in to replace `DEPLOYED_CONTRACT_ADDRESS` in this command:
-
-```shell
-npx hardhat verify --network ropsten DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
-```
-
-# Performance optimizations
-
-For faster runs of your tests and scripts, consider skipping ts-node's type checking by setting the environment variable `TS_NODE_TRANSPILE_ONLY` to `1` in hardhat's environment. For more details see [the documentation](https://hardhat.org/guides/typescript.html#performance-optimizations).
+Address of OfferRegistry contract on Mumbai: '0xb9a8e44D214E30004c54D253ed484A13Fb5381b5'
+Address of DirectRequestAggregator contract on Mumbai: '0x543838263CD6a67E3836eB3BC8f45cfB6c09CD19'
+Address of AggregatorOperator contract on Mumbai: '0xA0B18C7363989Ac72eAb8C778aE1f6De67802700'
+Owner/deployer of all the above contracts: '0xB7aB5555BB8927BF16F8496da338a3033c12F8f3'
