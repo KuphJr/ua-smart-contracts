@@ -55,6 +55,7 @@ contract DirectRequestAggregator is ChainlinkClient{
     bytes32 _hashedResponseJobspec,
     bytes32 _unhashedResponseJobspec,
     address[] memory _oracles,
+    uint _minResponses,
     uint _linkCostInJules,
     uint _expirationTimeInSeconds,
     uint _minGasForCallback
@@ -65,7 +66,7 @@ contract DirectRequestAggregator is ChainlinkClient{
     );
     setChainlinkToken(_link);
     linkToken = LinkTokenInterface(_link);
-    minResponses = uint(_oracles.length * 2) / uint(3);
+    minResponses = _minResponses;
     if (minResponses == 0) {
       minResponses = 1;
     }
@@ -261,7 +262,7 @@ contract DirectRequestAggregator is ChainlinkClient{
     }
     // If the response threshold is reached, distribute rewards
     // and call the callback function of the requester
-    if (rounds[roundId].unhashedResponses.length >= minResponses) {
+    if (rounds[roundId].unhashedResponses.length == minResponses) {
       completeRequest(roundIds[requestId]);
     }
   }
@@ -272,7 +273,7 @@ contract DirectRequestAggregator is ChainlinkClient{
     bytes32 unhashedAnswer
   ) {
     uint roundId = roundIds[requestId];
-    require(rounds[roundId].hashedResponders.length == minResponses, "Too soon");
+    require(rounds[roundId].hashedResponders.length >= minResponses, "Too soon");
     require(rounds[roundId].unhashedOracleRequests[requestId].oracle == msg.sender, "Incorrect requestId");
     require(rounds[roundId].unhashedOracleRequests[requestId].hasResponded == false, "Already responded");
     bytes32 keck = keccak256(abi.encodePacked((uint(unhashedAnswer) / uint(2)) + salt));
@@ -337,7 +338,7 @@ contract DirectRequestAggregator is ChainlinkClient{
       ) {
         oraclesToGetMedianReward[i] = rounds[roundId].unhashedResponses[rightIndex].oracle;
         i++;
-        rightIndex + 1;
+        rightIndex++;
         contRight = true;
       } else {
         contRight = false;

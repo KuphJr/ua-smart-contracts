@@ -2,5 +2,3 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as interfaces from "./interfaces";
-export * as vendor from "./vendor";
-export { ChainlinkClient__factory } from "./ChainlinkClient__factory";
