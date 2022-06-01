@@ -2,8 +2,8 @@ import { ethers } from "hardhat"
 
 async function main() {
   const JS = 'return BigInt(a)'
-  const CID = ''
-  const VARS = '{"a":42}'
+  const CID = 'abc123'
+  const VARS = ''
   const REF = ethers.utils.formatBytes32String('')
 
   const ExampleRequester = await ethers.getContractFactory("ExampleRequester");
