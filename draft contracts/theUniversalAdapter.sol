@@ -55,7 +55,8 @@ contract TheUniversalAdapter is ChainlinkClient {
     bytes4 callbackFunctionId;
     uint8 hashedResponseCount;
     mapping(uint8 => bytes32) hashedAnswers;
-    uint8[] nodeIdsSortedByResponse;
+    uint8 unhashedResponseCount;
+    uint8[RESPONSE_THRESHOLD] nodeIdsSortedByResponse;
     // mapping from a nodeId to that node's unhashed answer
     mapping(uint8 => bytes32) answers;
   }
@@ -121,13 +122,13 @@ contract TheUniversalAdapter is ChainlinkClient {
 
   function respondWithHashedAnswer(bytes32 requestId, bytes32 hashedAnswer)
   external {
-    require(rounds[requestId].nodeIdsSortedByResponse.length == 0, "too late");
+    require(rounds[requestId].unhashedResponseCount == 0, "too late");
     // solhint-disable-next-line not-rely-on-time
     if (rounds[requestId].expirationTime < block.timestamp) {
       delete rounds[requestId];
       return;
     }
-    uint nodeId = nodeIds[msg.sender];
+    uint8 nodeId = nodeIds[msg.sender];
     require(nodeId != 0, "unauthorized");
     require(rounds[requestId].hashedAnswers[nodeId] == 0, "already responded");
     rounds[requestId].hashedAnswers[nodeId] = hashedAnswer;
@@ -151,38 +152,35 @@ contract TheUniversalAdapter is ChainlinkClient {
       );
   }
 
-  function respondWithUnhashedAnswer(bytes32 requestId, uint salt, bytes32 unhashedAnswer)
+  function respondWithUnhashedAnswer(bytes32 requestId, uint salt, bytes32 answer)
   external returns (bool isSuccessful) {
     if (rounds[requestId].expirationTime < block.timestamp) { // solhint-disable-line not-rely-on-time
       delete rounds[requestId];
       return false;
     }
     uint8 nodeId = nodeIds[msg.sender];
-    require(!rounds[requestId].answers[nodeId],
-    "already responded"
-    );
     require(rounds[requestId].hashedResponseCount >= RESPONSE_THRESHOLD, "too soon");
+    // verify the answer matches the hashedAnswer
     require(
       bytes32(keccak256(
-        abi.encodePacked(uint(unhashedAnswer) + salt)
-      )) == rounds[requestId].answers[nodeId],
+        abi.encodePacked(uint(answer) + salt)
+      )) == rounds[requestId].hashedAnswers[nodeId],
       "invalid hash"
     );
     // delete the hashedAnswer to prevent a duplicate response
-    delete rounds[requestId].answers[nodeId];
-    insertAnswerInOrder(requestId, unhashedAnswer);
-    rounds[requestId].answers[nodeId] = unhashedAnswer;
+    delete rounds[requestId].hashedAnswers[nodeId];
+    insertAnswerInOrder(requestId, answer);
     balance[msg.sender] += BASE_REWARD;
-    if (round.hashedResponseCount == RESPONSE_THRESHOLD) {
+    if (rounds[requestId].nodeIdsSortedByResponse.length == RESPONSE_THRESHOLD) {
       // calculate the median
       bytes32 medianAnswer = getMedian(requestId);
       // clean up
       delete(rounds[requestId]);
       // call the Requester's callback
       require(gasleft() >= MIN_GAS_FOR_CALLBACK, "Not enough gas");
-      (bool success, ) = round.callbackAddress.call( // solhint-disable-line avoid-low-level-calls
+      (bool success, ) = rounds[requestId].callbackAddress.call( // solhint-disable-line avoid-low-level-calls
         abi.encodeWithSelector(
-          round.callbackFunctionId,
+          rounds[requestId].callbackFunctionId,
           requestId,
           medianAnswer
         )
@@ -192,50 +190,40 @@ contract TheUniversalAdapter is ChainlinkClient {
     return true;
   }
 
-  function insertAnswerInOrder(bytes32 requestId, uint answer)
+  function insertAnswerInOrder(bytes32 requestId, bytes32 answer)
   internal {
-    uint nodeId = nodeIds[msg.sender];
+    uint8 nodeId = nodeIds[msg.sender];
+    rounds[requestId].answers[nodeId] = answer;
     uint start = 0;
     // the end index is exclusive
-    uint end = rounds[requestId].answers.length;
-    uint middle = rounds[requestId].answers.length / 2;
+    uint end = rounds[requestId].unhashedResponseCount;
+    uint middle = rounds[requestId].unhashedResponseCount / 2;
     while (true) {
       if (end == start) {
         break;
       }
-      uint nodeIdAtIndex = rounds[requestId].nodeIdsSortedByResponse[middle];
-      uint answerAtIndex = rounds[requestId].answers[nodeIdAtIndex];
-      if (answer < answerAtIndex) {
+      uint8 nodeIdAtIndex = rounds[requestId].nodeIdsSortedByResponse[middle];
+      bytes32 answerAtIndex = rounds[requestId].answers[nodeIdAtIndex];
+      if (uint(answer) < uint(answerAtIndex)) {
         end = middle;
       } else {
         start = middle + 1;
       }
       middle = start + (end - start) / 2;
     }
-    // if the answer is the largest, push it onto the end and return
-    uint last = rounds[requestId].nodeIdsSortedByResponse.length - 1;
-    if (start == last) {
-      rounds[requestId].nodeIdsSortedByResponse.push(answer);
-      return;
-    }
-    // push a duplicate of the last element onto the array
-    rounds[requestId].nodeIdsSortedByResponse.push(
-      rounds[requestId].nodeIdsSortedByResponse[last]
-    );
     // shift the rest of the array forward by one index
-    for (uint i = start; i < rounds[requestId].nodeIdsSortedByResponse.length - 1; i++) {
+    for (uint i = start; i < rounds[requestId].unhashedResponseCount; i++) {
       rounds[requestId].nodeIdsSortedByResponse[i + 1] = rounds[requestId].nodeIdsSortedByResponse[i];
     }
-    // add the response
+    // add the nodeId at its correct postion to maintain order
     rounds[requestId].nodeIdsSortedByResponse[start] = nodeId;
   }
 
   function getMedian(bytes32 requestId) internal
   returns (bytes32 median) {
-    Round memory round = rounds[requestId];
     uint medianIndex = RESPONSE_THRESHOLD >> 1;
-    bytes32 medianAnswer = round.unhashedResponses[
-      round.order[medianIndex]
+    bytes32 medianAnswer = rounds[requestId].unhashedResponses[
+      rounds[requestId].order[medianIndex]
     ].unhashedAnswer;
     // find all nodes with an answer matching the median
     address[RESPONSE_THRESHOLD] memory nodesWithMedianAnswer;
@@ -247,9 +235,9 @@ contract TheUniversalAdapter is ChainlinkClient {
     uint numNodesWithMedianAnswer = 1;
     while (contLeft || contRight) {
       if (contLeft && leftIndex >= 0) {
-        uint8 sortedOrderLeftIndex = round.order[uint(leftIndex)];
+        uint8 sortedOrderLeftIndex = rounds[requestId].order[uint(leftIndex)];
         if (
-          round.unhashedResponses[sortedOrderLeftIndex].unhashedAnswer == medianAnswer
+          rounds[requestId].unhashedResponses[sortedOrderLeftIndex].unhashedAnswer == medianAnswer
         ) {
           nodesWithMedianAnswer[numNodesWithMedianAnswer] = node[sortedOrderLeftIndex];
           numNodesWithMedianAnswer++;
@@ -257,9 +245,9 @@ contract TheUniversalAdapter is ChainlinkClient {
         } else { contLeft = false; }
       }
       if (contRight && rightIndex < RESPONSE_THRESHOLD) {
-        uint8 sortedOrderRightIndex = round.order[uint(rightIndex)];
+        uint8 sortedOrderRightIndex = rounds[requestId].order[uint(rightIndex)];
         if (
-          round.unhashedResponses[sortedOrderRightIndex].unhashedAnswer == medianAnswer
+          rounds[requestId].unhashedResponses[sortedOrderRightIndex].unhashedAnswer == medianAnswer
         ) {
           nodesWithMedianAnswer[numNodesWithMedianAnswer] = node[sortedOrderRightIndex];
           numNodesWithMedianAnswer++;
@@ -268,7 +256,7 @@ contract TheUniversalAdapter is ChainlinkClient {
       }
     }
     // pay all oracles with an answer matching the median a bonus
-    uint bonusReward = uint(REQUEST_COST_IN_JULES >> 1) / numNodesWithMedianAnswer;
+    uint bonusReward = uint(REQUEST_COST_IN_JULES / 2) / numNodesWithMedianAnswer;
     for (uint i = 0; i < numNodesWithMedianAnswer; i++) {
       balance[nodesWithMedianAnswer[i]] += bonusReward;
     }
