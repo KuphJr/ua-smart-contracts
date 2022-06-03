@@ -52,18 +52,6 @@ export type { LinkTokenReceiver } from "./@chainlink/contracts/src/v0.7/LinkToke
 export { LinkTokenReceiver__factory } from "./factories/@chainlink/contracts/src/v0.7/LinkTokenReceiver__factory";
 export type { ENSResolver } from "./@chainlink/contracts/src/v0.7/vendor/ENSResolver";
 export { ENSResolver__factory } from "./factories/@chainlink/contracts/src/v0.7/vendor/ENSResolver__factory";
-export type { AggregatorOperator } from "./contracts/AggregatorOperator";
-export { AggregatorOperator__factory } from "./factories/contracts/AggregatorOperator__factory";
-export type { DirectRequestAggregator } from "./contracts/DirectRequestAggregator";
-export { DirectRequestAggregator__factory } from "./factories/contracts/DirectRequestAggregator__factory";
-export type { DirectRequestAggregatorInterface } from "./contracts/ExampleRequester.sol/DirectRequestAggregatorInterface";
-export { DirectRequestAggregatorInterface__factory } from "./factories/contracts/ExampleRequester.sol/DirectRequestAggregatorInterface__factory";
-export type { ExampleRequester } from "./contracts/ExampleRequester.sol/ExampleRequester";
-export { ExampleRequester__factory } from "./factories/contracts/ExampleRequester.sol/ExampleRequester__factory";
-export type { OfferRegistry } from "./contracts/OfferRegistry.sol/OfferRegistry";
-export { OfferRegistry__factory } from "./factories/contracts/OfferRegistry.sol/OfferRegistry__factory";
-export type { RequesterInterface } from "./contracts/OfferRegistry.sol/RequesterInterface";
-export { RequesterInterface__factory } from "./factories/contracts/OfferRegistry.sol/RequesterInterface__factory";
 export type { Requester } from "./contracts/Requester.sol/Requester";
 export { Requester__factory } from "./factories/contracts/Requester.sol/Requester__factory";
 export type { UniversalAdapterInterface } from "./contracts/Requester.sol/UniversalAdapterInterface";

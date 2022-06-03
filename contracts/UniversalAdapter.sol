@@ -10,10 +10,10 @@ contract UniversalAdapter is ChainlinkClient {
   LinkTokenInterface internal immutable linkToken;
   // cost of a request (1 LINK)
   uint constant public REQUEST_COST_IN_JULES = 100;
-  // number of nodes allowed to send responses
+  // number of nodes allowed to send responses (This has been tested with a maximum of 48 nodes)
   uint constant private NUMBER_OF_NODES = 16;
-  // number of responses required to fulfill a Round
-  uint constant private RESPONSE_THRESHOLD = 16;
+  // number of responses required to fulfill a Round (32 max for maximum gas efficency)
+  uint constant private RESPONSE_THRESHOLD = 10;
   // base reward sent to each node for a request
   uint constant private BASE_REWARD = (REQUEST_COST_IN_JULES / 2) / RESPONSE_THRESHOLD;
   // required amount of gas to use when executing callback
@@ -137,9 +137,14 @@ contract UniversalAdapter is ChainlinkClient {
     bytes32 requestId,
     bytes8 hashedAnswer
   ) external {
-    require(rounds[requestId].unhashedResponseCount == 0, "too late");
+    require(
+      rounds[requestId].expirationTime != 0 &&
+      rounds[requestId].unhashedResponseCount == 0,
+      "too late"
+    );
     // solhint-disable-next-line not-rely-on-time
     if (rounds[requestId].expirationTime < block.timestamp) {
+      console.log("expired");
       delete rounds[requestId];
       return;
     }
@@ -148,6 +153,9 @@ contract UniversalAdapter is ChainlinkClient {
     require(rounds[requestId].hashedAnswers[nodeId - 1] == 0, "already responded");
     rounds[requestId].hashedAnswers[nodeId - 1] = hashedAnswer;
     rounds[requestId].hashedResponseCount++;
+    console.log("Hashed response count");
+    console.logUint(rounds[requestId].hashedResponseCount);
+    console.logUint(gasleft());
     if (rounds[requestId].hashedResponseCount == RESPONSE_THRESHOLD) {
       requestUnhashedAnswers(requestId);
     }
@@ -156,16 +164,17 @@ contract UniversalAdapter is ChainlinkClient {
   function requestUnhashedAnswers(
     bytes32 requestId
   ) internal {
-      Chainlink.Request memory request;
-      request = buildChainlinkRequest(
-        UNHASHED_RESPONSE_JOBSPEC,
-        address(this),
-        this.respondWithUnhashedAnswer.selector
-      );
-      emit OracleRequest(UNHASHED_RESPONSE_JOBSPEC, rounds[requestId].callbackAddress, requestId,
-        0, rounds[requestId].callbackAddress, rounds[requestId].callbackFunctionId,
-        rounds[requestId].expirationTime, 1, request.buf.buf
-      );
+    Chainlink.Request memory request;
+    request = buildChainlinkRequest(
+      UNHASHED_RESPONSE_JOBSPEC,
+      address(this),
+      this.respondWithUnhashedAnswer.selector
+    );
+    emit OracleRequest(UNHASHED_RESPONSE_JOBSPEC, rounds[requestId].callbackAddress, requestId,
+      0, rounds[requestId].callbackAddress, rounds[requestId].callbackFunctionId,
+      rounds[requestId].expirationTime, 1, request.buf.buf
+    );
+    console.log("UNHASHED RESPONSE REQUESTED");
   }
 
   function respondWithUnhashedAnswer(

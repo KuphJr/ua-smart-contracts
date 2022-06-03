@@ -137,30 +137,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ENSResolver__factory>;
     getContractFactory(
-      name: "AggregatorOperator",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.AggregatorOperator__factory>;
-    getContractFactory(
-      name: "DirectRequestAggregator",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.DirectRequestAggregator__factory>;
-    getContractFactory(
-      name: "DirectRequestAggregatorInterface",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.DirectRequestAggregatorInterface__factory>;
-    getContractFactory(
-      name: "ExampleRequester",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ExampleRequester__factory>;
-    getContractFactory(
-      name: "OfferRegistry",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.OfferRegistry__factory>;
-    getContractFactory(
-      name: "RequesterInterface",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.RequesterInterface__factory>;
-    getContractFactory(
       name: "Requester",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Requester__factory>;
@@ -328,36 +304,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.ENSResolver>;
-    getContractAt(
-      name: "AggregatorOperator",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.AggregatorOperator>;
-    getContractAt(
-      name: "DirectRequestAggregator",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.DirectRequestAggregator>;
-    getContractAt(
-      name: "DirectRequestAggregatorInterface",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.DirectRequestAggregatorInterface>;
-    getContractAt(
-      name: "ExampleRequester",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ExampleRequester>;
-    getContractAt(
-      name: "OfferRegistry",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.OfferRegistry>;
-    getContractAt(
-      name: "RequesterInterface",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.RequesterInterface>;
     getContractAt(
       name: "Requester",
       address: string,
