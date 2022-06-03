@@ -13,7 +13,7 @@ contract UniversalAdapter is ChainlinkClient {
   // number of nodes allowed to send responses
   uint constant private NUMBER_OF_NODES = 16;
   // number of responses required to fulfill a Round
-  uint constant private RESPONSE_THRESHOLD = 10;
+  uint constant private RESPONSE_THRESHOLD = 16;
   // base reward sent to each node for a request
   uint constant private BASE_REWARD = (REQUEST_COST_IN_JULES / 2) / RESPONSE_THRESHOLD;
   // required amount of gas to use when executing callback
