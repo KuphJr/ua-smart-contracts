@@ -1,3 +1,5 @@
+The UniversalAdapter v2 contract 1st draft is now complete.  You can check it out at the branch `UniversalAdapterV2`.
+
 # [Check out the demo!](https://adapter-ui.vercel.app/)  Judges and Chainlink Labs team members, DM me via Slack or @KuphJr#5887 on Discord.
 
 Currently, only a single Chainlink node is fulfilling requests for the Universal Adapter, however adding additional nodes is simply a matter of infrastructure (and having the dough to rent more than one virtual machine).  You can test out the direct request aggregator contract locally, which simulates the response of Chainlink nodes to test the logic of the smart contract.  In the root directory, run
