@@ -105,9 +105,37 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ENSResolver__factory>;
     getContractFactory(
+      name: "ChainlinkClient",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ChainlinkClient__factory>;
+    getContractFactory(
+      name: "ChainlinkRequestInterface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ChainlinkRequestInterface__factory>;
+    getContractFactory(
+      name: "ENSInterface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ENSInterface__factory>;
+    getContractFactory(
       name: "LinkTokenInterface",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.LinkTokenInterface__factory>;
+    getContractFactory(
+      name: "OperatorInterface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.OperatorInterface__factory>;
+    getContractFactory(
+      name: "OracleInterface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.OracleInterface__factory>;
+    getContractFactory(
+      name: "PointerInterface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.PointerInterface__factory>;
+    getContractFactory(
+      name: "ENSResolver",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ENSResolver__factory>;
     getContractFactory(
       name: "AggregatorOperator",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -133,17 +161,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.RequesterInterface__factory>;
     getContractFactory(
-      name: "DirectRequestAggregatorInterface",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.DirectRequestAggregatorInterface__factory>;
-    getContractFactory(
-      name: "OfferRegistryInterface",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.OfferRegistryInterface__factory>;
-    getContractFactory(
       name: "Requester",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Requester__factory>;
+    getContractFactory(
+      name: "UniversalAdapterInterface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.UniversalAdapterInterface__factory>;
+    getContractFactory(
+      name: "UniversalAdapter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.UniversalAdapter__factory>;
 
     getContractAt(
       name: "ERC677Token",
@@ -261,10 +289,45 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ENSResolver>;
     getContractAt(
+      name: "ChainlinkClient",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ChainlinkClient>;
+    getContractAt(
+      name: "ChainlinkRequestInterface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ChainlinkRequestInterface>;
+    getContractAt(
+      name: "ENSInterface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ENSInterface>;
+    getContractAt(
       name: "LinkTokenInterface",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.LinkTokenInterface>;
+    getContractAt(
+      name: "OperatorInterface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.OperatorInterface>;
+    getContractAt(
+      name: "OracleInterface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.OracleInterface>;
+    getContractAt(
+      name: "PointerInterface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.PointerInterface>;
+    getContractAt(
+      name: "ENSResolver",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ENSResolver>;
     getContractAt(
       name: "AggregatorOperator",
       address: string,
@@ -296,20 +359,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.RequesterInterface>;
     getContractAt(
-      name: "DirectRequestAggregatorInterface",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.DirectRequestAggregatorInterface>;
-    getContractAt(
-      name: "OfferRegistryInterface",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.OfferRegistryInterface>;
-    getContractAt(
       name: "Requester",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Requester>;
+    getContractAt(
+      name: "UniversalAdapterInterface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.UniversalAdapterInterface>;
+    getContractAt(
+      name: "UniversalAdapter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.UniversalAdapter>;
 
     // default types
     getContractFactory(

@@ -64,7 +64,9 @@ export type { OfferRegistry } from "./contracts/OfferRegistry.sol/OfferRegistry"
 export { OfferRegistry__factory } from "./factories/contracts/OfferRegistry.sol/OfferRegistry__factory";
 export type { RequesterInterface } from "./contracts/OfferRegistry.sol/RequesterInterface";
 export { RequesterInterface__factory } from "./factories/contracts/OfferRegistry.sol/RequesterInterface__factory";
-export type { OfferRegistryInterface } from "./contracts/Requester.sol/OfferRegistryInterface";
-export { OfferRegistryInterface__factory } from "./factories/contracts/Requester.sol/OfferRegistryInterface__factory";
 export type { Requester } from "./contracts/Requester.sol/Requester";
 export { Requester__factory } from "./factories/contracts/Requester.sol/Requester__factory";
+export type { UniversalAdapterInterface } from "./contracts/Requester.sol/UniversalAdapterInterface";
+export { UniversalAdapterInterface__factory } from "./factories/contracts/Requester.sol/UniversalAdapterInterface__factory";
+export type { UniversalAdapter } from "./contracts/UniversalAdapter";
+export { UniversalAdapter__factory } from "./factories/contracts/UniversalAdapter__factory";

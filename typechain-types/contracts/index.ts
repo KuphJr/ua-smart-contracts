@@ -9,3 +9,4 @@ import type * as requesterSol from "./Requester.sol";
 export type { requesterSol };
 export type { AggregatorOperator } from "./AggregatorOperator";
 export type { DirectRequestAggregator } from "./DirectRequestAggregator";
+export type { UniversalAdapter } from "./UniversalAdapter";
