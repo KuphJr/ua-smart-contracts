@@ -152,7 +152,7 @@ const handleUnhashedResponses = async (requestId: string, nodeWallets: Signer[],
   hashedResponseLog.map((log) => totalGas = totalGas + log.gasUsed)
   unhashedResponseLog.map((log) => totalGas = totalGas + log.gasUsed)
   failedTxLog.map((log) => totalGas = totalGas + log.gasUsed)
-  console.log('Total Gas Used: ' + totalGas)
+  console.log('Total Gas Used for All Transactions Combined: ' + totalGas)
 }
 
 const getHashedAnswer = (answer: bigint): { hashedAnswer: string, salt: bigint } => {

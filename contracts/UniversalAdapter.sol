@@ -144,7 +144,6 @@ contract UniversalAdapter is ChainlinkClient {
     );
     // solhint-disable-next-line not-rely-on-time
     if (rounds[requestId].expirationTime < block.timestamp) {
-      console.log("expired");
       delete rounds[requestId];
       return;
     }
@@ -153,9 +152,6 @@ contract UniversalAdapter is ChainlinkClient {
     require(rounds[requestId].hashedAnswers[nodeId - 1] == 0, "already responded");
     rounds[requestId].hashedAnswers[nodeId - 1] = hashedAnswer;
     rounds[requestId].hashedResponseCount++;
-    console.log("Hashed response count");
-    console.logUint(rounds[requestId].hashedResponseCount);
-    console.logUint(gasleft());
     if (rounds[requestId].hashedResponseCount == RESPONSE_THRESHOLD) {
       requestUnhashedAnswers(requestId);
     }
@@ -174,7 +170,6 @@ contract UniversalAdapter is ChainlinkClient {
       0, rounds[requestId].callbackAddress, rounds[requestId].callbackFunctionId,
       rounds[requestId].expirationTime, 1, request.buf.buf
     );
-    console.log("UNHASHED RESPONSE REQUESTED");
   }
 
   function respondWithUnhashedAnswer(
