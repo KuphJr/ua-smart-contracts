@@ -8,7 +8,7 @@ import {
 
 const LINK_TOKEN_ADDRESS = '0x01BE23585060835E02B77ef475b0Cc51aA1e0709'
 // the number of nodes must be less than 255
-const NUMBER_OF_NODES = 32
+const NUMBER_OF_NODES = 16
 // note that the number of nodes and the response threshold do not have to be the same.
 // This allows for a certain number of nodes to fail to respond, without causing a request to fail.
 // The tolerance for the number of failed responses == NUMBER_OF_NODES - RESPONSE_THRESHOLD
