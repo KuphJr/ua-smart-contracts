@@ -115,7 +115,7 @@ const handleHashedResponses = async (requestId: string, nodeWallets: Signer[], u
       const txResult = await ethers.provider.waitForTransaction(tx.hash)
       hashedResponseLog.push({ success: !!txResult.status, gasUsed: txResult.cumulativeGasUsed.toNumber() })
     }
-    fs.writeFileSync('hashedResponseLog.json', JSON.stringify(hashedResponseLog))
+    fs.writeFileSync('./logs/hashedResponseLog.json', JSON.stringify(hashedResponseLog))
 }
 
 const handleUnhashedResponses = async (requestId: string, nodeWallets: Signer[], universalAdapter: Contract) => {
@@ -146,8 +146,8 @@ const handleUnhashedResponses = async (requestId: string, nodeWallets: Signer[],
       unhashedResponseLog.push({ success: !!txResult.status, gasUsed: txResult.cumulativeGasUsed.toNumber() })
   }
 
-  fs.writeFileSync('unhashedResponseLog.json', JSON.stringify(unhashedResponseLog))
-  fs.writeFileSync('failedTxLog.json', JSON.stringify(failedTxLog))
+  fs.writeFileSync('./logs/unhashedResponseLog.json', JSON.stringify(unhashedResponseLog))
+  fs.writeFileSync('./logs/failedTxLog.json', JSON.stringify(failedTxLog))
   let totalGas = 0
   hashedResponseLog.map((log) => totalGas = totalGas + log.gasUsed)
   unhashedResponseLog.map((log) => totalGas = totalGas + log.gasUsed)
