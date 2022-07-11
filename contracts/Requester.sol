@@ -1,5 +1,5 @@
 // "SPDX-License-Identifier: MIT"
-pragma solidity >=0.8.0;
+pragma solidity ^0.8.0;
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 import "hardhat/console.sol";
 
@@ -22,7 +22,8 @@ contract Requester {
     string js,
     string cid,
     string vars,
-    string ref  
+    string ref,
+    bytes32 requestId
   );
 
   event RequestFulfilled(
@@ -56,7 +57,7 @@ contract Requester {
       js, cid, vars, ref
     );
     emit RequestSent(
-      this.fulfillDirectRequest.selector, js, cid, vars, ref
+      this.fulfillDirectRequest.selector, js, cid, vars, ref, requestId
     );
     return requestId;
   }

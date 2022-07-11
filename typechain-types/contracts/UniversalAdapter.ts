@@ -32,7 +32,7 @@ export interface UniversalAdapterInterface extends utils.Interface {
     "balance(uint8)": FunctionFragment;
     "makeRequest(bytes4,string,string,string,string)": FunctionFragment;
     "respondWithHashedAnswer(bytes32,bytes8)": FunctionFragment;
-    "respondWithUnhashedAnswer(bytes32,uint256,bytes32)": FunctionFragment;
+    "respondWithUnhashedAnswer(bytes32,bytes32,bytes32)": FunctionFragment;
     "withdrawEarnings()": FunctionFragment;
   };
 
@@ -64,7 +64,7 @@ export interface UniversalAdapterInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "respondWithUnhashedAnswer",
-    values: [BytesLike, BigNumberish, BytesLike]
+    values: [BytesLike, BytesLike, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "withdrawEarnings",
@@ -218,7 +218,7 @@ export interface UniversalAdapter extends BaseContract {
 
     respondWithUnhashedAnswer(
       requestId: BytesLike,
-      salt: BigNumberish,
+      salt: BytesLike,
       answer: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -249,7 +249,7 @@ export interface UniversalAdapter extends BaseContract {
 
   respondWithUnhashedAnswer(
     requestId: BytesLike,
-    salt: BigNumberish,
+    salt: BytesLike,
     answer: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -280,7 +280,7 @@ export interface UniversalAdapter extends BaseContract {
 
     respondWithUnhashedAnswer(
       requestId: BytesLike,
-      salt: BigNumberish,
+      salt: BytesLike,
       answer: BytesLike,
       overrides?: CallOverrides
     ): Promise<boolean>;
@@ -350,7 +350,7 @@ export interface UniversalAdapter extends BaseContract {
 
     respondWithUnhashedAnswer(
       requestId: BytesLike,
-      salt: BigNumberish,
+      salt: BytesLike,
       answer: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -387,7 +387,7 @@ export interface UniversalAdapter extends BaseContract {
 
     respondWithUnhashedAnswer(
       requestId: BytesLike,
-      salt: BigNumberish,
+      salt: BytesLike,
       answer: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;

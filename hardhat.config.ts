@@ -14,23 +14,27 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       { version: "0.8.0" },
-      { version: "0.7.0" },
-      { version: "0.6.0" },
       { version: "0.4.24" },
-      { version: "0.4.11" }
+      { version: "0.4.11" },
+      { version: "0.4.8" }
     ]
   },
   networks: {
+    mumbai: {
+      url: "https://dry-young-sun.matic-testnet.quiknode.pro/f0d9ee2313cc5813ca36460677985e066497f634/",
+      gasMultiplier: 15,
+      accounts: [ process.env.WALLETKEY || '' ]
+    },
     hardhat: {
       accounts: [
         {
-          privateKey: process.env.PRIVATE_KEY as string,
+          privateKey: process.env.WALLETKEY as string,
           balance: '99999999999999999999'
         }
       ],
       gasMultiplier: 2,
       forking: {
-        url: process.env.RINKBY_URL || "",
+        url: "https://dry-young-sun.matic-testnet.quiknode.pro/f0d9ee2313cc5813ca36460677985e066497f634/",
         enabled: true
       }
     }

@@ -48,17 +48,33 @@ export const setupContracts = async (
     // is allowed to collect payment in this example.
     nodeAddresses
   )
-  const deployTx = await ethers.provider.waitForTransaction(universalAdapter.deployTransaction.hash)
+  const universalAdapterAddress = (await ethers.provider.waitForTransaction(universalAdapter.deployTransaction.hash)).contractAddress
+  console.log('Universal Adapter Address: ', universalAdapterAddress);
   const Requester = await ethers.getContractFactory("Requester")
   const requester = await Requester.deploy(
     linkTokenAddress,
-    deployTx.contractAddress,
+    universalAdapterAddress,
     100
   )
+  const requesterAddress = (await ethers.provider.waitForTransaction(requester.deployTransaction.hash)).contractAddress
+  console.log('Requester Address: ', requesterAddress)
   const LinkToken = await ethers.getContractFactory('LinkToken')
   const linkToken = await LinkToken.attach(linkTokenAddress)
-  await requester.deployed()
   return { universalAdapter, requester, linkToken }
+}
+
+export const attachToContracts = async (
+  universalAdapterAddress: string,
+  requesterAddress: string,
+  linkTokenAddress: string
+): Promise<{ universalAdapter: Contract, requester: Contract, linkToken: Contract }> => {
+  const UniversalAdapter = await ethers.getContractFactory("UniversalAdapter")
+  const universalAdapter = UniversalAdapter.attach(universalAdapterAddress)
+  const Requester = await ethers.getContractFactory("Requester")
+  const requester = Requester.attach(requesterAddress)
+  const LinkToken = await ethers.getContractFactory('LinkToken')
+  const linkToken = await LinkToken.attach(linkTokenAddress)
+  return { universalAdapter, requester, linkToken }  
 }
 
 type Address = string
@@ -76,12 +92,23 @@ export const mockChainlinkNodes = (
 ) => {
   universalAdapter.on(
     'OracleRequest',
-    ( specId, requester, requestId, payment, callbackAddr, callbackFunctionId, cancelExpiration, dataVersion, data) => {
+    ( specId: any, requester: any, requestId: any, payment: any, callbackAddr: any, callbackFunctionId: any, cancelExpiration: any, dataVersion: any, data: any) => {
       console.log('OracleRequest Emitted')
-      if (specId == '0x3363313763343939373562353432323038613864376539636133333430386531')
+      if (specId == '0x3133346463393332346463643465633061383131363162356131363730323432')
         handleHashedResponses(requestId, nodeWallets, universalAdapter)
-      if (specId == '0x6339653230663039656138373432393462316166396533666233613338313739')
+      if (specId == '0x6339336337646136616536303432363762653736663136353837306431326230')
         handleUnhashedResponses(requestId, nodeWallets, universalAdapter)
+    }
+  )
+}
+
+export const logOracleRequests = (universalAdapter: Contract) => {
+  universalAdapter.on(
+    'OracleRequest',
+    (specId: any, requester: any, requestId: any, payment: any, callbackAddr: any, callbackFunctionId: any, cancelExpiration: any, dataVersion: any, data: any) => {
+      console.log('OracleRequest Emitted')
+      console.log('requestId: ', requestId)
+      console.log('data: ', data)
     }
   )
 }
@@ -100,7 +127,8 @@ const handleHashedResponses = async (requestId: string, nodeWallets: Signer[], u
       const initialBalance = BigInt((await wallet.getBalance()).toString())
       try {
         const tx = await universalAdapter.connect(wallet).respondWithHashedAnswer(
-          requestId, hashedAnswer, { gasLimit: 500000 }
+          //requestId, hashedAnswer, { gasLimit: 500000 }
+          requestId, '0xc35743cb37a481a9', { gasLimit: 500000 }
         )
         hashedResponseTransactions.push(tx)
       }
@@ -125,10 +153,13 @@ const handleUnhashedResponses = async (requestId: string, nodeWallets: Signer[],
     const initialBalance = BigInt((await wallet.getBalance()).toString())
     try {
       const tx = await universalAdapter.connect(wallet).respondWithUnhashedAnswer(
-        requestId, salt, ethers.utils.hexZeroPad('0x' + answer, 32), { gasLimit: 500000 }
+        //requestId, ethers.utils.hexZeroPad('0x' + salt.toString(16), 32), ethers.utils.hexZeroPad('0x' + answer, 32), { gasLimit: 500000 }
+        requestId, '0x0000000000000000000000000000000000000000000000000000f4a1ff6ccaf2', '0x0000000000000000000000000000000000000000000000000000000000000064', { gasLimit: 500000 }
       )
       unhashedResponseTransactions.push(tx)
     } catch (error) {
+      console.log('TX FAILED!!!')
+      console.log(error)
       const gasPrice = BigInt((await ethers.provider.getGasPrice()).toString())
       const endingBalance = BigInt((await wallet.getBalance()).toString())
       const gasUsed = (initialBalance - endingBalance) / gasPrice
@@ -140,7 +171,7 @@ const handleUnhashedResponses = async (requestId: string, nodeWallets: Signer[],
     try {
       txResult = await ethers.provider.waitForTransaction(tx.hash)
     } catch (error) {
-      //console.log(JSON.stringify(error))
+      console.log(JSON.stringify(error))
     }
     if (txResult)
       unhashedResponseLog.push({ success: !!txResult.status, gasUsed: txResult.cumulativeGasUsed.toNumber() })
@@ -156,13 +187,14 @@ const handleUnhashedResponses = async (requestId: string, nodeWallets: Signer[],
 }
 
 const getHashedAnswer = (answer: bigint): { hashedAnswer: string, salt: bigint } => {
-  const salt = BigInt(randomInt(0, 281474976710655))
+  //const salt = BigInt(randomInt(0, 281474976710655))
+  const salt = BigInt('10969606012957470052')
   const answerPlusSalt = BigInt('0b' + (answer + salt).toString(2).slice(-256))
   const fullHashedAnswer = ethers.utils.keccak256(
     ethers.utils.hexZeroPad('0x' + answerPlusSalt.toString(16), 32)
   )
-  const last4Bytes = BigInt('0b' + BigInt(fullHashedAnswer).toString(2).slice(-64)).toString(16)
-  return { hashedAnswer: ethers.utils.hexZeroPad('0x' + last4Bytes, 8), salt }
+  const last8Bytes = BigInt('0b' + BigInt(fullHashedAnswer).toString(2).slice(-64)).toString(16)
+  return { hashedAnswer: ethers.utils.hexZeroPad('0x' + last8Bytes, 8), salt }
 }
 
 // Generates a BigInt equal to 95, plus a random number between 0 and 10 (inclusive)
@@ -173,19 +205,20 @@ export const setupRequesterLogging = (
 ) => {
   requester.on('RequestSent',
     (
-      callbackFunctionId,
-      js,
-      cid,
-      vars,
-      ref
+      callbackFunctionId: any,
+      js: any,
+      cid: any,
+      vars: any,
+      ref: any,
+      requestId: any
     ) => {
       console.log('Logging request sent event')
     }
   )
   requester.on('RequestFulfilled',
     (
-      result,
-      requestId
+      result: any,
+      requestId: any
     ) => {
       console.log('🎉 Request Fulfilled! 🎉')
       console.log({ result, requestId })

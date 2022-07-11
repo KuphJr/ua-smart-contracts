@@ -58,7 +58,7 @@ export interface RequesterInterface extends utils.Interface {
 
   events: {
     "RequestFulfilled(bytes32,bytes32)": EventFragment;
-    "RequestSent(bytes4,string,string,string,string)": EventFragment;
+    "RequestSent(bytes4,string,string,string,string,bytes32)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "RequestFulfilled"): EventFragment;
@@ -83,9 +83,10 @@ export interface RequestSentEventObject {
   cid: string;
   vars: string;
   ref: string;
+  requestId: string;
 }
 export type RequestSentEvent = TypedEvent<
-  [string, string, string, string, string],
+  [string, string, string, string, string, string],
   RequestSentEventObject
 >;
 
@@ -179,19 +180,21 @@ export interface Requester extends BaseContract {
       requestId?: null
     ): RequestFulfilledEventFilter;
 
-    "RequestSent(bytes4,string,string,string,string)"(
+    "RequestSent(bytes4,string,string,string,string,bytes32)"(
       callbackFunctionId?: null,
       js?: null,
       cid?: null,
       vars?: null,
-      ref?: null
+      ref?: null,
+      requestId?: null
     ): RequestSentEventFilter;
     RequestSent(
       callbackFunctionId?: null,
       js?: null,
       cid?: null,
       vars?: null,
-      ref?: null
+      ref?: null,
+      requestId?: null
     ): RequestSentEventFilter;
   };
 

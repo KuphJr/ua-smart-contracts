@@ -1,5 +1,5 @@
 // "SPDX-License-Identifier: MIT"
-pragma solidity >=0.8.0;
+pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
@@ -8,22 +8,17 @@ import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 contract UniversalAdapter is ChainlinkClient {
   using Chainlink for Chainlink.Request;
   LinkTokenInterface internal immutable linkToken;
-  // cost of a request (1 LINK)
+
   uint constant public REQUEST_COST_IN_JULES = 100;
   // number of nodes allowed to send responses (This has been tested with a maximum of 48 nodes)
-  uint constant private NUMBER_OF_NODES = 16;
-  // number of responses required to fulfill a Round (32 max for maximum gas efficency)
-  uint constant private RESPONSE_THRESHOLD = 10;
-  // base reward sent to each node for a request
+  uint constant private NUMBER_OF_NODES = 1;
+  // number of responses required to conclude a round (32 max for maximum gas efficency)
+  uint constant private RESPONSE_THRESHOLD = 1;
   uint constant private BASE_REWARD = (REQUEST_COST_IN_JULES / 2) / RESPONSE_THRESHOLD;
-  // required amount of gas to use when executing callback
   uint constant private MIN_GAS_FOR_CALLBACK = 100000; //solhint-disable-line var-name-mixedcase
-  // number of seconds until a round is considered expired (5 minutes)
   uint40 constant private EXPIRATION_TIME_IN_SECONDS = 300;
-  // the jobspec for getting the hashed answer
-  bytes32 constant private HASHED_RESPONSE_JOBSPEC = "3c17c49975b542208a8d7e9ca33408e1";
-  // the jobspec for getting the unhashed answer
-  bytes32 constant private UNHASHED_RESPONSE_JOBSPEC = "c9e20f09ea874294b1af9e3fb3a38179";
+  bytes32 constant private HASHED_RESPONSE_JOBSPEC = "134dc9324dcd4ec0a81161b5a1670242";
+  bytes32 constant private UNHASHED_RESPONSE_JOBSPEC = "c93c7da6ae604267be76f165870d12b0";
 
   event OracleRequest(
     bytes32 indexed specId,
@@ -37,7 +32,7 @@ contract UniversalAdapter is ChainlinkClient {
     bytes data
   );
 
-  struct Round{
+  struct Round {
     uint40 expirationTime;
     address callbackAddress;
     bytes4 callbackFunctionId;
@@ -174,7 +169,7 @@ contract UniversalAdapter is ChainlinkClient {
 
   function respondWithUnhashedAnswer(
     bytes32 requestId,
-    uint salt,
+    bytes32 salt,
     bytes32 answer
   ) external returns (bool isSuccessful) {
     require(rounds[requestId].expirationTime != 0, "too late");
@@ -186,7 +181,7 @@ contract UniversalAdapter is ChainlinkClient {
     require(rounds[requestId].hashedResponseCount >= RESPONSE_THRESHOLD, "too soon");
     // verify the answer matches the hashedAnswer
     require(
-      bytes32(keccak256(abi.encodePacked(uint(answer) + salt))) & 0x000000000000000000000000000000000000000000000000ffffffffffffffff
+      bytes32(keccak256(abi.encodePacked(uint(answer) + uint(salt)))) & 0x000000000000000000000000000000000000000000000000ffffffffffffffff
       == bytes32(rounds[requestId].hashedAnswers[nodeId - 1]) >> 192,
       "hash doesn't match"
     );
