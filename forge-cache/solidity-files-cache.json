@@ -13,7 +13,7 @@
   },
   "files": {
     "lib/forge-std/lib/ds-test/src/test.sol": {
-      "lastModificationDate": 1657721183600,
+      "lastModificationDate": 1657723726855,
       "contentHash": "962996f0e05d5218857a538a62d7c47e",
       "sourceName": "lib/forge-std/lib/ds-test/src/test.sol",
       "solcConfig": {
@@ -51,7 +51,7 @@
       }
     },
     "lib/forge-std/src/Script.sol": {
-      "lastModificationDate": 1657721182439,
+      "lastModificationDate": 1657723726438,
       "contentHash": "aa35d1ccd596e76bd27d2f26624ff8a4",
       "sourceName": "lib/forge-std/src/Script.sol",
       "solcConfig": {
@@ -93,7 +93,7 @@
       }
     },
     "lib/forge-std/src/Test.sol": {
-      "lastModificationDate": 1657721182439,
+      "lastModificationDate": 1657723726439,
       "contentHash": "adda574ef53cb30afda008ea43fbb506",
       "sourceName": "lib/forge-std/src/Test.sol",
       "solcConfig": {
@@ -146,7 +146,7 @@
       }
     },
     "lib/forge-std/src/Vm.sol": {
-      "lastModificationDate": 1657721182440,
+      "lastModificationDate": 1657723726442,
       "contentHash": "ccd3a0be9e2282ce8ca35b03fba623e0",
       "sourceName": "lib/forge-std/src/Vm.sol",
       "solcConfig": {
@@ -184,7 +184,7 @@
       }
     },
     "lib/forge-std/src/console.sol": {
-      "lastModificationDate": 1657721182440,
+      "lastModificationDate": 1657723726440,
       "contentHash": "100b8a33b917da1147740d7ab8b0ded3",
       "sourceName": "lib/forge-std/src/console.sol",
       "solcConfig": {
@@ -222,7 +222,7 @@
       }
     },
     "lib/forge-std/src/console2.sol": {
-      "lastModificationDate": 1657721182440,
+      "lastModificationDate": 1657723726440,
       "contentHash": "5df91f8e93efbfcccf68973dc1b74a70",
       "sourceName": "lib/forge-std/src/console2.sol",
       "solcConfig": {
@@ -260,7 +260,7 @@
       }
     },
     "scripts/foundry/Contract.s.sol": {
-      "lastModificationDate": 1657721178571,
+      "lastModificationDate": 1657723725598,
       "contentHash": "3642d05d9c479368231825c40aaa276a",
       "sourceName": "scripts/foundry/Contract.s.sol",
       "solcConfig": {
@@ -302,46 +302,8 @@
         }
       }
     },
-    "src/Contract.sol": {
-      "lastModificationDate": 1657721178570,
-      "contentHash": "0a4db02f64172ef6ba21d89f49444a92",
-      "sourceName": "src/Contract.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs"
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ]
-            }
-          },
-          "evmVersion": "london",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "^0.8.13",
-      "artifacts": {
-        "Contract": {
-          "0.8.15+commit.e14f2714.Darwin.appleclang": "Contract.sol/Contract.json"
-        }
-      }
-    },
     "test/foundry/Contract.t.sol": {
-      "lastModificationDate": 1657721393413,
+      "lastModificationDate": 1657723725598,
       "contentHash": "e232b48eea82a9f0bb9cf0074f103ad6",
       "sourceName": "test/foundry/Contract.t.sol",
       "solcConfig": {

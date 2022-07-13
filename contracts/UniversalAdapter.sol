@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
+import "./interfaces/IAgreement.sol";
 
 contract UniversalAdapter is ChainlinkClient {
   using Chainlink for Chainlink.Request;
@@ -18,6 +19,7 @@ contract UniversalAdapter is ChainlinkClient {
   uint40 constant private EXPIRATION_TIME_IN_SECONDS = 300;
   bytes32 constant private HASHED_RESPONSE_JOBSPEC = "134dc9324dcd4ec0a81161b5a1670242";
   bytes32 constant private UNHASHED_RESPONSE_JOBSPEC = "c93c7da6ae604267be76f165870d12b0";
+  bytes4 constant private CALLBACK_FUNCTION_SELECTOR = IAgreement.fulfillRequest.selector;
 
   event OracleRequest(
     bytes32 indexed specId,
@@ -25,7 +27,6 @@ contract UniversalAdapter is ChainlinkClient {
     bytes32 requestId,
     uint256 payment,
     address callbackAddr,
-    bytes4 callbackFunctionId,
     uint256 cancelExpiration,
     uint256 dataVersion,
     bytes data
@@ -34,7 +35,6 @@ contract UniversalAdapter is ChainlinkClient {
   struct Round {
     uint40 expirationTime;
     address callbackAddress;
-    bytes4 callbackFunctionId;
     uint8 hashedResponseCount;
     bytes8[NUMBER_OF_NODES] hashedAnswers;
     uint8 unhashedResponseCount;
@@ -78,7 +78,6 @@ contract UniversalAdapter is ChainlinkClient {
   }
 
   function makeRequest(
-    bytes4 callbackFunctionId,
     string calldata js,
     string calldata cid,
     string calldata vars,
@@ -105,11 +104,10 @@ contract UniversalAdapter is ChainlinkClient {
     if (bytes(ref).length != 0) {
       request.add("ref", ref);
     }
-    return sendOracleRequest(callbackFunctionId, request);
+    return sendOracleRequest(request);
   }
 
   function sendOracleRequest(
-    bytes4 callbackFunctionId,
     Chainlink.Request memory request
   ) internal returns (bytes32 _requestId) {
     // TODO do we actually need to do keccak and get a hash or can we use requestCount as the requestID
@@ -117,12 +115,11 @@ contract UniversalAdapter is ChainlinkClient {
     requestCount++;
     bytes32 requestId = bytes32(requestCount);
     rounds[requestId].callbackAddress = msg.sender;
-    rounds[requestId].callbackFunctionId = callbackFunctionId;
     // solhint-disable-next-line not-rely-on-time
     uint40 expiration = EXPIRATION_TIME_IN_SECONDS + uint40(block.timestamp);
     rounds[requestId].expirationTime = expiration;
     emit OracleRequest(HASHED_RESPONSE_JOBSPEC, msg.sender, requestId, 0,
-      msg.sender, callbackFunctionId, uint(expiration), 1, request.buf.buf
+      msg.sender, uint(expiration), 1, request.buf.buf
     );
     return requestId;
   }
@@ -161,7 +158,7 @@ contract UniversalAdapter is ChainlinkClient {
       this.respondWithUnhashedAnswer.selector
     );
     emit OracleRequest(UNHASHED_RESPONSE_JOBSPEC, rounds[requestId].callbackAddress, requestId,
-      0, rounds[requestId].callbackAddress, rounds[requestId].callbackFunctionId,
+      0, rounds[requestId].callbackAddress,
       rounds[requestId].expirationTime, 1, request.buf.buf
     );
   }
@@ -197,13 +194,12 @@ contract UniversalAdapter is ChainlinkClient {
       bytes32 medianAnswer = getMedianAndDistributeBonusReward(requestId);
       // clean up
       address callbackAddress = rounds[requestId].callbackAddress;
-      bytes4 callbackFunctionId = rounds[requestId].callbackFunctionId;
       delete(rounds[requestId]);
       // call the Requester's callback
       require(gasleft() >= MIN_GAS_FOR_CALLBACK, "Not enough gas");
       (bool success, ) = callbackAddress.call( // solhint-disable-line avoid-low-level-calls
         abi.encodeWithSelector(
-          callbackFunctionId,
+          CALLBACK_FUNCTION_SELECTOR,
           requestId,
           medianAnswer
         )
