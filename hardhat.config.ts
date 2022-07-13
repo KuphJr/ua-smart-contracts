@@ -1,16 +1,17 @@
 import * as dotenv from "dotenv";
 import process from 'process'
 
-import { HardhatUserConfig } from "hardhat/config"
 import "@nomiclabs/hardhat-etherscan"
 import "@nomiclabs/hardhat-waffle"
+import "@foundry-rs/hardhat-forge";
+import "@foundry-rs/hardhat-anvil";
 import "@typechain/hardhat"
 import "hardhat-gas-reporter"
 import "solidity-coverage"
 
 dotenv.config()
 
-const config: HardhatUserConfig = {
+module.exports = {
   solidity: {
     compilers: [
       { version: "0.8.0" },
@@ -47,5 +48,3 @@ const config: HardhatUserConfig = {
     apiKey: process.env.ETHERSCAN_API_KEY
   }
 }
-
-export default config
