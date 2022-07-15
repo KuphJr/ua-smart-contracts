@@ -9,14 +9,4 @@ test = 'test/foundry'
 script = 'scripts/foundry'
 cache_path  = 'forge-cache'
 
-remappings = [
-    '@chainlink/=node_modules/@chainlink/',
-    '@ensdomains/=node_modules/@ensdomains/',
-    '@solmate/=node_modules/@rari-capital/solmate/src/',
-    'eth-gas-reporter/=node_modules/eth-gas-reporter/',
-    'hardhat/=node_modules/hardhat/',
-    'ds-test/=lib/forge-std/lib/ds-test/src/',
-    'forge-std/=lib/forge-std/src',
-]
-
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
