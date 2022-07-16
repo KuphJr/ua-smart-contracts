@@ -1,16 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {Agreement} from "./Agreement.sol";
 import "./interfaces/IUniversalAdapter.sol";
+import {Agreement} from "./Agreement.sol";
+import {BitPackedMap} from "./utils/BitPackedMap.sol";
+import {Strings} from "./utils/Strings.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
+import {Base64} from "base64-sol/base64.sol";
 import {ERC20} from "@solmate/tokens/ERC20.sol";
 import {ERC721} from "@solmate/tokens/ERC721.sol";
 import {Owned} from "@solmate/auth/Owned.sol";
 import {SafeTransferLib} from "@solmate/utils/SafeTransferLib.sol";
 
-contract AgreementRegistry is ERC721, Owned {
+contract AgreementRegistry is BitPackedMap, ERC721, Owned {
     using SafeTransferLib for ERC20;
+    using Strings for address;
+    using Strings for string;
+    using Strings for uint256;
 
     LinkTokenInterface private linkToken;
     IUniversalAdapter private universalAdapter;
@@ -83,12 +89,70 @@ contract AgreementRegistry is ERC721, Owned {
         creatorAgreements[redeemer].push(agreementId);
         
         _safeMint(redeemer, agreementId);
+
+        // TODO: bitmap construction logic (current value is an example from repo https://github.com/kadenzipfel/bit-packed-map/)
+        bytes32 bitmap = 0x7624778dedc75f8b322b9fa1632a610d40b85e106c7d9bf0e743a9ce291b9c63;
+        _addBitmap(agreementId, bitmap);
+
         emit AgreementCreated(agreementId, agreement);
     }
 
     function tokenURI(uint256 id) public view override returns (string memory uri) {
-        // TODO: metadata logic
-        // https://github.com/kadenzipfel/bit-packed-map
+        require(_ownerOf[id] != address(0), "INVALID_TOKEN");
+
+        Agreement agreement = agreements[id];
+        string memory owner = agreement.owner().toString();
+        string memory redeemer = agreement.redeemer().toString();
+
+        uri = string(
+            abi.encodePacked(
+                "data:application/json;base64,",
+                Base64.encode(
+                    bytes(
+                        abi.encodePacked(
+                            "{'name': '",
+                            string(abi.encodePacked("uApp Agreement #", id.toString())),
+                            "', 'description': 'A trust-minimised agreement powered by the Universal Adapter', ",
+                            "'attributes': [{'trait_type': 'Contract', 'value': '",
+                            agreement,
+                            "'}, {'trait_type': 'Balance', 'value': '",
+                            linkToken.balanceOf(address(agreement)),
+                            "'}, {'trait_type': 'owner', 'value': '",
+                            abi.encodePacked(
+                                "0x",
+                                owner.substring(0, 4),
+                                "...",
+                                owner.substring(bytes(owner).length - 4, 4)
+                            ),
+                            "'}, {'trait_type': 'Redeemer', 'value': '",
+                            abi.encodePacked(
+                                "0x",
+                                redeemer.substring(0, 4),
+                                "...",
+                                redeemer.substring(bytes(redeemer).length - 4, 4)
+                            ),
+                            "'}, {'trait_type': 'Soulbound', 'value': '",
+                            agreement.soulbound(),
+                            "'}, {'trait_type': 'State', 'value': '",
+                            agreement.state(),
+                            "'}], ",
+                            "'image_data': ",
+                            string(
+                                abi.encodePacked(
+                                    "data:image/svg+xml;base64,",
+                                    Base64.encode(
+                                        bytes(
+                                            tokenSvg(id)
+                                        )
+                                    )
+                                )
+                            ),
+                            "'}"
+                        )
+                    )
+                )
+            )
+        );
     }
 
     function transferFrom(
