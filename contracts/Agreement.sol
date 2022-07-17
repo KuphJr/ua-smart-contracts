@@ -25,6 +25,7 @@ contract Agreement is IAgreement, Owned {
   string private cid;
   string private vars;
   string private ref;
+  uint256 public result;
   mapping(address => bool) public cancellations;
 
   enum States {
@@ -54,8 +55,6 @@ contract Agreement is IAgreement, Owned {
     bytes32 indexed requestId,
     bytes32 result
   );
-
-  bytes32 public result;
 
   constructor (
     LinkTokenInterface _link,
@@ -87,8 +86,8 @@ contract Agreement is IAgreement, Owned {
     ref = _ref;
   }
 
-  function makeRequest(
-    /* TODO: url etc & private vars packed with public vars? */
+  function makeRequest( 
+    string calldata _vars
   ) public override returns (bytes32 universalAdapterRequestId) {
     require(state() == States.PENDING, "INACTIVE_AGREEMENT");
     require(msg.sender == redeemer(), "INVALID_REDEEMER");
@@ -96,10 +95,10 @@ contract Agreement is IAgreement, Owned {
     linkToken.transferFrom(msg.sender, address(this), requestCost);
     linkToken.approve(address(universalAdapter), requestCost);
     bytes32 requestId = universalAdapter.makeRequest(
-      js, cid, vars, ref
+      js, cid, _vars, ref
     );
     emit RequestSent(
-      requestId, js, cid, vars, ref
+      requestId, js, cid, _vars, ref
     );
     return requestId;
   }
@@ -126,11 +125,9 @@ contract Agreement is IAgreement, Owned {
   function fulfillRequest(bytes32 requestId, bytes32 _result)
     public override onlyUniversalAdapter
   {
-    result = _result;
-
-    // TODO some condition on bytes32 result? Do we need to map anything against requestId?
-    // state_ = States.FULFILLED;
-    // ERC20(address(linkToken)).safeTransfer(redeemer(), juels);
+    state_ = States.FULFILLED;
+    result = uint256(_result);
+    ERC20(address(linkToken)).safeTransfer(redeemer(), uint256(_result));
 
     emit RequestFulfilled(requestId, _result);
     emit AgreementFulfilled(agreementId);
