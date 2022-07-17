@@ -2,11 +2,9 @@
 pragma solidity ^0.8.0;
 
 /// @title BitPackedMap
-/// @author https://github.com/kadenzipfel
+/// @author Modified from https://github.com/kadenzipfel
 /// @notice Bitpacked 8x8 bitmap
-contract BitPackedMap {
-    mapping(uint256 => bytes32) public bitmaps;
-
+library BitPackedMap {
     /// @notice Given a value for a square, return the corresponding fill rgb hex string.
     /// @param  square 4 bit uint denoting the color of the square.
     /// @return fill rgb hex string corresponding to square.
@@ -74,22 +72,8 @@ contract BitPackedMap {
         return svgString;
     }
 
-    /// @notice Add a bitmap to a corresponding tokenId.
-    /// @param  tokenId ID of token to add a bitmap to.
-    /// @param  bitmap 32 byte value containing all bitmap data.
-    function _addBitmap(uint256 tokenId, bytes32 bitmap) internal virtual {
-        bitmaps[tokenId] = bitmap;
-    }
-
-    /// @notice Given a tokenId, returns corresponding bitmap svg string.
-    /// @param  tokenId ID of token to retrieve bitmap svg string.
-    /// @return svg string to display bitmap.
-    function tokenSvg(uint256 tokenId) public view returns (string memory) {
-        return _renderSvg(bitmaps[tokenId]);
-    }
-
     // SOURCE: https://etherscan.io/address/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63#code
-    function _uintToHexDigit(uint8 d) private pure returns (bytes1) {
+    function _uintToHexDigit(uint8 d) internal pure returns (bytes1) {
         if (0 <= d && d <= 9) {
             return bytes1(uint8(bytes1("0")) + d);
         } else if (10 <= uint8(d) && uint8(d) <= 15) {
@@ -99,7 +83,7 @@ contract BitPackedMap {
     }
 
     // SOURCE: https://etherscan.io/address/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63#code
-    function _uintToHexString(uint a) private pure returns (string memory) {
+    function _uintToHexString(uint a) internal pure returns (string memory) {
         uint count = 0;
         uint b = a;
         while (b != 0) {
@@ -123,7 +107,7 @@ contract BitPackedMap {
     }
 
     // SOURCE: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/3210a8653b66726114226ee5153bbcf59b0475bd/contracts/utils/Strings.sol#L16
-    function _toString(uint256 value) private pure returns (string memory) {
+    function _toString(uint256 value) internal pure returns (string memory) {
         // Inspired by OraclizeAPI's implementation - MIT licence
         // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
 

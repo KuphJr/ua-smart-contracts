@@ -12,7 +12,7 @@ import {ERC721} from "@solmate/tokens/ERC721.sol";
 import {Owned} from "@solmate/auth/Owned.sol";
 import {SafeTransferLib} from "@solmate/utils/SafeTransferLib.sol";
 
-contract AgreementRegistry is BitPackedMap, ERC721, Owned {
+contract AgreementRegistry is ERC721, Owned {
     using SafeTransferLib for ERC20;
     using Strings for address;
     using Strings for string;
@@ -90,19 +90,12 @@ contract AgreementRegistry is BitPackedMap, ERC721, Owned {
         
         _safeMint(redeemer, agreementId);
 
-        // TODO: bitmap construction logic (current value is an example from repo https://github.com/kadenzipfel/bit-packed-map/)
-        bytes32 bitmap = 0x7624778dedc75f8b322b9fa1632a610d40b85e106c7d9bf0e743a9ce291b9c63;
-        _addBitmap(agreementId, bitmap);
-
         emit AgreementCreated(agreementId, agreement);
     }
 
     function tokenURI(uint256 id) public view override returns (string memory uri) {
         require(_ownerOf[id] != address(0), "INVALID_TOKEN");
-
         Agreement agreement = agreements[id];
-        string memory owner = agreement.owner().toString();
-        string memory redeemer = agreement.redeemer().toString();
 
         uri = string(
             abi.encodePacked(
@@ -113,28 +106,24 @@ contract AgreementRegistry is BitPackedMap, ERC721, Owned {
                             "{'name': '",
                             string(abi.encodePacked("uApp Agreement #", id.toString())),
                             "', 'description': 'A trust-minimised agreement powered by the Universal Adapter', ",
-                            "'attributes': [{'trait_type': 'Contract', 'value': '",
-                            agreement,
+                            "'attributes': [{'trait_type': 'Agreement', 'value': '",
+                            id.toString(),
+                            "'}, {'trait_type': 'Contract', 'value': '",
+                            _substringAddress(address(agreement)),
                             "'}, {'trait_type': 'Balance', 'value': '",
-                            linkToken.balanceOf(address(agreement)),
-                            "'}, {'trait_type': 'owner', 'value': '",
-                            abi.encodePacked(
-                                "0x",
-                                owner.substring(0, 4),
-                                "...",
-                                owner.substring(bytes(owner).length - 4, 4)
-                            ),
+                            agreement.state() == Agreement.States.FULFILLED
+                                ? agreement.result()
+                                : linkToken.balanceOf(address(agreement)),
+                            "'}, {'trait_type': 'Creator', 'value': '",
+                            _substringAddress(address(agreement.owner())),
                             "'}, {'trait_type': 'Redeemer', 'value': '",
-                            abi.encodePacked(
-                                "0x",
-                                redeemer.substring(0, 4),
-                                "...",
-                                redeemer.substring(bytes(redeemer).length - 4, 4)
-                            ),
+                            _substringAddress(address(agreement.redeemer())),
+                            "'}, {'trait_type': 'Deadline', 'value': '",
+                            agreement.deadline().toString(),
                             "'}, {'trait_type': 'Soulbound', 'value': '",
-                            agreement.soulbound(),
+                            agreement.soulbound() ? "true" : "false",
                             "'}, {'trait_type': 'State', 'value': '",
-                            agreement.state(),
+                            _stateToString(uint8(agreement.state())),
                             "'}], ",
                             "'image_data': ",
                             string(
@@ -142,7 +131,11 @@ contract AgreementRegistry is BitPackedMap, ERC721, Owned {
                                     "data:image/svg+xml;base64,",
                                     Base64.encode(
                                         bytes(
-                                            tokenSvg(id)
+                                            BitPackedMap._renderSvg(
+                                                _generateBitmap(
+                                                    agreement
+                                                )
+                                            )
                                         )
                                     )
                                 )
@@ -174,5 +167,50 @@ contract AgreementRegistry is BitPackedMap, ERC721, Owned {
 
     function setRequestCost(uint256 _requestCost) external onlyOwner {
         requestCost = _requestCost;
+    }
+
+    function _substringAddress(
+        address _address
+    ) internal pure returns (bytes memory) {
+        string memory stringAddress = _address.toString();
+        return abi.encodePacked(
+            "0x",
+            stringAddress.substring(0, 4),
+            "...",
+            stringAddress.substring(bytes(stringAddress).length - 4, 4)
+        );
+    }
+
+    function _stateToString(uint8 state) internal pure returns (string memory) {
+        assembly {
+            mstore(0x20, 0x20)
+            switch state
+            case 0 { mstore(0x47, 0x0750454e44494e47) }
+            case 1 { mstore(0x45 , 0x0946554c46494c4c4544) }
+            case 2 { mstore(0x45 , 0x0943414e43454c4c4544) }
+            case 3 { mstore(0x47, 0x0745585049524544) }
+            return(0x20, 0x60)
+        }
+    }
+
+    function _generateBitmap(Agreement agreement) internal view returns (bytes32 bitmap) {
+        bytes4 mask = 0xFFFFFFFF;
+        bytes4 _id = BitPackedMap._uintToHexDigit(uint8(agreement.agreementId() % 16)) & mask;
+        bytes4 _agreement = BitPackedMap._uintToHexDigit(uint8(uint256(uint160(address(agreement))) % 16)) & mask;
+        bytes4 _balance = (
+            BitPackedMap._uintToHexDigit(
+                uint8(
+                    agreement.state() == Agreement.States.FULFILLED
+                        ? agreement.result()
+                        : linkToken.balanceOf(address(agreement))
+                ) % 16
+            )
+        ) & mask;
+        bytes4 _creator = BitPackedMap._uintToHexDigit(uint8(uint256(uint160(address(msg.sender))) % 16)) & mask;
+        bytes4 _redeemer = BitPackedMap._uintToHexDigit(uint8(uint256(uint160(address(agreement.redeemer()))) % 16)) & mask;
+        bytes4 _deadline = BitPackedMap._uintToHexDigit(uint8(agreement.deadline() % 16)) & mask;
+        bytes4 _soul = BitPackedMap._uintToHexDigit(uint8(agreement.soulbound() ? 10 : 11)) & mask;
+        bytes4 _state = BitPackedMap._uintToHexDigit(uint8(agreement.state())) & mask;
+        bitmap = bytes32(bytes.concat(_id, _agreement, _balance, _creator, _redeemer, _deadline, _soul, _state));
     }
 }
