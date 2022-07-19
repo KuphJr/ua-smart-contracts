@@ -8,5 +8,6 @@ libs = [
 test = 'test/foundry'
 script = 'scripts/foundry'
 cache_path  = 'forge-cache'
+via-ir = true
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config

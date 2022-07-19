@@ -12,6 +12,261 @@
     ]
   },
   "files": {
+    "contracts/Agreement.sol": {
+      "lastModificationDate": 1658056645376,
+      "contentHash": "1d57a36a2188d4e70cccade0db92be52",
+      "sourceName": "contracts/Agreement.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "viaIR": true,
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/interfaces/IAgreement.sol",
+        "contracts/interfaces/IUniversalAdapter.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@rari-capital/solmate/src/auth/Owned.sol",
+        "node_modules/@rari-capital/solmate/src/tokens/ERC20.sol",
+        "node_modules/@rari-capital/solmate/src/tokens/ERC721.sol",
+        "node_modules/@rari-capital/solmate/src/utils/SafeTransferLib.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "Agreement": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "Agreement.sol/Agreement.json"
+        }
+      }
+    },
+    "contracts/AgreementRegistry.sol": {
+      "lastModificationDate": 1658224760369,
+      "contentHash": "56da506880469bb195a40e5c57e16e4a",
+      "sourceName": "contracts/AgreementRegistry.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "viaIR": true,
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/Agreement.sol",
+        "contracts/interfaces/IAgreement.sol",
+        "contracts/interfaces/IUniversalAdapter.sol",
+        "contracts/utils/BitPackedMap.sol",
+        "contracts/utils/Strings.sol",
+        "lib/forge-std/src/console.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@rari-capital/solmate/src/auth/Owned.sol",
+        "node_modules/@rari-capital/solmate/src/tokens/ERC20.sol",
+        "node_modules/@rari-capital/solmate/src/tokens/ERC721.sol",
+        "node_modules/@rari-capital/solmate/src/utils/SafeTransferLib.sol",
+        "node_modules/base64-sol/base64.sol"
+      ],
+      "versionRequirement": "^0.8.14",
+      "artifacts": {
+        "AgreementRegistry": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "AgreementRegistry.sol/AgreementRegistry.json"
+        }
+      }
+    },
+    "contracts/interfaces/IAgreement.sol": {
+      "lastModificationDate": 1658056326197,
+      "contentHash": "62653f00812500a722c51d1fa54e48fa",
+      "sourceName": "contracts/interfaces/IAgreement.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "viaIR": true,
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "IAgreement": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "IAgreement.sol/IAgreement.json"
+        }
+      }
+    },
+    "contracts/interfaces/IUniversalAdapter.sol": {
+      "lastModificationDate": 1657922255493,
+      "contentHash": "a5acd8753f2b9d5595cf32df84e9aa62",
+      "sourceName": "contracts/interfaces/IUniversalAdapter.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "viaIR": true,
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "IUniversalAdapter": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "IUniversalAdapter.sol/IUniversalAdapter.json"
+        }
+      }
+    },
+    "contracts/utils/BitPackedMap.sol": {
+      "lastModificationDate": 1658224520294,
+      "contentHash": "71dcc47f957762d3319b8bda5e56fc0c",
+      "sourceName": "contracts/utils/BitPackedMap.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "viaIR": true,
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.14",
+      "artifacts": {
+        "BitPackedMap": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "BitPackedMap.sol/BitPackedMap.json"
+        }
+      }
+    },
+    "contracts/utils/Strings.sol": {
+      "lastModificationDate": 1658223150178,
+      "contentHash": "5d6b056d5e25bce0e327b7cd76db8b3b",
+      "sourceName": "contracts/utils/Strings.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "viaIR": true,
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "Strings": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "Strings.sol/Strings.json"
+        }
+      }
+    },
     "lib/forge-std/lib/ds-test/src/test.sol": {
       "lastModificationDate": 1657723726855,
       "contentHash": "962996f0e05d5218857a538a62d7c47e",
@@ -39,6 +294,7 @@
             }
           },
           "evmVersion": "london",
+          "viaIR": true,
           "libraries": {}
         }
       },
@@ -77,6 +333,7 @@
             }
           },
           "evmVersion": "london",
+          "viaIR": true,
           "libraries": {}
         }
       },
@@ -119,6 +376,7 @@
             }
           },
           "evmVersion": "london",
+          "viaIR": true,
           "libraries": {}
         }
       },
@@ -172,6 +430,7 @@
             }
           },
           "evmVersion": "london",
+          "viaIR": true,
           "libraries": {}
         }
       },
@@ -210,6 +469,7 @@
             }
           },
           "evmVersion": "london",
+          "viaIR": true,
           "libraries": {}
         }
       },
@@ -248,6 +508,7 @@
             }
           },
           "evmVersion": "london",
+          "viaIR": true,
           "libraries": {}
         }
       },
@@ -259,10 +520,10 @@
         }
       }
     },
-    "scripts/foundry/Contract.s.sol": {
-      "lastModificationDate": 1657723725598,
-      "contentHash": "3642d05d9c479368231825c40aaa276a",
-      "sourceName": "scripts/foundry/Contract.s.sol",
+    "node_modules/@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol": {
+      "lastModificationDate": 1657720687070,
+      "contentHash": "da5a0c3bd86c896f6a407f909c57edf3",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -286,19 +547,313 @@
             }
           },
           "evmVersion": "london",
+          "viaIR": true,
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "LinkTokenInterface": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "LinkTokenInterface.sol/LinkTokenInterface.json"
+        }
+      }
+    },
+    "node_modules/@rari-capital/solmate/src/auth/Owned.sol": {
+      "lastModificationDate": 1657723525552,
+      "contentHash": "3614611f004e59330b08437861886977",
+      "sourceName": "node_modules/@rari-capital/solmate/src/auth/Owned.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "viaIR": true,
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.8.0",
+      "artifacts": {
+        "Owned": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "Owned.sol/Owned.json"
+        }
+      }
+    },
+    "node_modules/@rari-capital/solmate/src/tokens/ERC20.sol": {
+      "lastModificationDate": 1657723525545,
+      "contentHash": "a0b1801a2ffe030a0f4ff4d508ceb74f",
+      "sourceName": "node_modules/@rari-capital/solmate/src/tokens/ERC20.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "viaIR": true,
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.8.0",
+      "artifacts": {
+        "ERC20": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "ERC20.sol/ERC20.json"
+        }
+      }
+    },
+    "node_modules/@rari-capital/solmate/src/tokens/ERC721.sol": {
+      "lastModificationDate": 1657723525547,
+      "contentHash": "224006de5bf59fbbf155dcaac8c3a955",
+      "sourceName": "node_modules/@rari-capital/solmate/src/tokens/ERC721.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "viaIR": true,
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.8.0",
+      "artifacts": {
+        "ERC721": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "ERC721.sol/ERC721.json"
+        },
+        "ERC721TokenReceiver": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "ERC721.sol/ERC721TokenReceiver.json"
+        }
+      }
+    },
+    "node_modules/@rari-capital/solmate/src/utils/SafeTransferLib.sol": {
+      "lastModificationDate": 1657723525555,
+      "contentHash": "2de39f553e7ea0899eb4c6fa167f4083",
+      "sourceName": "node_modules/@rari-capital/solmate/src/utils/SafeTransferLib.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "viaIR": true,
           "libraries": {}
         }
       },
       "imports": [
+        "node_modules/@rari-capital/solmate/src/tokens/ERC20.sol"
+      ],
+      "versionRequirement": ">=0.8.0",
+      "artifacts": {
+        "SafeTransferLib": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "SafeTransferLib.sol/SafeTransferLib.json"
+        }
+      }
+    },
+    "node_modules/base64-sol/base64.sol": {
+      "lastModificationDate": 1657968528101,
+      "contentHash": "0d54cb6a748ddde95d92ed7802c9248d",
+      "sourceName": "node_modules/base64-sol/base64.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "viaIR": true,
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.6.0",
+      "artifacts": {
+        "Base64": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "base64.sol/Base64.json"
+        }
+      }
+    },
+    "scripts/foundry/Agreement.s.sol": {
+      "lastModificationDate": 1658169327627,
+      "contentHash": "194dc571b9e356aab7aa05fc377708f5",
+      "sourceName": "scripts/foundry/Agreement.s.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "viaIR": true,
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/Agreement.sol",
+        "contracts/AgreementRegistry.sol",
+        "contracts/interfaces/IAgreement.sol",
+        "contracts/interfaces/IUniversalAdapter.sol",
+        "contracts/utils/BitPackedMap.sol",
+        "contracts/utils/Strings.sol",
         "lib/forge-std/src/Script.sol",
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
-        "lib/forge-std/src/console2.sol"
+        "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@rari-capital/solmate/src/auth/Owned.sol",
+        "node_modules/@rari-capital/solmate/src/tokens/ERC20.sol",
+        "node_modules/@rari-capital/solmate/src/tokens/ERC721.sol",
+        "node_modules/@rari-capital/solmate/src/utils/SafeTransferLib.sol",
+        "node_modules/base64-sol/base64.sol",
+        "scripts/foundry/MockLinkToken.sol"
       ],
-      "versionRequirement": "^0.8.13",
+      "versionRequirement": "^0.8.0",
       "artifacts": {
         "ContractScript": {
-          "0.8.15+commit.e14f2714.Darwin.appleclang": "Contract.s.sol/ContractScript.json"
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "Agreement.s.sol/ContractScript.json"
+        }
+      }
+    },
+    "scripts/foundry/MockLinkToken.sol": {
+      "lastModificationDate": 1658070156024,
+      "contentHash": "69d3e92d0c509696af0ba0ac6550cc03",
+      "sourceName": "scripts/foundry/MockLinkToken.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "viaIR": true,
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "node_modules/@rari-capital/solmate/src/tokens/ERC20.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "MockLinkToken": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "MockLinkToken.sol/MockLinkToken.json"
         }
       }
     },
@@ -329,6 +884,7 @@
             }
           },
           "evmVersion": "london",
+          "viaIR": true,
           "libraries": {}
         }
       },

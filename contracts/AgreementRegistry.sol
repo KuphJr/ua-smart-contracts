@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.14;
 
 import "./interfaces/IUniversalAdapter.sol";
 import {Agreement} from "./Agreement.sol";
@@ -44,10 +44,7 @@ contract AgreementRegistry is ERC721, Owned {
         uint256 deadline,
         bool soulbound,
         uint256 maxPayout,
-        string calldata js,
-        string calldata cid,
-        string calldata vars,
-        string calldata ref
+        bytes calldata data
     ) external returns (Agreement agreement) {
         require(redeemer != address(0), "INVALID_REDEEMER");
         require(deadline > block.timestamp, "INVALID_DEADLINE");
@@ -65,6 +62,13 @@ contract AgreementRegistry is ERC721, Owned {
                 )
             );   
         }
+
+        (
+            string memory js,
+            string memory cid,
+            string memory vars,
+            string memory ref
+        ) = abi.decode(data, (string, string, string, string));
         
         agreement = new Agreement{salt: salt}(
             linkToken,
@@ -86,7 +90,7 @@ contract AgreementRegistry is ERC721, Owned {
 
         agreements.push(agreement);
         creatorAgreements[msg.sender].push(agreementId);
-        creatorAgreements[redeemer].push(agreementId);
+        redeemerAgreements[redeemer].push(agreementId);
         
         _safeMint(redeemer, agreementId);
 
@@ -96,6 +100,21 @@ contract AgreementRegistry is ERC721, Owned {
     function tokenURI(uint256 id) public view override returns (string memory uri) {
         require(_ownerOf[id] != address(0), "INVALID_TOKEN");
         Agreement agreement = agreements[id];
+
+        string memory _imageData = string(
+            abi.encodePacked(
+                "data:image/svg+xml;base64,",
+                Base64.encode(
+                    bytes(
+                        BitPackedMap._renderSvg(
+                            _generateBitmap(
+                                agreement
+                            )
+                        )
+                    )
+                )
+            )
+        );
 
         uri = string(
             abi.encodePacked(
@@ -112,8 +131,8 @@ contract AgreementRegistry is ERC721, Owned {
                             _substringAddress(address(agreement)),
                             "'}, {'trait_type': 'Balance', 'value': '",
                             agreement.state() == Agreement.States.FULFILLED
-                                ? agreement.result()
-                                : linkToken.balanceOf(address(agreement)),
+                                ? agreement.result().toString()
+                                : linkToken.balanceOf(address(agreement)).toString(),
                             "'}, {'trait_type': 'Creator', 'value': '",
                             _substringAddress(address(agreement.owner())),
                             "'}, {'trait_type': 'Redeemer', 'value': '",
@@ -126,20 +145,7 @@ contract AgreementRegistry is ERC721, Owned {
                             _stateToString(uint8(agreement.state())),
                             "'}], ",
                             "'image_data': ",
-                            string(
-                                abi.encodePacked(
-                                    "data:image/svg+xml;base64,",
-                                    Base64.encode(
-                                        bytes(
-                                            BitPackedMap._renderSvg(
-                                                _generateBitmap(
-                                                    agreement
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
-                            ),
+                            _imageData,
                             "'}"
                         )
                     )
@@ -171,46 +177,47 @@ contract AgreementRegistry is ERC721, Owned {
 
     function _substringAddress(
         address _address
-    ) internal pure returns (bytes memory) {
+    ) internal pure returns (string memory) {
         string memory stringAddress = _address.toString();
-        return abi.encodePacked(
-            "0x",
-            stringAddress.substring(0, 4),
-            "...",
-            stringAddress.substring(bytes(stringAddress).length - 4, 4)
+        return string(
+            abi.encodePacked(
+                "0x",
+                stringAddress.substring(0, 4),
+                "...",
+                stringAddress.substring(bytes(stringAddress).length - 4, 4)
+            )
         );
     }
 
-    function _stateToString(uint8 state) internal pure returns (string memory) {
+    function _stateToString(uint8 state) internal pure returns (string memory str) {
         assembly {
-            mstore(0x20, 0x20)
+            str := mload(0x40)
+            mstore(str, 0x20)
             switch state
-            case 0 { mstore(0x47, 0x0750454e44494e47) }
-            case 1 { mstore(0x45 , 0x0946554c46494c4c4544) }
-            case 2 { mstore(0x45 , 0x0943414e43454c4c4544) }
-            case 3 { mstore(0x47, 0x0745585049524544) }
-            return(0x20, 0x60)
+            case 0 { mstore(add(str, 0x07), 0x0750454e44494e47) }
+            case 1 { mstore(add(str, 0x05) , 0x0946554c46494c4c4544) }
+            case 2 { mstore(add(str, 0x05) , 0x0943414e43454c4c4544) }
+            case 3 { mstore(add(str, 0x07), 0x0745585049524544) }
+            mstore(0x40, add(str, 0x60))
         }
     }
 
-    function _generateBitmap(Agreement agreement) internal view returns (bytes32 bitmap) {
-        bytes4 mask = 0xFFFFFFFF;
-        bytes4 _id = BitPackedMap._uintToHexDigit(uint8(agreement.agreementId() % 16)) & mask;
-        bytes4 _agreement = BitPackedMap._uintToHexDigit(uint8(uint256(uint160(address(agreement))) % 16)) & mask;
-        bytes4 _balance = (
-            BitPackedMap._uintToHexDigit(
-                uint8(
-                    agreement.state() == Agreement.States.FULFILLED
-                        ? agreement.result()
-                        : linkToken.balanceOf(address(agreement))
-                ) % 16
-            )
-        ) & mask;
-        bytes4 _creator = BitPackedMap._uintToHexDigit(uint8(uint256(uint160(address(msg.sender))) % 16)) & mask;
-        bytes4 _redeemer = BitPackedMap._uintToHexDigit(uint8(uint256(uint160(address(agreement.redeemer()))) % 16)) & mask;
-        bytes4 _deadline = BitPackedMap._uintToHexDigit(uint8(agreement.deadline() % 16)) & mask;
-        bytes4 _soul = BitPackedMap._uintToHexDigit(uint8(agreement.soulbound() ? 10 : 11)) & mask;
-        bytes4 _state = BitPackedMap._uintToHexDigit(uint8(agreement.state())) & mask;
-        bitmap = bytes32(bytes.concat(_id, _agreement, _balance, _creator, _redeemer, _deadline, _soul, _state));
+    function _generateBitmap(Agreement agreement) internal view returns (bytes16 bitmap) {
+        string memory tmp;
+        uint256 bal = agreement.state() == Agreement.States.FULFILLED
+                                ? agreement.result()
+                                : linkToken.balanceOf(address(agreement));
+        {
+            string memory _id = BitPackedMap._uintToHexString(uint8(agreement.agreementId() % 256));
+            string memory _agreement = BitPackedMap._uintToHexString(uint8(uint256(uint160(address(agreement))) % 256));
+            string memory _balance = BitPackedMap._uintToHexString(uint8(bal % 256));
+            string memory _creator = BitPackedMap._uintToHexString(uint8(uint256(uint160(address(msg.sender))) % 256));
+            tmp = string(abi.encodePacked(_id, _id, _agreement, _agreement, _balance, _balance, _creator, _creator));
+        }
+        string memory _redeemer = BitPackedMap._uintToHexString(uint8(uint256(uint160(address(agreement.redeemer()))) % 256));
+        string memory _deadline = BitPackedMap._uintToHexString(uint8(agreement.deadline() % 256));
+        string memory _soul = BitPackedMap._uintToHexString(uint8(agreement.soulbound() ? 42 : 77));
+        string memory _state = BitPackedMap._uintToHexString(uint8(agreement.state()));
+        bitmap = bytes16(abi.encodePacked(tmp, _redeemer, _redeemer, _deadline, _deadline, _soul, _soul, _state, _state));
     }
 }

@@ -46,7 +46,8 @@ library Strings {
     ) internal pure returns (string memory) {
         bytes memory b = bytes(str);
         bytes memory s = new bytes(length);
-        for (; length > 0; --length) {
+        for (; length > 0;) {
+            --length;
             s[length] = b[startIndex + length];
         }
         return string(s);
