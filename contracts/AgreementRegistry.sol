@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
+// I prefer to use this version of Solidity because it is better supported by HardHat if that is okay.
+pragma solidity ^0.8.0;
 
 import "./interfaces/IUniversalAdapter.sol";
 import {Agreement} from "./Agreement.sol";
@@ -69,7 +70,7 @@ contract AgreementRegistry is ERC721, Owned {
             string memory vars,
             string memory ref
         ) = abi.decode(data, (string, string, string, string));
-        
+        // Cool use of salt here!  I had to look it up: https://docs.soliditylang.org/en/v0.8.3/control-structures.html?highlight=salt#salted-contract-creations-create2
         agreement = new Agreement{salt: salt}(
             linkToken,
             universalAdapter,

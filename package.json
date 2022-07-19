@@ -42,6 +42,7 @@
     "@rari-capital/solmate": "^6.4.0",
     "axios": "^0.27.2",
     "base64-sol": "^1.1.0",
-    "crypto": "^1.0.1"
+    "crypto": "^1.0.1",
+    "solmate": "^6.5.0"
   }
 }

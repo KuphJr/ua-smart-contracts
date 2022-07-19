@@ -128,7 +128,8 @@ contract Agreement is IAgreement, Owned {
     state_ = States.FULFILLED;
     result = uint256(_result);
     ERC20(address(linkToken)).safeTransfer(redeemer(), uint256(_result));
-
+    // We should automatically transfer the remaining value in the contract back to the contract creator.  They should not have to call recoverFunds()
+    ERC20(address(linkToken)).safeTransfer(msg.sender, linkToken.balanceOf(address(this)));
     emit RequestFulfilled(requestId, _result);
     emit AgreementFulfilled(agreementId);
   }
@@ -140,7 +141,8 @@ contract Agreement is IAgreement, Owned {
   function state() public view returns(States _state) {
     _state = state_ == States.FULFILLED
       ? state_
-      : block.timestamp >= deadline
+      // this is super minor, but I think that a contract isn't expired until AFTER the expiration date, not including the expiration date
+      : block.timestamp > deadline // solhint-disable-line not-rely-on-time
         ? States.EXPIRED
         : state_;
   }
