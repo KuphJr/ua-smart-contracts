@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.0;
 
 import "./interfaces/IUniversalAdapter.sol";
 import {Agreement} from "./Agreement.sol";
@@ -66,9 +66,10 @@ contract AgreementRegistry is ERC721, Owned {
         (
             string memory js,
             string memory cid,
-            string memory vars,
+            string[] memory publicVars,
+            string[] memory privateVars,
             string memory ref
-        ) = abi.decode(data, (string, string, string, string));
+        ) = abi.decode(data, (string, string, string[], string[], string));
         
         agreement = new Agreement{salt: salt}(
             linkToken,
@@ -82,7 +83,8 @@ contract AgreementRegistry is ERC721, Owned {
             soulbound,
             js,
             cid,
-            vars,
+            publicVars,
+            privateVars,
             ref
         );
 
@@ -107,8 +109,15 @@ contract AgreementRegistry is ERC721, Owned {
                 Base64.encode(
                     bytes(
                         BitPackedMap._renderSvg(
-                            _generateBitmap(
-                                agreement
+                            // _generateBitmap(
+                            //     agreement
+                            // )
+                            bytes16(
+                                keccak256(
+                                    abi.encodePacked(
+                                        agreement
+                                    )
+                                )
                             )
                         )
                     )
@@ -163,10 +172,6 @@ contract AgreementRegistry is ERC721, Owned {
         super.transferFrom(from, to, id);
     }
 
-    function setLinkToken(LinkTokenInterface _linkToken) external onlyOwner {
-        linkToken = _linkToken;
-    }
-
     function setUniversalAdapter(IUniversalAdapter _universalAdapter) external onlyOwner {
         universalAdapter = _universalAdapter;
     }
@@ -190,6 +195,7 @@ contract AgreementRegistry is ERC721, Owned {
     }
 
     function _stateToString(uint8 state) internal pure returns (string memory str) {
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             str := mload(0x40)
             mstore(str, 0x20)
@@ -202,22 +208,22 @@ contract AgreementRegistry is ERC721, Owned {
         }
     }
 
-    function _generateBitmap(Agreement agreement) internal view returns (bytes16 bitmap) {
-        string memory tmp;
-        uint256 bal = agreement.state() == Agreement.States.FULFILLED
-                                ? agreement.result()
-                                : linkToken.balanceOf(address(agreement));
-        {
-            string memory _id = BitPackedMap._uintToHexString(uint8(agreement.agreementId() % 256));
-            string memory _agreement = BitPackedMap._uintToHexString(uint8(uint256(uint160(address(agreement))) % 256));
-            string memory _balance = BitPackedMap._uintToHexString(uint8(bal % 256));
-            string memory _creator = BitPackedMap._uintToHexString(uint8(uint256(uint160(address(msg.sender))) % 256));
-            tmp = string(abi.encodePacked(_id, _id, _agreement, _agreement, _balance, _balance, _creator, _creator));
-        }
-        string memory _redeemer = BitPackedMap._uintToHexString(uint8(uint256(uint160(address(agreement.redeemer()))) % 256));
-        string memory _deadline = BitPackedMap._uintToHexString(uint8(agreement.deadline() % 256));
-        string memory _soul = BitPackedMap._uintToHexString(uint8(agreement.soulbound() ? 42 : 77));
-        string memory _state = BitPackedMap._uintToHexString(uint8(agreement.state()));
-        bitmap = bytes16(abi.encodePacked(tmp, _redeemer, _redeemer, _deadline, _deadline, _soul, _soul, _state, _state));
-    }
+    // function _generateBitmap(Agreement agreement) internal view returns (bytes16 bitmap) {
+    //     string memory tmp;
+    //     uint256 bal = agreement.state() == Agreement.States.FULFILLED
+    //                             ? agreement.result()
+    //                             : linkToken.balanceOf(address(agreement));
+    //     {
+    //         string memory _id = BitPackedMap._uintToHexString(uint8(agreement.agreementId() % 256));
+    //         string memory _agreement = BitPackedMap._uintToHexString(uint8(uint256(uint160(address(agreement))) % 256));
+    //         string memory _balance = BitPackedMap._uintToHexString(uint8(bal % 256));
+    //         string memory _creator = BitPackedMap._uintToHexString(uint8(uint256(uint160(address(msg.sender))) % 256));
+    //         tmp = string(abi.encodePacked(_id, _id, _agreement, _agreement, _balance, _balance, _creator, _creator));
+    //     }
+    //     string memory _redeemer = BitPackedMap._uintToHexString(uint8(uint256(uint160(address(agreement.redeemer()))) % 256));
+    //     string memory _deadline = BitPackedMap._uintToHexString(uint8(agreement.deadline() % 256));
+    //     string memory _soul = BitPackedMap._uintToHexString(uint8(agreement.soulbound() ? 42 : 77));
+    //     string memory _state = BitPackedMap._uintToHexString(uint8(agreement.state()));
+    //     bitmap = bytes16(abi.encodePacked(tmp, _redeemer, _redeemer, _deadline, _deadline, _soul, _soul, _state, _state));
+    // }
 }

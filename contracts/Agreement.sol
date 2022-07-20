@@ -23,7 +23,8 @@ contract Agreement is IAgreement, Owned {
   States private state_;
   string private js;
   string private cid;
-  string private vars;
+  string[] public publicVars;
+  string[] public privateVars;
   string private ref;
   uint256 public result;
   mapping(address => bool) public cancellations;
@@ -68,7 +69,8 @@ contract Agreement is IAgreement, Owned {
     bool _soulbound,
     string memory _js,
     string memory _cid,
-    string memory _vars,
+    string[] memory _publicVars,
+    string[] memory _privateVars,
     string memory _ref
   ) Owned(_creator) {
     linkToken = _link;
@@ -82,12 +84,14 @@ contract Agreement is IAgreement, Owned {
     state_ = States.PENDING;
     js = _js;
     cid = _cid;
-    vars = _vars;
+    publicVars = _publicVars;
+    privateVars = _privateVars;
     ref = _ref;
   }
 
   function makeRequest( 
-    string calldata _vars
+    string calldata _vars,
+    string calldata _ref
   ) public override returns (bytes32 universalAdapterRequestId) {
     require(state() == States.PENDING, "INACTIVE_AGREEMENT");
     require(msg.sender == redeemer(), "INVALID_REDEEMER");
@@ -95,10 +99,10 @@ contract Agreement is IAgreement, Owned {
     linkToken.transferFrom(msg.sender, address(this), requestCost);
     linkToken.approve(address(universalAdapter), requestCost);
     bytes32 requestId = universalAdapter.makeRequest(
-      js, cid, _vars, ref
+      this.fulfillRequest.selector, js, cid, _vars, _ref
     );
     emit RequestSent(
-      requestId, js, cid, _vars, ref
+      requestId, js, cid, _vars, _ref
     );
     return requestId;
   }
@@ -127,7 +131,9 @@ contract Agreement is IAgreement, Owned {
   {
     state_ = States.FULFILLED;
     result = uint256(_result);
+    uint256 remainder = linkToken.balanceOf(address(this)) - result;
     ERC20(address(linkToken)).safeTransfer(redeemer(), uint256(_result));
+    ERC20(address(linkToken)).safeTransfer(owner, remainder);
 
     emit RequestFulfilled(requestId, _result);
     emit AgreementFulfilled(agreementId);
@@ -140,7 +146,7 @@ contract Agreement is IAgreement, Owned {
   function state() public view returns(States _state) {
     _state = state_ == States.FULFILLED
       ? state_
-      : block.timestamp >= deadline
+      : block.timestamp > deadline // solhint-disable-line not-rely-on-time
         ? States.EXPIRED
         : state_;
   }

@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 interface IUniversalAdapter {
   function makeRequest(
+    bytes4 callbackFunctionId,
     string calldata js,
     string calldata cid,
     string calldata vars,
