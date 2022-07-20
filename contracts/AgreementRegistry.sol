@@ -102,7 +102,7 @@ contract AgreementRegistry is Owned, ERC721 {
             )
         );
         string memory uriPart1 = string(abi.encodePacked(
-          '{"name:" "uApp Agreement #', id.toString(), // solhint-disable-line quotes
+          '{"name":"uApp Agreement #', id.toString(), // solhint-disable-line quotes
           '","address":"', address(agreement).toString(), // solhint-disable-line quotes
           '","balance":"', linkToken.balanceOf(address(agreement)).toString(), // solhint-disable-line quotes
           '","creator":"', agreement.owner().toString(), // solhint-disable-line quotes
@@ -116,39 +116,6 @@ contract AgreementRegistry is Owned, ERC721 {
           '"}' // solhint-disable-line quotes
         ));
         return string(abi.encodePacked(uriPart1, uriPart2));
-
-        // uri = string(
-        //     abi.encodePacked(
-        //         "data:application/json;base64,",
-        //         Base64.encode(
-        //             bytes(
-        //                 abi.encodePacked(
-
-        //                     "'}, {'trait_type': 'Contract', 'value': '",
-        //                     _substringAddress(address(agreement)),
-        //                     "'}, {'trait_type': 'Balance', 'value': '",
-        //                     agreement.state() == Agreement.States.FULFILLED
-        //                         ? agreement.result().toString()
-        //                         : linkToken.balanceOf(address(agreement)).toString(),
-        //                     "'}, {'trait_type': 'Creator', 'value': '",
-        //                     _substringAddress(address(agreement.owner())),
-        //                     "'}, {'trait_type': 'Redeemer', 'value': '",
-        //                     _substringAddress(address(agreement.redeemer())),
-        //                     "'}, {'trait_type': 'Deadline', 'value': '",
-        //                     agreement.deadline().toString(),
-        //                     "'}, {'trait_type': 'Soulbound', 'value': '",
-        //                     agreement.soulbound() ? "true" : "false",
-        //                     "'}, {'trait_type': 'State', 'value': '",
-        //                     _stateToString(uint8(agreement.state())),
-        //                     "'}], ",
-        //                     "'image_data': ",
-        //                     _imageData,
-        //                     "'}"
-        //                 )
-        //             )
-        //         )
-        //     )
-        // );
     }
 
     function transferFrom(
