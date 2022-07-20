@@ -36,6 +36,7 @@ export interface AgreementInterface extends utils.Interface {
     "owner()": FunctionFragment;
     "recoverFunds()": FunctionFragment;
     "redeem(string,string)": FunctionFragment;
+    "redeemer()": FunctionFragment;
     "result()": FunctionFragment;
     "setOwner(address)": FunctionFragment;
     "soulbound()": FunctionFragment;
@@ -52,6 +53,7 @@ export interface AgreementInterface extends utils.Interface {
       | "owner"
       | "recoverFunds"
       | "redeem"
+      | "redeemer"
       | "result"
       | "setOwner"
       | "soulbound"
@@ -84,6 +86,7 @@ export interface AgreementInterface extends utils.Interface {
     functionFragment: "redeem",
     values: [string, string]
   ): string;
+  encodeFunctionData(functionFragment: "redeemer", values?: undefined): string;
   encodeFunctionData(functionFragment: "result", values?: undefined): string;
   encodeFunctionData(functionFragment: "setOwner", values: [string]): string;
   encodeFunctionData(functionFragment: "soulbound", values?: undefined): string;
@@ -112,6 +115,7 @@ export interface AgreementInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "redeem", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "redeemer", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "result", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "setOwner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "soulbound", data: BytesLike): Result;
@@ -246,6 +250,10 @@ export interface Agreement extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    redeemer(
+      overrides?: CallOverrides
+    ): Promise<[string] & { _redeemer: string }>;
+
     result(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     setOwner(
@@ -286,6 +294,8 @@ export interface Agreement extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  redeemer(overrides?: CallOverrides): Promise<string>;
+
   result(overrides?: CallOverrides): Promise<BigNumber>;
 
   setOwner(
@@ -321,6 +331,8 @@ export interface Agreement extends BaseContract {
       _ref: string,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    redeemer(overrides?: CallOverrides): Promise<string>;
 
     result(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -409,6 +421,8 @@ export interface Agreement extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    redeemer(overrides?: CallOverrides): Promise<BigNumber>;
+
     result(overrides?: CallOverrides): Promise<BigNumber>;
 
     setOwner(
@@ -452,6 +466,8 @@ export interface Agreement extends BaseContract {
       _ref: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
+
+    redeemer(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     result(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

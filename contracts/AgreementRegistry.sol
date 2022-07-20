@@ -5,12 +5,19 @@ pragma solidity ^0.8.0;
 import "./interfaces/IUniversalAdapter.sol";
 import {Agreement} from "./Agreement.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
+import {Base64} from "base64-sol/base64.sol";
+import {Strings} from "./utils/Strings.sol";
 import {Owned} from "solmate/src/auth/Owned.sol";
+import {ERC721} from "solmate/src/tokens/ERC721.sol";
+import {BitPackedMap} from "./utils/BitPackedMap.sol";
 
-contract AgreementRegistry is Owned {
+contract AgreementRegistry is Owned, ERC721 {
+    using Strings for address;
+    using Strings for string;
+    using Strings for uint256;
+
     LinkTokenInterface private linkToken;
     IUniversalAdapter private universalAdapter;
-    uint256 public requestCost;
     uint256 public ids;
     mapping(address => uint256) private nonces;
     Agreement[] public agreements;
@@ -19,14 +26,9 @@ contract AgreementRegistry is Owned {
 
     event AgreementCreated(uint256 indexed agreementId, address agreementContractAddress, Agreement agreement);
 
-    constructor(
-        LinkTokenInterface _linkToken,
-        IUniversalAdapter _universalAdapter,
-        uint256 _requestCost
-    ) Owned(msg.sender) {
-        linkToken = _linkToken;
-        universalAdapter = _universalAdapter;
-        requestCost = _requestCost;
+    constructor() ERC721("Universal Adapter Protocol", "uApp") Owned(msg.sender) {
+        linkToken = LinkTokenInterface(0x326C977E6efc84E512bB9C30f76E30c160eD06FB);
+        universalAdapter = IUniversalAdapter(0x5526B90295EcAbB23E4ce210511071843C8EE955);
     }
 
     function createAgreement(
@@ -55,10 +57,7 @@ contract AgreementRegistry is Owned {
         }
         // Cool use of salt here!  I had to look it up: https://docs.soliditylang.org/en/v0.8.3/control-structures.html?highlight=salt#salted-contract-creations-create2
         agreement = new Agreement{salt: salt}(
-            linkToken,
-            universalAdapter,
             address(this),
-            requestCost,
             agreementId,
             msg.sender,
             redeemer,
@@ -72,12 +71,109 @@ contract AgreementRegistry is Owned {
         creatorAgreements[msg.sender].push(agreementId);
         redeemerAgreements[redeemer].push(agreementId);
 
+        _safeMint(redeemer, agreementId);
+
         emit AgreementCreated(agreementId, address(agreement), agreement);
     }
 
-    function setRequestCost(uint256 _requestCost) external onlyOwner {
-        requestCost = _requestCost;
+    function tokenURI(uint256 id) public view override returns (string memory uri) {
+        require(_ownerOf[id] != address(0), "INVALID_TOKEN");
+        Agreement agreement = agreements[id];
+
+        string memory _imageData = string(
+            abi.encodePacked(
+                "data:image/svg+xml;base64,",
+                Base64.encode(
+                    bytes(
+                        BitPackedMap._renderSvg(
+                            // _generateBitmap(
+                            //     agreement
+                            // )
+                            bytes16(
+                                keccak256(
+                                    abi.encodePacked(
+                                        agreement
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        );
+        uri = "Hello World";
+        // uri = string(
+        //     abi.encodePacked(
+        //         "data:application/json;base64,",
+        //         Base64.encode(
+        //             bytes(
+        //                 abi.encodePacked(
+        //                     "{'name': '",
+        //                     string(abi.encodePacked("uApp Agreement #", id.toString())),
+        //                     "', 'description': 'A trust-minimised agreement powered by the Universal Adapter', ",
+        //                     "'attributes': [{'trait_type': 'Agreement', 'value': '",
+        //                     id.toString(),
+        //                     "'}, {'trait_type': 'Contract', 'value': '",
+        //                     _substringAddress(address(agreement)),
+        //                     "'}, {'trait_type': 'Balance', 'value': '",
+        //                     agreement.state() == Agreement.States.FULFILLED
+        //                         ? agreement.result().toString()
+        //                         : linkToken.balanceOf(address(agreement)).toString(),
+        //                     "'}, {'trait_type': 'Creator', 'value': '",
+        //                     _substringAddress(address(agreement.owner())),
+        //                     "'}, {'trait_type': 'Redeemer', 'value': '",
+        //                     _substringAddress(address(agreement.redeemer())),
+        //                     "'}, {'trait_type': 'Deadline', 'value': '",
+        //                     agreement.deadline().toString(),
+        //                     "'}, {'trait_type': 'Soulbound', 'value': '",
+        //                     agreement.soulbound() ? "true" : "false",
+        //                     "'}, {'trait_type': 'State', 'value': '",
+        //                     _stateToString(uint8(agreement.state())),
+        //                     "'}], ",
+        //                     "'image_data': ",
+        //                     _imageData,
+        //                     "'}"
+        //                 )
+        //             )
+        //         )
+        //     )
+        // );
     }
 
-    // all the setter functions were unnecessary.  Those values should all be immutable.
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) public override {
+        require(!agreements[id].soulbound(), "SOULBOUND");
+        super.transferFrom(from, to, id);
+    }
+
+    function _substringAddress(
+        address _address
+    ) internal pure returns (string memory) {
+        string memory stringAddress = _address.toString();
+        return string(
+            abi.encodePacked(
+                "0x",
+                stringAddress.substring(0, 4),
+                "...",
+                stringAddress.substring(bytes(stringAddress).length - 4, 4)
+            )
+        );
+    }
+
+    function _stateToString(uint8 state) internal pure returns (string memory str) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            str := mload(0x40)
+            mstore(str, 0x20)
+            switch state
+            case 0 { mstore(add(str, 0x07), 0x0750454e44494e47) }
+            case 1 { mstore(add(str, 0x05) , 0x0946554c46494c4c4544) }
+            case 2 { mstore(add(str, 0x05) , 0x0943414e43454c4c4544) }
+            case 3 { mstore(add(str, 0x07), 0x0745585049524544) }
+            mstore(0x40, add(str, 0x60))
+        }
+    }
 }

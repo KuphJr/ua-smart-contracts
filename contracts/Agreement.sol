@@ -3,18 +3,20 @@ pragma solidity ^0.8.0;
 
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 import {Owned} from "solmate/src/auth/Owned.sol";
+import {ERC721} from "solmate/src/tokens/ERC721.sol";
 import "./interfaces/IAgreement.sol";
 import "./interfaces/IUniversalAdapter.sol";
 
 contract Agreement is IAgreement, Owned {
+  uint256 private constant REQUEST_COST = 100;
+
   LinkTokenInterface private immutable linkToken;
   IUniversalAdapter private immutable universalAdapter;
   address private immutable agreementRegistry;
-  uint256 private immutable requestCost;
   uint256 public immutable agreementId;
   uint256 public immutable deadline;
   bool public immutable soulbound;
-  address private redeemer;
+  address private redeemer_;
   States private state_;
   string private js;
   string private cid;
@@ -53,10 +55,7 @@ contract Agreement is IAgreement, Owned {
   );
 
   constructor (
-    LinkTokenInterface _link,
-    IUniversalAdapter _universalAdapter,
     address _agreementRegistry,
-    uint256 _requestCost,
     uint256 _agreementId,
     address _creator,
     address _redeemer,
@@ -64,12 +63,11 @@ contract Agreement is IAgreement, Owned {
     bool _soulbound,
     bytes memory data
   ) Owned(_creator) {
-    linkToken = _link;
-    universalAdapter = _universalAdapter;
+    linkToken = LinkTokenInterface(0x326C977E6efc84E512bB9C30f76E30c160eD06FB);
+    universalAdapter = IUniversalAdapter(0x5526B90295EcAbB23E4ce210511071843C8EE955);
     agreementRegistry = _agreementRegistry;
-    requestCost = _requestCost;
     agreementId = _agreementId;
-    redeemer = _redeemer;
+    redeemer_ = _redeemer;
     deadline = _deadline;
     soulbound = _soulbound;
     state_ = States.PENDING;
@@ -87,15 +85,15 @@ contract Agreement is IAgreement, Owned {
     string calldata _ref
   ) public override returns (bytes32 universalAdapterRequestId) {
     require(state() == States.PENDING, "INACTIVE_AGREEMENT");
-    require(msg.sender == redeemer, "INVALID_REDEEMER");
+    require(msg.sender == redeemer(), "INVALID_REDEEMER");
     // If the redeemer provides their own private vars, they can use them.
     // This prevents the contract owner from cancelling API keys and preventing
     // the redeemer from getting the money they are owed.
     if (bytes(ref).length > 0) {
       ref = _ref;
     }
-    linkToken.transferFrom(msg.sender, address(this), requestCost);
-    linkToken.approve(address(universalAdapter), requestCost);
+    linkToken.transferFrom(msg.sender, address(this), REQUEST_COST);
+    linkToken.approve(address(universalAdapter), REQUEST_COST);
     bytes32 requestId = universalAdapter.makeRequest(
       this.fulfillRequest.selector, js, cid, _vars, ref
     );
@@ -109,9 +107,9 @@ contract Agreement is IAgreement, Owned {
     require(state() == States.PENDING, "CANNOT_CANCEL");
     address sender = msg.sender;
     address _owner = owner;
-    require(sender == _owner || sender == redeemer, "NOT_ALLOWED");
+    require(sender == _owner || sender == redeemer(), "NOT_ALLOWED");
     cancellations[sender] = true;
-    if (cancellations[_owner] && cancellations[redeemer]) {
+    if (cancellations[_owner] && cancellations[redeemer()]) {
       state_ = States.CANCELLED;
       emit AgreementCancelled(agreementId);
     }
@@ -128,11 +126,15 @@ contract Agreement is IAgreement, Owned {
   {
     state_ = States.FULFILLED;
     result = uint256(_result);
-    linkToken.transfer(redeemer, uint256(_result));
+    linkToken.transfer(redeemer(), uint256(_result));
     // We should automatically transfer the remaining value in the contract back to the contract creator.  They should not have to call recoverFunds()
     linkToken.transfer(msg.sender, linkToken.balanceOf(address(this)));
     emit RequestFulfilled(requestId, _result);
     emit AgreementFulfilled(agreementId);
+  }
+
+  function redeemer() public view returns(address _redeemer) {
+    _redeemer = soulbound ? redeemer_ : ERC721(agreementRegistry).ownerOf(agreementId);
   }
 
   function state() public view returns(States _state) {

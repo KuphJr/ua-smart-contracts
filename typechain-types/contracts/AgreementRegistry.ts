@@ -29,33 +29,60 @@ import type {
 export interface AgreementRegistryInterface extends utils.Interface {
   functions: {
     "agreements(uint256)": FunctionFragment;
+    "approve(address,uint256)": FunctionFragment;
+    "balanceOf(address)": FunctionFragment;
     "createAgreement(address,uint256,bool,uint256,bytes)": FunctionFragment;
     "creatorAgreements(address,uint256)": FunctionFragment;
+    "getApproved(uint256)": FunctionFragment;
     "ids()": FunctionFragment;
+    "isApprovedForAll(address,address)": FunctionFragment;
+    "name()": FunctionFragment;
     "owner()": FunctionFragment;
+    "ownerOf(uint256)": FunctionFragment;
     "redeemerAgreements(address,uint256)": FunctionFragment;
-    "requestCost()": FunctionFragment;
+    "safeTransferFrom(address,address,uint256)": FunctionFragment;
+    "safeTransferFrom(address,address,uint256,bytes)": FunctionFragment;
+    "setApprovalForAll(address,bool)": FunctionFragment;
     "setOwner(address)": FunctionFragment;
-    "setRequestCost(uint256)": FunctionFragment;
+    "supportsInterface(bytes4)": FunctionFragment;
+    "symbol()": FunctionFragment;
+    "tokenURI(uint256)": FunctionFragment;
+    "transferFrom(address,address,uint256)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
       | "agreements"
+      | "approve"
+      | "balanceOf"
       | "createAgreement"
       | "creatorAgreements"
+      | "getApproved"
       | "ids"
+      | "isApprovedForAll"
+      | "name"
       | "owner"
+      | "ownerOf"
       | "redeemerAgreements"
-      | "requestCost"
+      | "safeTransferFrom(address,address,uint256)"
+      | "safeTransferFrom(address,address,uint256,bytes)"
+      | "setApprovalForAll"
       | "setOwner"
-      | "setRequestCost"
+      | "supportsInterface"
+      | "symbol"
+      | "tokenURI"
+      | "transferFrom"
   ): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "agreements",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "approve",
+    values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
   encodeFunctionData(
     functionFragment: "createAgreement",
     values: [string, BigNumberish, boolean, BigNumberish, BytesLike]
@@ -64,23 +91,55 @@ export interface AgreementRegistryInterface extends utils.Interface {
     functionFragment: "creatorAgreements",
     values: [string, BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "getApproved",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(functionFragment: "ids", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "isApprovedForAll",
+    values: [string, string]
+  ): string;
+  encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "ownerOf",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "redeemerAgreements",
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "requestCost",
-    values?: undefined
+    functionFragment: "safeTransferFrom(address,address,uint256)",
+    values: [string, string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "safeTransferFrom(address,address,uint256,bytes)",
+    values: [string, string, BigNumberish, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setApprovalForAll",
+    values: [string, boolean]
   ): string;
   encodeFunctionData(functionFragment: "setOwner", values: [string]): string;
   encodeFunctionData(
-    functionFragment: "setRequestCost",
+    functionFragment: "supportsInterface",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(functionFragment: "symbol", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "tokenURI",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferFrom",
+    values: [string, string, BigNumberish]
   ): string;
 
   decodeFunctionResult(functionFragment: "agreements", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "createAgreement",
     data: BytesLike
@@ -89,29 +148,59 @@ export interface AgreementRegistryInterface extends utils.Interface {
     functionFragment: "creatorAgreements",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "getApproved",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "ids", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "isApprovedForAll",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "redeemerAgreements",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "requestCost",
+    functionFragment: "safeTransferFrom(address,address,uint256)",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "safeTransferFrom(address,address,uint256,bytes)",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setApprovalForAll",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "setOwner", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "setRequestCost",
+    functionFragment: "supportsInterface",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "symbol", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "tokenURI", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "transferFrom",
     data: BytesLike
   ): Result;
 
   events: {
     "AgreementCreated(uint256,address,address)": EventFragment;
+    "Approval(address,address,uint256)": EventFragment;
+    "ApprovalForAll(address,address,bool)": EventFragment;
     "OwnerUpdated(address,address)": EventFragment;
+    "Transfer(address,address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "AgreementCreated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnerUpdated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
 
 export interface AgreementCreatedEventObject {
@@ -127,6 +216,30 @@ export type AgreementCreatedEvent = TypedEvent<
 export type AgreementCreatedEventFilter =
   TypedEventFilter<AgreementCreatedEvent>;
 
+export interface ApprovalEventObject {
+  owner: string;
+  spender: string;
+  id: BigNumber;
+}
+export type ApprovalEvent = TypedEvent<
+  [string, string, BigNumber],
+  ApprovalEventObject
+>;
+
+export type ApprovalEventFilter = TypedEventFilter<ApprovalEvent>;
+
+export interface ApprovalForAllEventObject {
+  owner: string;
+  operator: string;
+  approved: boolean;
+}
+export type ApprovalForAllEvent = TypedEvent<
+  [string, string, boolean],
+  ApprovalForAllEventObject
+>;
+
+export type ApprovalForAllEventFilter = TypedEventFilter<ApprovalForAllEvent>;
+
 export interface OwnerUpdatedEventObject {
   user: string;
   newOwner: string;
@@ -137,6 +250,18 @@ export type OwnerUpdatedEvent = TypedEvent<
 >;
 
 export type OwnerUpdatedEventFilter = TypedEventFilter<OwnerUpdatedEvent>;
+
+export interface TransferEventObject {
+  from: string;
+  to: string;
+  id: BigNumber;
+}
+export type TransferEvent = TypedEvent<
+  [string, string, BigNumber],
+  TransferEventObject
+>;
+
+export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
 export interface AgreementRegistry extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -170,6 +295,14 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
+    approve(
+      spender: string,
+      id: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    balanceOf(owner: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+
     createAgreement(
       redeemer: string,
       deadline: BigNumberish,
@@ -185,9 +318,27 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    getApproved(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
     ids(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    isApprovedForAll(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    name(overrides?: CallOverrides): Promise<[string]>;
+
     owner(overrides?: CallOverrides): Promise<[string]>;
+
+    ownerOf(
+      id: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string] & { owner: string }>;
 
     redeemerAgreements(
       arg0: string,
@@ -195,20 +346,61 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    requestCost(overrides?: CallOverrides): Promise<[BigNumber]>;
+    "safeTransferFrom(address,address,uint256)"(
+      from: string,
+      to: string,
+      id: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    "safeTransferFrom(address,address,uint256,bytes)"(
+      from: string,
+      to: string,
+      id: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setApprovalForAll(
+      operator: string,
+      approved: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     setOwner(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setRequestCost(
-      _requestCost: BigNumberish,
+    supportsInterface(
+      interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    symbol(overrides?: CallOverrides): Promise<[string]>;
+
+    tokenURI(
+      id: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string] & { uri: string }>;
+
+    transferFrom(
+      from: string,
+      to: string,
+      id: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
 
   agreements(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+  approve(
+    spender: string,
+    id: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   createAgreement(
     redeemer: string,
@@ -225,9 +417,21 @@ export interface AgreementRegistry extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  getApproved(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
   ids(overrides?: CallOverrides): Promise<BigNumber>;
 
+  isApprovedForAll(
+    arg0: string,
+    arg1: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  name(overrides?: CallOverrides): Promise<string>;
+
   owner(overrides?: CallOverrides): Promise<string>;
+
+  ownerOf(id: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
   redeemerAgreements(
     arg0: string,
@@ -235,20 +439,58 @@ export interface AgreementRegistry extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  requestCost(overrides?: CallOverrides): Promise<BigNumber>;
+  "safeTransferFrom(address,address,uint256)"(
+    from: string,
+    to: string,
+    id: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  "safeTransferFrom(address,address,uint256,bytes)"(
+    from: string,
+    to: string,
+    id: BigNumberish,
+    data: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setApprovalForAll(
+    operator: string,
+    approved: boolean,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   setOwner(
     newOwner: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  setRequestCost(
-    _requestCost: BigNumberish,
+  supportsInterface(
+    interfaceId: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  symbol(overrides?: CallOverrides): Promise<string>;
+
+  tokenURI(id: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+  transferFrom(
+    from: string,
+    to: string,
+    id: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
     agreements(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+    approve(
+      spender: string,
+      id: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     createAgreement(
       redeemer: string,
@@ -265,9 +507,21 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    getApproved(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
     ids(overrides?: CallOverrides): Promise<BigNumber>;
 
+    isApprovedForAll(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    name(overrides?: CallOverrides): Promise<string>;
+
     owner(overrides?: CallOverrides): Promise<string>;
+
+    ownerOf(id: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
     redeemerAgreements(
       arg0: string,
@@ -275,12 +529,42 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    requestCost(overrides?: CallOverrides): Promise<BigNumber>;
+    "safeTransferFrom(address,address,uint256)"(
+      from: string,
+      to: string,
+      id: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "safeTransferFrom(address,address,uint256,bytes)"(
+      from: string,
+      to: string,
+      id: BigNumberish,
+      data: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setApprovalForAll(
+      operator: string,
+      approved: boolean,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     setOwner(newOwner: string, overrides?: CallOverrides): Promise<void>;
 
-    setRequestCost(
-      _requestCost: BigNumberish,
+    supportsInterface(
+      interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    symbol(overrides?: CallOverrides): Promise<string>;
+
+    tokenURI(id: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+    transferFrom(
+      from: string,
+      to: string,
+      id: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -297,6 +581,28 @@ export interface AgreementRegistry extends BaseContract {
       agreement?: null
     ): AgreementCreatedEventFilter;
 
+    "Approval(address,address,uint256)"(
+      owner?: string | null,
+      spender?: string | null,
+      id?: BigNumberish | null
+    ): ApprovalEventFilter;
+    Approval(
+      owner?: string | null,
+      spender?: string | null,
+      id?: BigNumberish | null
+    ): ApprovalEventFilter;
+
+    "ApprovalForAll(address,address,bool)"(
+      owner?: string | null,
+      operator?: string | null,
+      approved?: null
+    ): ApprovalForAllEventFilter;
+    ApprovalForAll(
+      owner?: string | null,
+      operator?: string | null,
+      approved?: null
+    ): ApprovalForAllEventFilter;
+
     "OwnerUpdated(address,address)"(
       user?: string | null,
       newOwner?: string | null
@@ -305,6 +611,17 @@ export interface AgreementRegistry extends BaseContract {
       user?: string | null,
       newOwner?: string | null
     ): OwnerUpdatedEventFilter;
+
+    "Transfer(address,address,uint256)"(
+      from?: string | null,
+      to?: string | null,
+      id?: BigNumberish | null
+    ): TransferEventFilter;
+    Transfer(
+      from?: string | null,
+      to?: string | null,
+      id?: BigNumberish | null
+    ): TransferEventFilter;
   };
 
   estimateGas: {
@@ -312,6 +629,14 @@ export interface AgreementRegistry extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    approve(
+      spender: string,
+      id: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     createAgreement(
       redeemer: string,
@@ -328,9 +653,24 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    getApproved(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     ids(overrides?: CallOverrides): Promise<BigNumber>;
 
+    isApprovedForAll(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    name(overrides?: CallOverrides): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    ownerOf(id: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
     redeemerAgreements(
       arg0: string,
@@ -338,15 +678,45 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    requestCost(overrides?: CallOverrides): Promise<BigNumber>;
+    "safeTransferFrom(address,address,uint256)"(
+      from: string,
+      to: string,
+      id: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    "safeTransferFrom(address,address,uint256,bytes)"(
+      from: string,
+      to: string,
+      id: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setApprovalForAll(
+      operator: string,
+      approved: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     setOwner(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    setRequestCost(
-      _requestCost: BigNumberish,
+    supportsInterface(
+      interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    symbol(overrides?: CallOverrides): Promise<BigNumber>;
+
+    tokenURI(id: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+    transferFrom(
+      from: string,
+      to: string,
+      id: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
@@ -357,6 +727,17 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    approve(
+      spender: string,
+      id: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    balanceOf(
+      owner: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     createAgreement(
       redeemer: string,
       deadline: BigNumberish,
@@ -372,9 +753,27 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    getApproved(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     ids(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    isApprovedForAll(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    ownerOf(
+      id: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     redeemerAgreements(
       arg0: string,
@@ -382,15 +781,48 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    requestCost(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    "safeTransferFrom(address,address,uint256)"(
+      from: string,
+      to: string,
+      id: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    "safeTransferFrom(address,address,uint256,bytes)"(
+      from: string,
+      to: string,
+      id: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setApprovalForAll(
+      operator: string,
+      approved: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     setOwner(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    setRequestCost(
-      _requestCost: BigNumberish,
+    supportsInterface(
+      interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    symbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    tokenURI(
+      id: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    transferFrom(
+      from: string,
+      to: string,
+      id: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };
