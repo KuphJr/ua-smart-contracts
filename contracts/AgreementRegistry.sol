@@ -106,7 +106,7 @@ contract AgreementRegistry is Owned, ERC721 {
           '","address":"', address(agreement).toString(), // solhint-disable-line quotes
           '","balance":"', linkToken.balanceOf(address(agreement)).toString(), // solhint-disable-line quotes
           '","creator":"', agreement.owner().toString(), // solhint-disable-line quotes
-          '":,"owner":"', agreement.redeemer().toString(), // solhint-disable-line quotes
+          '","owner":"', agreement.redeemer().toString(), // solhint-disable-line quotes
           '","soulbound":"', agreement.soulbound() ? "true" : "false", // solhint-disable-line quotes
           '","state":"', _stateToString(uint8(agreement.state())) // solhint-disable-line quotes
         ));
