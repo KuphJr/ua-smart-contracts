@@ -67,6 +67,7 @@ contract Agreement is IAgreement, Owned {
     universalAdapter = IUniversalAdapter(0x5526B90295EcAbB23E4ce210511071843C8EE955);
     agreementRegistry = _agreementRegistry;
     agreementId = _agreementId;
+    // we don't need to pass the redeemer if we abstract away that logic to the NFT contract
     redeemer_ = _redeemer;
     deadline = _deadline;
     soulbound = _soulbound;

@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// I prefer to use this version of Solidity because it is better supported by HardHat if that is okay.
 pragma solidity ^0.8.0;
 
 import "./interfaces/IUniversalAdapter.sol";
@@ -55,7 +54,7 @@ contract AgreementRegistry is Owned, ERC721 {
                 )
             );
         }
-        // Cool use of salt here!  I had to look it up: https://docs.soliditylang.org/en/v0.8.3/control-structures.html?highlight=salt#salted-contract-creations-create2
+
         agreement = new Agreement{salt: salt}(
             address(this),
             agreementId,
@@ -101,20 +100,22 @@ contract AgreementRegistry is Owned, ERC721 {
                 )
             )
         );
+        // solhint-disable quotes
         string memory uriPart1 = string(abi.encodePacked(
-          '{"name":"uApp Agreement #', id.toString(), // solhint-disable-line quotes
-          '","address":"', address(agreement).toString(), // solhint-disable-line quotes
-          '","balance":"', linkToken.balanceOf(address(agreement)).toString(), // solhint-disable-line quotes
-          '","creator":"', agreement.owner().toString(), // solhint-disable-line quotes
-          '","owner":"', agreement.redeemer().toString(), // solhint-disable-line quotes
-          '","soulbound":"', agreement.soulbound() ? "true" : "false", // solhint-disable-line quotes
-          '","state":"', _stateToString(uint8(agreement.state())) // solhint-disable-line quotes
+          '{"name":"uApp Agreement #', id.toString(), 
+          '","address":"', address(agreement).toString(),
+          '","balance":"', linkToken.balanceOf(address(agreement)).toString(),
+          '","creator":"', agreement.owner().toString(),
+          '","redeemer":"', agreement.redeemer().toString(),
+          '","soulbound":"', agreement.soulbound() ? "true" : "false",
+          '","state":"', agreement.state()
         ));
         string memory uriPart2 = string(abi.encodePacked(
-          '","deadline":"', agreement.deadline().toString(), // solhint-disable-line quotes
-          '","image_data":"', _imageData, // solhint-disable-line quotes
-          '"}' // solhint-disable-line quotes
+          '","deadline":"', agreement.deadline().toString(),
+          '","image_data":"', _imageData,
+          '"}'
         ));
+        // solhint-enable quotes
         return string(abi.encodePacked(uriPart1, uriPart2));
     }
 
@@ -148,8 +149,8 @@ contract AgreementRegistry is Owned, ERC721 {
             mstore(str, 0x20)
             switch state
             case 0 { mstore(add(str, 0x07), 0x0750454e44494e47) }
-            case 1 { mstore(add(str, 0x05) , 0x0946554c46494c4c4544) }
-            case 2 { mstore(add(str, 0x05) , 0x0943414e43454c4c4544) }
+            case 1 { mstore(add(str, 0x05), 0x0946554c46494c4c4544) }
+            case 2 { mstore(add(str, 0x05), 0x0943414e43454c4c4544) }
             case 3 { mstore(add(str, 0x07), 0x0745585049524544) }
             mstore(0x40, add(str, 0x60))
         }

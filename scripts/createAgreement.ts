@@ -2,7 +2,7 @@ import process from 'process'
 import { ethers } from 'hardhat'
 
 async function main() {
-  const agreementRegistryDeployedAddress = '0xfd82828dc4Bf8fFF427F70d1b2bd617915078393'
+  const agreementRegistryDeployedAddress = '0xFE987A77eD34241CB4838304D80e56430B72F114'
 
   const AgreementRegistry = await ethers.getContractFactory("AgreementRegistry")
   const agreementRegistry = await AgreementRegistry.attach(agreementRegistryDeployedAddress)
@@ -27,11 +27,11 @@ async function main() {
   const tx = await agreementRegistry.createAgreement(
     '0xB7aB5555BB8927BF16F8496da338a3033c12F8f3',
     BigInt('1658362756'),
-    false,
+    true,
     200,
     ethers.utils.defaultAbiCoder.encode(
-      ['string', 'string', 'string', 'string'],
-      ['return 55', '', '', '']
+      ['string', 'string', 'string[]', 'string[]', 'string'],
+      ['return BigInt(45)', '', [], [], '']
     )
   )
   console.log(tx)
