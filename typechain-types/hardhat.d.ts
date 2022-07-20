@@ -77,6 +77,22 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ENSResolver__factory>;
     getContractFactory(
+      name: "Agreement",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Agreement__factory>;
+    getContractFactory(
+      name: "AgreementRegistry",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AgreementRegistry__factory>;
+    getContractFactory(
+      name: "IAgreement",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAgreement__factory>;
+    getContractFactory(
+      name: "IUniversalAdapter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IUniversalAdapter__factory>;
+    getContractFactory(
       name: "Requester",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Requester__factory>;
@@ -88,6 +104,22 @@ declare module "hardhat/types/runtime" {
       name: "UniversalAdapter",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniversalAdapter__factory>;
+    getContractFactory(
+      name: "Owned",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Owned__factory>;
+    getContractFactory(
+      name: "ERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC20__factory>;
+    getContractFactory(
+      name: "ERC721",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC721__factory>;
+    getContractFactory(
+      name: "ERC721TokenReceiver",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC721TokenReceiver__factory>;
 
     getContractAt(
       name: "ERC677Token",
@@ -170,6 +202,26 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ENSResolver>;
     getContractAt(
+      name: "Agreement",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Agreement>;
+    getContractAt(
+      name: "AgreementRegistry",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AgreementRegistry>;
+    getContractAt(
+      name: "IAgreement",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAgreement>;
+    getContractAt(
+      name: "IUniversalAdapter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IUniversalAdapter>;
+    getContractAt(
       name: "Requester",
       address: string,
       signer?: ethers.Signer
@@ -184,6 +236,26 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.UniversalAdapter>;
+    getContractAt(
+      name: "Owned",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Owned>;
+    getContractAt(
+      name: "ERC20",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC20>;
+    getContractAt(
+      name: "ERC721",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC721>;
+    getContractAt(
+      name: "ERC721TokenReceiver",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC721TokenReceiver>;
 
     // default types
     getContractFactory(

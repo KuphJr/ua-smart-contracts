@@ -3,4 +3,8 @@
 /* eslint-disable */
 import type * as requesterSol from "./Requester.sol";
 export type { requesterSol };
+import type * as interfaces from "./interfaces";
+export type { interfaces };
+export type { Agreement } from "./Agreement";
+export type { AgreementRegistry } from "./AgreementRegistry";
 export type { UniversalAdapter } from "./UniversalAdapter";

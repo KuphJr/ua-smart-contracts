@@ -2,4 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as requesterSol from "./Requester.sol";
+export * as interfaces from "./interfaces";
+export { Agreement__factory } from "./Agreement__factory";
+export { AgreementRegistry__factory } from "./AgreementRegistry__factory";
 export { UniversalAdapter__factory } from "./UniversalAdapter__factory";
