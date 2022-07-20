@@ -56,7 +56,3 @@ export type { UniversalAdapter } from "./contracts/UniversalAdapter";
 export { UniversalAdapter__factory } from "./factories/contracts/UniversalAdapter__factory";
 export type { Owned } from "./solmate/src/auth/Owned";
 export { Owned__factory } from "./factories/solmate/src/auth/Owned__factory";
-export type { ERC721 } from "./solmate/src/tokens/ERC721.sol/ERC721";
-export { ERC721__factory } from "./factories/solmate/src/tokens/ERC721.sol/ERC721__factory";
-export type { ERC721TokenReceiver } from "./solmate/src/tokens/ERC721.sol/ERC721TokenReceiver";
-export { ERC721TokenReceiver__factory } from "./factories/solmate/src/tokens/ERC721.sol/ERC721TokenReceiver__factory";

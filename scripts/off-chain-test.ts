@@ -73,7 +73,7 @@ async function main() {
     100,
     ethers.utils.defaultAbiCoder.encode(
       ['string', 'string', 'string[]', 'string[]', 'string'],
-      ['return 55', '', [], [], '']
+      ['return BigInt(55)', '', [], [], '']
     )
   )
   await ethers.provider.waitForTransaction(tx.hash)
