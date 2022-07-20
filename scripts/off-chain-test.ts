@@ -26,11 +26,11 @@ async function main() {
   // CREATE
   const LinkToken = await ethers.getContractFactory('LinkToken')
   
-  console.log('sending link')
+  console.log('Funding agreement with LINK')
   const linkToken = await LinkToken.attach('0x326C977E6efc84E512bB9C30f76E30c160eD06FB')
   const tokenTx = await linkToken.approve(agreementRegistryAddress, BigInt(200))
   await ethers.provider.waitForTransaction(tokenTx.hash)
-  console.log('Inital Funding approved')
+  console.log('Agreement has been successfully funded')
 
   agreementRegistry.on('AgreementCreated',
     async (
@@ -42,10 +42,10 @@ async function main() {
       console.log('REDEEMING')
 
       // REDEEM
-      console.log('sending link')
-      const tokenTx = await linkToken.approve(agreementAddress, BigInt(200))
+      console.log('Sending LINK to pay for redeem')
+      const tokenTx = await linkToken.approve(agreementAddress, BigInt(100))
       await ethers.provider.waitForTransaction(tokenTx.hash)
-      console.log('Redeem Funding approved')
+      console.log('Redeem funding approved')
 
       const Agreement = await ethers.getContractFactory("Agreement")
       const agreement = await Agreement.attach(agreementAddress)
@@ -59,21 +59,21 @@ async function main() {
           console.log(`Request id ${requestId} fulfilled with result ${result}`)
         }
       )
-      console.log('BEFORE MAKEREQUEST')
-      const tx = await agreement.makeRequest('')
+      console.log('BEFORE REDEEM')
+      const tx = await agreement.redeem('', '')
       await ethers.provider.waitForTransaction(tx.hash)
-      console.log('successfully called makeRequest')
+      console.log('successfully called REDEEM')
     }
   )
 
   const tx = await agreementRegistry.createAgreement(
     '0xB7aB5555BB8927BF16F8496da338a3033c12F8f3',
-    BigInt('1658362756'),
+    BigInt('1658562756'),
     false,
-    200,
+    100,
     ethers.utils.defaultAbiCoder.encode(
-      ['string', 'string', 'string', 'string'],
-      ['return 55', '', '', '']
+      ['string', 'string', 'string[]', 'string[]', 'string'],
+      ['return 55', '', [], [], '']
     )
   )
   await ethers.provider.waitForTransaction(tx.hash)

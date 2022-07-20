@@ -33,9 +33,9 @@ export interface AgreementInterface extends utils.Interface {
     "cancellations(address)": FunctionFragment;
     "deadline()": FunctionFragment;
     "fulfillRequest(bytes32,bytes32)": FunctionFragment;
-    "makeRequest(string)": FunctionFragment;
     "owner()": FunctionFragment;
     "recoverFunds()": FunctionFragment;
+    "redeem(string,string)": FunctionFragment;
     "result()": FunctionFragment;
     "setOwner(address)": FunctionFragment;
     "soulbound()": FunctionFragment;
@@ -49,9 +49,9 @@ export interface AgreementInterface extends utils.Interface {
       | "cancellations"
       | "deadline"
       | "fulfillRequest"
-      | "makeRequest"
       | "owner"
       | "recoverFunds"
+      | "redeem"
       | "result"
       | "setOwner"
       | "soulbound"
@@ -75,11 +75,14 @@ export interface AgreementInterface extends utils.Interface {
     functionFragment: "fulfillRequest",
     values: [BytesLike, BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "makeRequest", values: [string]): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "recoverFunds",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "redeem",
+    values: [string, string]
   ): string;
   encodeFunctionData(functionFragment: "result", values?: undefined): string;
   encodeFunctionData(functionFragment: "setOwner", values: [string]): string;
@@ -103,15 +106,12 @@ export interface AgreementInterface extends utils.Interface {
     functionFragment: "fulfillRequest",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "makeRequest",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "recoverFunds",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "redeem", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "result", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "setOwner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "soulbound", data: BytesLike): Result;
@@ -234,14 +234,15 @@ export interface Agreement extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    makeRequest(
-      _vars: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     recoverFunds(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    redeem(
+      _vars: string,
+      _ref: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -273,14 +274,15 @@ export interface Agreement extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  makeRequest(
-    _vars: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   owner(overrides?: CallOverrides): Promise<string>;
 
   recoverFunds(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  redeem(
+    _vars: string,
+    _ref: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -310,11 +312,15 @@ export interface Agreement extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    makeRequest(_vars: string, overrides?: CallOverrides): Promise<string>;
-
     owner(overrides?: CallOverrides): Promise<string>;
 
     recoverFunds(overrides?: CallOverrides): Promise<void>;
+
+    redeem(
+      _vars: string,
+      _ref: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
     result(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -391,14 +397,15 @@ export interface Agreement extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    makeRequest(
-      _vars: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     recoverFunds(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    redeem(
+      _vars: string,
+      _ref: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -434,14 +441,15 @@ export interface Agreement extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    makeRequest(
-      _vars: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     recoverFunds(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    redeem(
+      _vars: string,
+      _ref: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

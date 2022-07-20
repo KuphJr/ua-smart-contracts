@@ -24,27 +24,27 @@ import type {
 export interface IAgreementInterface extends utils.Interface {
   functions: {
     "fulfillRequest(bytes32,bytes32)": FunctionFragment;
-    "makeRequest(string)": FunctionFragment;
+    "redeem(string,string)": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic: "fulfillRequest" | "makeRequest"
+    nameOrSignatureOrTopic: "fulfillRequest" | "redeem"
   ): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "fulfillRequest",
     values: [BytesLike, BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "makeRequest", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "redeem",
+    values: [string, string]
+  ): string;
 
   decodeFunctionResult(
     functionFragment: "fulfillRequest",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "makeRequest",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "redeem", data: BytesLike): Result;
 
   events: {};
 }
@@ -82,8 +82,9 @@ export interface IAgreement extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    makeRequest(
+    redeem(
       _vars: string,
+      ref: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
@@ -94,8 +95,9 @@ export interface IAgreement extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  makeRequest(
+  redeem(
     _vars: string,
+    ref: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -106,7 +108,11 @@ export interface IAgreement extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    makeRequest(_vars: string, overrides?: CallOverrides): Promise<string>;
+    redeem(
+      _vars: string,
+      ref: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
   };
 
   filters: {};
@@ -118,8 +124,9 @@ export interface IAgreement extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    makeRequest(
+    redeem(
       _vars: string,
+      ref: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
@@ -131,8 +138,9 @@ export interface IAgreement extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    makeRequest(
+    redeem(
       _vars: string,
+      ref: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };

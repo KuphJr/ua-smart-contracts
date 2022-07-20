@@ -18,7 +18,8 @@ contract Agreement is IAgreement, Owned {
   States private state_;
   string private js;
   string private cid;
-  string private vars;
+  string[] private requiredPrivateVars;
+  string[] private requiredPublicVars;
   string private ref;
   uint256 public result;
   mapping(address => bool) public cancellations;
@@ -75,17 +76,24 @@ contract Agreement is IAgreement, Owned {
     (
       js,
       cid,
-      vars,
+      requiredPublicVars,
+      requiredPrivateVars,
       ref
-    ) = abi.decode(data, (string, string, string, string));
+    ) = abi.decode(data, (string, string, string[], string[], string));
   }
 
-  function makeRequest( 
-    string calldata _vars
+  function redeem( 
+    string calldata _vars,
+    string calldata _ref
   ) public override returns (bytes32 universalAdapterRequestId) {
     require(state() == States.PENDING, "INACTIVE_AGREEMENT");
     require(msg.sender == redeemer, "INVALID_REDEEMER");
-
+    // If the redeemer provides their own private vars, they can use them.
+    // This prevents the contract owner from cancelling API keys and preventing
+    // the redeemer from getting the money they are owed.
+    if (bytes(ref).length > 0) {
+      ref = _ref;
+    }
     linkToken.transferFrom(msg.sender, address(this), requestCost);
     linkToken.approve(address(universalAdapter), requestCost);
     bytes32 requestId = universalAdapter.makeRequest(

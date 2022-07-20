@@ -35,8 +35,13 @@ const _abi = [
         name: "_vars",
         type: "string",
       },
+      {
+        internalType: "string",
+        name: "ref",
+        type: "string",
+      },
     ],
-    name: "makeRequest",
+    name: "redeem",
     outputs: [
       {
         internalType: "bytes32",

@@ -20,14 +20,12 @@ contract AgreementRegistry is Owned {
     event AgreementCreated(uint256 indexed agreementId, address agreementContractAddress, Agreement agreement);
 
     constructor(
-        // I am unsure of how to deploy these by taking interfaces as arguments.
-        // I only know how to use the contract address and create an instance of the contract interface.
-        address _linkToken,
-        address _universalAdapter,
+        LinkTokenInterface _linkToken,
+        IUniversalAdapter _universalAdapter,
         uint256 _requestCost
     ) Owned(msg.sender) {
-        linkToken = LinkTokenInterface(_linkToken);
-        universalAdapter = IUniversalAdapter(_universalAdapter);
+        linkToken = _linkToken;
+        universalAdapter = _universalAdapter;
         requestCost = _requestCost;
     }
 
@@ -39,6 +37,7 @@ contract AgreementRegistry is Owned {
         bytes memory data
     ) external returns (Agreement agreement) {
         require(redeemer != address(0), "INVALID_REDEEMER");
+        // solhint-disable-next-line not-rely-on-time
         require(deadline > block.timestamp, "INVALID_DEADLINE");
         uint256 agreementId = ids++;
 
