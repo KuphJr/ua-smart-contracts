@@ -118,7 +118,7 @@ const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 const handleHashedResponses = async (requestId: string, nodeWallets: Signer[], universalAdapter: Contract) => {    
     const hashedResponseTransactions = []
     // sort the nodes so they respond in random order
-    for (const wallet of nodeWallets/*.sort(() => (Math.random() > .5) ? 1 : -1)*/) {
+    for (const wallet of nodeWallets.sort(() => (Math.random() > .5) ? 1 : -1)) {
       const answer = getRandomResponse()
       const { hashedAnswer, salt } = getHashedAnswer(answer)
       if (!cachedResponses[await wallet.getAddress()])
@@ -127,8 +127,7 @@ const handleHashedResponses = async (requestId: string, nodeWallets: Signer[], u
       const initialBalance = BigInt((await wallet.getBalance()).toString())
       try {
         const tx = await universalAdapter.connect(wallet).respondWithHashedAnswer(
-          //requestId, hashedAnswer, { gasLimit: 500000 }
-          requestId, '0xc35743cb37a481a9', { gasLimit: 500000 }
+          requestId, hashedAnswer, { gasLimit: 500000 }
         )
         hashedResponseTransactions.push(tx)
       }
@@ -148,13 +147,12 @@ const handleHashedResponses = async (requestId: string, nodeWallets: Signer[], u
 
 const handleUnhashedResponses = async (requestId: string, nodeWallets: Signer[], universalAdapter: Contract) => {
   const unhashedResponseTransactions = []
-  for (const wallet of nodeWallets/*.sort(() => (Math.random() > .5) ? 1 : -1)*/) {
+  for (const wallet of nodeWallets) {
     const [ answer, salt ] = cachedResponses[await wallet.getAddress()][requestId]
     const initialBalance = BigInt((await wallet.getBalance()).toString())
     try {
       const tx = await universalAdapter.connect(wallet).respondWithUnhashedAnswer(
-        //requestId, ethers.utils.hexZeroPad('0x' + salt.toString(16), 32), ethers.utils.hexZeroPad('0x' + answer, 32), { gasLimit: 500000 }
-        requestId, '0x0000000000000000000000000000000000000000000000000000f4a1ff6ccaf2', '0x0000000000000000000000000000000000000000000000000000000000000064', { gasLimit: 500000 }
+        requestId, ethers.utils.hexZeroPad('0x' + salt.toString(16), 32), ethers.utils.hexZeroPad('0x' + answer, 32), { gasLimit: 500000 }
       )
       unhashedResponseTransactions.push(tx)
     } catch (error) {

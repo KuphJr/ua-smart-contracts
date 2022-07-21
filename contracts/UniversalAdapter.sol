@@ -11,9 +11,9 @@ contract UniversalAdapter is ChainlinkClient {
 
   uint constant public REQUEST_COST_IN_JULES = 100;
   // number of nodes allowed to send responses (This has been tested with a maximum of 48 nodes)
-  uint constant private NUMBER_OF_NODES = 1;
+  uint constant private NUMBER_OF_NODES = 9;
   // number of responses required to conclude a round (32 max for maximum gas efficency)
-  uint constant private RESPONSE_THRESHOLD = 1;
+  uint constant private RESPONSE_THRESHOLD = 9;
   uint constant private BASE_REWARD = (REQUEST_COST_IN_JULES / 2) / RESPONSE_THRESHOLD;
   uint constant private MIN_GAS_FOR_CALLBACK = 100000; //solhint-disable-line var-name-mixedcase
   uint40 constant private EXPIRATION_TIME_IN_SECONDS = 300;
@@ -214,6 +214,7 @@ contract UniversalAdapter is ChainlinkClient {
     return true;
   }
 
+  // logic is faulty
   function insertAnswerInOrder(
     bytes32 requestId,
     bytes32 answer
@@ -238,12 +239,23 @@ contract UniversalAdapter is ChainlinkClient {
       middle = start + (end - start) / 2;
     }
     // shift the rest of the array forward by one index
+    // this logic is bad :(
+    uint j = rounds[requestId].unhashedResponseCount;
     for (uint i = start; i < rounds[requestId].unhashedResponseCount; i++) {
-      rounds[requestId].nodeIdsSortedByAnswer[i + 1] = rounds[requestId].nodeIdsSortedByAnswer[i];
+      rounds[requestId].nodeIdsSortedByAnswer[rounds[requestId].unhashedResponseCount - i] =
+        rounds[requestId].nodeIdsSortedByAnswer[rounds[requestId].unhashedResponseCount - i - 1];
     }
     // add the nodeId at its correct postion to maintain order
+    console.log("inserting at position");
+    console.logUint(start);
     rounds[requestId].nodeIdsSortedByAnswer[start] = nodeId;
     rounds[requestId].unhashedResponseCount++;
+    console.log("PRINTING RESPONSES IN SORTED ORDER");
+    for (uint j = 0; j < rounds[requestId].unhashedResponseCount; j++) {
+      uint8 nodeIdInOrder = rounds[requestId].nodeIdsSortedByAnswer[j];
+      console.logUint(nodeIdInOrder);
+      console.log(uint(rounds[requestId].answers[nodeIdInOrder]));
+    }
   }
 
   function getMedianAndDistributeBonusReward(
@@ -278,7 +290,9 @@ contract UniversalAdapter is ChainlinkClient {
     }
     // pay a bonus to all oracles with an answer matching the median
     uint bonusReward = uint(REQUEST_COST_IN_JULES / 2) / numNodesWithMedian;
+    console.log("Logging nodes with the median answer");
     for (uint i = 0; i < numNodesWithMedian; i++) {
+      console.logUint(nodeIdsWithMedian[i]);
       balance[nodeIdsWithMedian[i]] += bonusReward;
     }
     return medianAnswer;

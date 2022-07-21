@@ -127,7 +127,7 @@ contract Agreement is Owned {
     if (result > linkToken.balanceOf(address(this))) {
       linkToken.transfer(ERC721(agreementRegistry).ownerOf(agreementId), linkToken.balanceOf(address(this)));
     } else {
-      linkToken.transfer(ERC721(agreementRegistry).ownerOf(agreementId), uint256(_result));
+      linkToken.transfer(ERC721(agreementRegistry).ownerOf(agreementId), result);
       linkToken.transfer(owner, linkToken.balanceOf(address(this)));
     }
     emit RequestFulfilled(requestId, _result);
