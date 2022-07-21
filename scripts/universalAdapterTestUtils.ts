@@ -146,6 +146,7 @@ const handleHashedResponses = async (requestId: string, nodeWallets: Signer[], u
 }
 
 const handleUnhashedResponses = async (requestId: string, nodeWallets: Signer[], universalAdapter: Contract) => {
+  console.log('Heard oracle request for unhashed responses')
   const unhashedResponseTransactions = []
   for (const wallet of nodeWallets) {
     const [ answer, salt ] = cachedResponses[await wallet.getAddress()][requestId]

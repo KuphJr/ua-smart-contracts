@@ -11,12 +11,12 @@ contract UniversalAdapter is ChainlinkClient {
 
   uint constant public REQUEST_COST_IN_JULES = 100;
   // number of nodes allowed to send responses (This has been tested with a maximum of 48 nodes)
-  uint constant private NUMBER_OF_NODES = 9;
-  // number of responses required to conclude a round (32 max for maximum gas efficency)
-  uint constant private RESPONSE_THRESHOLD = 9;
+  uint constant private NUMBER_OF_NODES = 16;
+  // number of responses required to conclude a round (32 max for maximum gas efficency per response)
+  uint constant private RESPONSE_THRESHOLD = 10;
   uint constant private BASE_REWARD = (REQUEST_COST_IN_JULES / 2) / RESPONSE_THRESHOLD;
   uint constant private MIN_GAS_FOR_CALLBACK = 100000; //solhint-disable-line var-name-mixedcase
-  uint40 constant private EXPIRATION_TIME_IN_SECONDS = 300;
+  uint40 constant private EXPIRATION_TIME_IN_SECONDS = 10000;
   bytes32 constant private HASHED_RESPONSE_JOBSPEC = "134dc9324dcd4ec0a81161b5a1670242";
   bytes32 constant private UNHASHED_RESPONSE_JOBSPEC = "c93c7da6ae604267be76f165870d12b0";
 
@@ -239,11 +239,9 @@ contract UniversalAdapter is ChainlinkClient {
       middle = start + (end - start) / 2;
     }
     // shift the rest of the array forward by one index
-    // this logic is bad :(
-    uint j = rounds[requestId].unhashedResponseCount;
-    for (uint i = start; i < rounds[requestId].unhashedResponseCount; i++) {
-      rounds[requestId].nodeIdsSortedByAnswer[rounds[requestId].unhashedResponseCount - i] =
-        rounds[requestId].nodeIdsSortedByAnswer[rounds[requestId].unhashedResponseCount - i - 1];
+    for (uint indexOffset = 1; indexOffset <= (rounds[requestId].unhashedResponseCount - start); indexOffset++) {
+      rounds[requestId].nodeIdsSortedByAnswer[rounds[requestId].unhashedResponseCount - indexOffset + 1] =
+        rounds[requestId].nodeIdsSortedByAnswer[rounds[requestId].unhashedResponseCount - indexOffset];
     }
     // add the nodeId at its correct postion to maintain order
     console.log("inserting at position");
