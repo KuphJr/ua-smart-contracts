@@ -70,7 +70,7 @@ async function main() {
   const tx = await agreementRegistry.createAgreement(
     '0xB7aB5555BB8927BF16F8496da338a3033c12F8f3',
     BigInt('1858347930'),
-    false,
+    true,
     100,
     ethers.utils.defaultAbiCoder.encode(
       ['string', 'string', 'string[]', 'string[]', 'string'],
