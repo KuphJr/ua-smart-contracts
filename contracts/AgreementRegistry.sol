@@ -25,9 +25,12 @@ contract AgreementRegistry is Owned, ERC721 {
 
     event AgreementCreated(uint256 indexed agreementId, address agreementContractAddress, Agreement agreement);
 
-    constructor() ERC721("Universal Adapter Protocol", "uApp") Owned(msg.sender) {
-        linkToken = LinkTokenInterface(0x326C977E6efc84E512bB9C30f76E30c160eD06FB);
-        universalAdapter = IUniversalAdapter(0x5526B90295EcAbB23E4ce210511071843C8EE955);
+    constructor(
+      LinkTokenInterface _linkToken,
+      IUniversalAdapter _universalAdapter
+    ) ERC721("Universal Adapter Protocol", "uApp") Owned(msg.sender) {
+        linkToken = _linkToken;
+        universalAdapter = _universalAdapter;
     }
 
     function createAgreement(
@@ -37,9 +40,9 @@ contract AgreementRegistry is Owned, ERC721 {
         uint256 maxPayout,
         bytes memory data
     ) external returns (Agreement agreement) {
-        require(redeemer != address(0), "INVALID_REDEEMER");
+        require(redeemer != address(0), "REDEEMER");
         // solhint-disable-next-line not-rely-on-time
-        require(deadline > block.timestamp, "INVALID_DEADLINE");
+        require(deadline > block.timestamp, "DEADLINE");
         uint256 agreementId = ids++;
 
         // Use the CREATE2 opcode to deploy a new Agreement contract.
@@ -56,10 +59,11 @@ contract AgreementRegistry is Owned, ERC721 {
         }
 
         agreement = new Agreement{salt: salt}(
+            linkToken,
+            universalAdapter,
             address(this),
             agreementId,
             msg.sender,
-            redeemer,
             deadline,
             soulbound,
             data
@@ -76,7 +80,7 @@ contract AgreementRegistry is Owned, ERC721 {
     }
 
     function tokenURI(uint256 id) public view override returns (string memory uri) {
-        require(_ownerOf[id] != address(0), "INVALID_TOKEN");
+        require(_ownerOf[id] != address(0), "INVALID");
         Agreement agreement = agreements[id];
 
         string memory _imageData = string(
@@ -101,22 +105,17 @@ contract AgreementRegistry is Owned, ERC721 {
             )
         );
         // solhint-disable quotes
-        string memory uriPart1 = string(abi.encodePacked(
-          '{"name":"uApp Agreement #', id.toString(), 
-          '","address":"', address(agreement).toString(),
+        uri = string(abi.encodePacked(
+          '"address":"', address(agreement).toString(),
           '","balance":"', linkToken.balanceOf(address(agreement)).toString(),
           '","creator":"', agreement.owner().toString(),
-          '","redeemer":"', agreement.redeemer().toString(),
+          '","redeemer":"', _ownerOf[id].toString(),
           '","soulbound":"', agreement.soulbound() ? "true" : "false",
-          '","state":"', agreement.state()
-        ));
-        string memory uriPart2 = string(abi.encodePacked(
+          '","state":"', _stateToString(agreement.state()),
           '","deadline":"', agreement.deadline().toString(),
-          '","image_data":"', _imageData,
-          '"}'
+          '","image":"', _imageData
         ));
         // solhint-enable quotes
-        return string(abi.encodePacked(uriPart1, uriPart2));
     }
 
     function transferFrom(
@@ -128,31 +127,29 @@ contract AgreementRegistry is Owned, ERC721 {
         super.transferFrom(from, to, id);
     }
 
-    function _substringAddress(
-        address _address
-    ) internal pure returns (string memory) {
-        string memory stringAddress = _address.toString();
-        return string(
-            abi.encodePacked(
-                "0x",
-                stringAddress.substring(0, 4),
-                "...",
-                stringAddress.substring(bytes(stringAddress).length - 4, 4)
-            )
-        );
-    }
-
-    function _stateToString(uint8 state) internal pure returns (string memory str) {
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            str := mload(0x40)
-            mstore(str, 0x20)
-            switch state
-            case 0 { mstore(add(str, 0x07), 0x0750454e44494e47) }
-            case 1 { mstore(add(str, 0x05), 0x0946554c46494c4c4544) }
-            case 2 { mstore(add(str, 0x05), 0x0943414e43454c4c4544) }
-            case 3 { mstore(add(str, 0x07), 0x0745585049524544) }
-            mstore(0x40, add(str, 0x60))
+    // function _stateToString(uint8 state) internal pure returns (string memory str) {
+    //     // solhint-disable-next-line no-inline-assembly
+    //     assembly {
+    //         str := mload(0x40)
+    //         mstore(str, 0x20)
+    //         switch state
+    //         case 0 { mstore(add(str, 0x07), 0x0750454e44494e47) }
+    //         case 1 { mstore(add(str, 0x05), 0x0946554c46494c4c4544) }
+    //         case 2 { mstore(add(str, 0x05), 0x0943414e43454c4c4544) }
+    //         case 3 { mstore(add(str, 0x07), 0x0745585049524544) }
+    //         mstore(0x40, add(str, 0x60))
+    //     }
+    // }
+    function _stateToString(Agreement.States state) internal pure returns (string memory str) {
+        if (state == Agreement.States.PENDING) {
+            return "PENDING";
         }
+        if (state == Agreement.States.FULFILLED) {
+            return "FULFILLED";
+        }
+        if (state == Agreement.States.CANCELLED) {
+            return "CANCELLED";
+        }
+        return "EXPIRED";
     }
 }

@@ -1,5 +1,6 @@
 import process from 'process'
 import { ethers } from 'hardhat'
+import { experimentalAddHardhatNetworkMessageTraceHook } from 'hardhat/config'
 
 async function main() {
   const UniversalAdapter = await ethers.getContractFactory("UniversalAdapter")
@@ -15,7 +16,10 @@ async function main() {
   )
   // Deploy
   const AgreementRegistry = await ethers.getContractFactory("AgreementRegistry")
-  const agreementRegistry = await AgreementRegistry.deploy()
+  const agreementRegistry = await AgreementRegistry.deploy(
+    '0x326C977E6efc84E512bB9C30f76E30c160eD06FB',
+    '0x5526B90295EcAbB23E4ce210511071843C8EE955'
+  )
   const agreementRegistryAddress = (await ethers.provider.waitForTransaction(agreementRegistry.deployTransaction.hash)).contractAddress
   console.log('AgreementRegistry Address: ', agreementRegistryAddress);
 
@@ -37,7 +41,6 @@ async function main() {
       console.log('Agreement created with address: ' + agreementAddress)
 
       console.log('NFT URI: ' + await agreementRegistry.tokenURI(agreementId))
-
       console.log('REDEEMING')
 
       // REDEEM
@@ -59,17 +62,14 @@ async function main() {
           console.log('NFT URI: ' + await agreementRegistry.tokenURI(agreementId))
         }
       )
-      console.log('BEFORE REDEEM')
       const tx = await agreement.redeem('', '')
       await ethers.provider.waitForTransaction(tx.hash)
-      console.log('successfully called REDEEM')
-
     }
   )
 
   const tx = await agreementRegistry.createAgreement(
     '0xB7aB5555BB8927BF16F8496da338a3033c12F8f3',
-    BigInt('1758347930'),
+    BigInt('1858347930'),
     false,
     100,
     ethers.utils.defaultAbiCoder.encode(
