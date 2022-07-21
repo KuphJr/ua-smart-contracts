@@ -71,7 +71,7 @@ async function main() {
 
   const tx = await agreementRegistry.createAgreement(
     '0xB7aB5555BB8927BF16F8496da338a3033c12F8f3',
-    BigInt('1758367000'),
+    BigInt('1858367000'),
     true,
     100,
     ethers.utils.defaultAbiCoder.encode(
