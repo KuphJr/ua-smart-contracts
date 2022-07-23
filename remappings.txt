@@ -1,7 +1,5 @@
-@chainlink/=node_modules/@chainlink/
-@ensdomains/=node_modules/@ensdomains/
-@solmate/=node_modules/@rari-capital/solmate/src/
-eth-gas-reporter/=node_modules/eth-gas-reporter/
-hardhat/=node_modules/hardhat/
 ds-test/=lib/forge-std/lib/ds-test/src/
-forge-std/=lib/forge-std/src
+forge-std/=lib/forge-std/src/
+base64/=lib/base64/
+chainlink/=lib/chainlink-brownie-contracts/contracts/src/v0.8/
+@solmate/=lib/solmate/src/

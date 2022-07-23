@@ -1,13 +1,11 @@
 [profile.default]
 src = 'src'
-out = 'artifacts'
-libs = [
-    'lib',
-    'node_modules',
-]
-test = 'test/foundry'
-script = 'scripts/foundry'
-cache_path  = 'forge-cache'
+out = 'out'
+libs = ['lib']
+test = 'src/test'
+script = 'src/script'
+eth-rpc-url = "https://dry-young-sun.matic-testnet.quiknode.pro/f0d9ee2313cc5813ca36460677985e066497f634/"
+# solc_version = '0.8.15'
 via-ir = true
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
