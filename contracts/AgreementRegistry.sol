@@ -62,14 +62,6 @@ contract AgreementRegistry is ERC721, Owned {
                 )
             );   
         }
-
-        (
-            string memory js,
-            string memory cid,
-            string[] memory publicVars,
-            string[] memory privateVars,
-            string memory ref
-        ) = abi.decode(data, (string, string, string[], string[], string));
         
         agreement = new Agreement{salt: salt}(
             linkToken,
@@ -81,11 +73,7 @@ contract AgreementRegistry is ERC721, Owned {
             redeemer,
             deadline,
             soulbound,
-            js,
-            cid,
-            publicVars,
-            privateVars,
-            ref
+            data
         );
 
         ERC20(address(linkToken)).safeTransferFrom(msg.sender, address(agreement), maxPayout);
@@ -201,8 +189,8 @@ contract AgreementRegistry is ERC721, Owned {
             mstore(str, 0x20)
             switch state
             case 0 { mstore(add(str, 0x07), 0x0750454e44494e47) }
-            case 1 { mstore(add(str, 0x05) , 0x0946554c46494c4c4544) }
-            case 2 { mstore(add(str, 0x05) , 0x0943414e43454c4c4544) }
+            case 1 { mstore(add(str, 0x09) , 0x0946554c46494c4c4544) }
+            case 2 { mstore(add(str, 0x09) , 0x0943414e43454c4c4544) }
             case 3 { mstore(add(str, 0x07), 0x0745585049524544) }
             mstore(0x40, add(str, 0x60))
         }

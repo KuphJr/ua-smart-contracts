@@ -67,11 +67,7 @@ contract Agreement is IAgreement, Owned {
     address _redeemer,
     uint256 _deadline,
     bool _soulbound,
-    string memory _js,
-    string memory _cid,
-    string[] memory _publicVars,
-    string[] memory _privateVars,
-    string memory _ref
+    bytes memory data
   ) Owned(_creator) {
     linkToken = _link;
     universalAdapter = _universalAdapter;
@@ -82,11 +78,14 @@ contract Agreement is IAgreement, Owned {
     deadline = _deadline;
     soulbound = _soulbound;
     state_ = States.PENDING;
-    js = _js;
-    cid = _cid;
-    publicVars = _publicVars;
-    privateVars = _privateVars;
-    ref = _ref;
+
+    (
+      js,
+      cid,
+      publicVars,
+      privateVars,
+      ref
+    ) = abi.decode(data, (string, string, string[], string[], string));
   }
 
   function makeRequest( 
