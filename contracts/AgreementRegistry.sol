@@ -24,8 +24,8 @@ contract AgreementRegistry is ERC721, Owned {
     uint256 public ids;
     mapping(address => uint256) private nonces;
     Agreement[] public agreements;
-    mapping(address => uint[]) public creatorAgreements;
-    mapping(address => uint[]) public redeemerAgreements;
+    mapping(address => uint256[]) public creatorAgreements;
+    mapping(address => uint256[]) public redeemerAgreements;
 
     event AgreementCreated(uint256 indexed agreementId, Agreement agreement);
 
@@ -47,6 +47,7 @@ contract AgreementRegistry is ERC721, Owned {
         bytes calldata data
     ) external returns (Agreement agreement) {
         require(redeemer != address(0), "INVALID_REDEEMER");
+        // solhint-disable-next-line not-rely-on-time
         require(deadline > block.timestamp, "INVALID_DEADLINE");
         uint256 agreementId = ids++;
 

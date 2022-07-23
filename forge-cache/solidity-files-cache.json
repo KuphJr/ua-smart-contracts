@@ -13,8 +13,8 @@
   },
   "files": {
     "contracts/Agreement.sol": {
-      "lastModificationDate": 1658056645376,
-      "contentHash": "1d57a36a2188d4e70cccade0db92be52",
+      "lastModificationDate": 1658571104684,
+      "contentHash": "70e985553270614979960bc2ff8ffc85",
       "sourceName": "contracts/Agreement.sol",
       "solcConfig": {
         "settings": {
@@ -60,8 +60,8 @@
       }
     },
     "contracts/AgreementRegistry.sol": {
-      "lastModificationDate": 1658224760369,
-      "contentHash": "56da506880469bb195a40e5c57e16e4a",
+      "lastModificationDate": 1658570672133,
+      "contentHash": "e09f397bb332218553ce2d3d61605d7b",
       "sourceName": "contracts/AgreementRegistry.sol",
       "solcConfig": {
         "settings": {
@@ -96,7 +96,6 @@
         "contracts/interfaces/IUniversalAdapter.sol",
         "contracts/utils/BitPackedMap.sol",
         "contracts/utils/Strings.sol",
-        "lib/forge-std/src/console.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
         "node_modules/@rari-capital/solmate/src/auth/Owned.sol",
         "node_modules/@rari-capital/solmate/src/tokens/ERC20.sol",
@@ -104,7 +103,7 @@
         "node_modules/@rari-capital/solmate/src/utils/SafeTransferLib.sol",
         "node_modules/base64-sol/base64.sol"
       ],
-      "versionRequirement": "^0.8.14",
+      "versionRequirement": "^0.8.0",
       "artifacts": {
         "AgreementRegistry": {
           "0.8.15+commit.e14f2714.Darwin.appleclang": "AgreementRegistry.sol/AgreementRegistry.json"
@@ -112,8 +111,8 @@
       }
     },
     "contracts/interfaces/IAgreement.sol": {
-      "lastModificationDate": 1658056326197,
-      "contentHash": "62653f00812500a722c51d1fa54e48fa",
+      "lastModificationDate": 1658327889135,
+      "contentHash": "5cb83778de853630a646006dd2b93671",
       "sourceName": "contracts/interfaces/IAgreement.sol",
       "solcConfig": {
         "settings": {
@@ -151,8 +150,8 @@
       }
     },
     "contracts/interfaces/IUniversalAdapter.sol": {
-      "lastModificationDate": 1657922255493,
-      "contentHash": "a5acd8753f2b9d5595cf32df84e9aa62",
+      "lastModificationDate": 1658327092460,
+      "contentHash": "47fa312f326100e65d9401b7b45887d7",
       "sourceName": "contracts/interfaces/IUniversalAdapter.sol",
       "solcConfig": {
         "settings": {

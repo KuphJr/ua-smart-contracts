@@ -95,6 +95,13 @@ contract Agreement is IAgreement, Owned {
     require(state() == States.PENDING, "INACTIVE_AGREEMENT");
     require(msg.sender == redeemer(), "INVALID_REDEEMER");
 
+    // If the redeemer provides their own private vars, they can use them.
+    // This prevents the contract owner from cancelling API keys and preventing
+    // the redeemer from getting the money they are owed.
+    if (bytes(ref).length > 0) {
+      ref = _ref;
+    }
+
     linkToken.transferFrom(msg.sender, address(this), requestCost);
     linkToken.approve(address(universalAdapter), requestCost);
     bytes32 requestId = universalAdapter.makeRequest(
@@ -130,9 +137,13 @@ contract Agreement is IAgreement, Owned {
   {
     state_ = States.FULFILLED;
     result = uint256(_result);
-    uint256 remainder = linkToken.balanceOf(address(this)) - result;
-    ERC20(address(linkToken)).safeTransfer(redeemer(), uint256(_result));
-    ERC20(address(linkToken)).safeTransfer(owner, remainder);
+    uint256 balance = linkToken.balanceOf(address(this));
+    if (result > balance) {
+      ERC20(address(linkToken)).safeTransfer(redeemer(), balance);
+    } else {
+      ERC20(address(linkToken)).safeTransfer(redeemer(), uint256(_result));
+      ERC20(address(linkToken)).safeTransfer(owner, balance - uint256(_result));
+    }
 
     emit RequestFulfilled(requestId, _result);
     emit AgreementFulfilled(agreementId);
