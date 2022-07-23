@@ -28,7 +28,7 @@ import type {
 
 export interface UniversalAdapterInterface extends utils.Interface {
   functions: {
-    "REQUEST_COST_IN_JULES()": FunctionFragment;
+    "REQUEST_COST_IN_JUELS()": FunctionFragment;
     "balance(uint8)": FunctionFragment;
     "makeRequest(bytes4,string,string,string,string)": FunctionFragment;
     "respondWithHashedAnswer(bytes32,bytes8)": FunctionFragment;
@@ -38,7 +38,7 @@ export interface UniversalAdapterInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "REQUEST_COST_IN_JULES"
+      | "REQUEST_COST_IN_JUELS"
       | "balance"
       | "makeRequest"
       | "respondWithHashedAnswer"
@@ -47,7 +47,7 @@ export interface UniversalAdapterInterface extends utils.Interface {
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "REQUEST_COST_IN_JULES",
+    functionFragment: "REQUEST_COST_IN_JUELS",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -72,7 +72,7 @@ export interface UniversalAdapterInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "REQUEST_COST_IN_JULES",
+    functionFragment: "REQUEST_COST_IN_JUELS",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "balance", data: BytesLike): Result;
@@ -194,7 +194,7 @@ export interface UniversalAdapter extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    REQUEST_COST_IN_JULES(overrides?: CallOverrides): Promise<[BigNumber]>;
+    REQUEST_COST_IN_JUELS(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     balance(
       arg0: BigNumberish,
@@ -228,7 +228,7 @@ export interface UniversalAdapter extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  REQUEST_COST_IN_JULES(overrides?: CallOverrides): Promise<BigNumber>;
+  REQUEST_COST_IN_JUELS(overrides?: CallOverrides): Promise<BigNumber>;
 
   balance(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -259,7 +259,7 @@ export interface UniversalAdapter extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    REQUEST_COST_IN_JULES(overrides?: CallOverrides): Promise<BigNumber>;
+    REQUEST_COST_IN_JUELS(overrides?: CallOverrides): Promise<BigNumber>;
 
     balance(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -329,7 +329,7 @@ export interface UniversalAdapter extends BaseContract {
   };
 
   estimateGas: {
-    REQUEST_COST_IN_JULES(overrides?: CallOverrides): Promise<BigNumber>;
+    REQUEST_COST_IN_JUELS(overrides?: CallOverrides): Promise<BigNumber>;
 
     balance(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -361,7 +361,7 @@ export interface UniversalAdapter extends BaseContract {
   };
 
   populateTransaction: {
-    REQUEST_COST_IN_JULES(
+    REQUEST_COST_IN_JUELS(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

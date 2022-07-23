@@ -9,12 +9,12 @@ contract UniversalAdapter is ChainlinkClient {
   using Chainlink for Chainlink.Request;
   LinkTokenInterface internal immutable linkToken;
 
-  uint constant public REQUEST_COST_IN_JULES = 100;
+  uint constant public REQUEST_COST_IN_JUELS = 100;
   // number of nodes allowed to send responses (This has been tested with a maximum of 48 nodes)
   uint constant private NUMBER_OF_NODES = 1;
   // number of responses required to conclude a round (32 max for maximum gas efficency)
   uint constant private RESPONSE_THRESHOLD = 1;
-  uint constant private BASE_REWARD = (REQUEST_COST_IN_JULES / 2) / RESPONSE_THRESHOLD;
+  uint constant private BASE_REWARD = (REQUEST_COST_IN_JUELS / 2) / RESPONSE_THRESHOLD;
   uint constant private MIN_GAS_FOR_CALLBACK = 100000; //solhint-disable-line var-name-mixedcase
   uint40 constant private EXPIRATION_TIME_IN_SECONDS = 300;
   bytes32 constant private HASHED_RESPONSE_JOBSPEC = "134dc9324dcd4ec0a81161b5a1670242";
@@ -86,7 +86,7 @@ contract UniversalAdapter is ChainlinkClient {
     string calldata ref
   )
   external returns (bytes32 _requestId) {
-    linkToken.transferFrom(msg.sender, address(this), REQUEST_COST_IN_JULES);
+    linkToken.transferFrom(msg.sender, address(this), REQUEST_COST_IN_JUELS);
     Chainlink.Request memory request;
     request = buildChainlinkRequest(
       HASHED_RESPONSE_JOBSPEC,
@@ -277,7 +277,7 @@ contract UniversalAdapter is ChainlinkClient {
       }
     }
     // pay a bonus to all oracles with an answer matching the median
-    uint bonusReward = uint(REQUEST_COST_IN_JULES / 2) / numNodesWithMedian;
+    uint bonusReward = uint(REQUEST_COST_IN_JUELS / 2) / numNodesWithMedian;
     for (uint i = 0; i < numNodesWithMedian; i++) {
       balance[nodeIdsWithMedian[i]] += bonusReward;
     }

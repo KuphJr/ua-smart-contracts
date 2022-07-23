@@ -65,7 +65,7 @@ export interface DirectRequestAggregatorInterface extends utils.Interface {
     "bytes32ToHexString(bytes32)": FunctionFragment;
     "expirationTimeInSeconds()": FunctionFragment;
     "hashedResponseJobspec()": FunctionFragment;
-    "linkCostInJules()": FunctionFragment;
+    "linkCostInJuels()": FunctionFragment;
     "makeRequest(address,bytes4,string,string,string,bytes32)": FunctionFragment;
     "minGasForCallback()": FunctionFragment;
     "minResponses()": FunctionFragment;
@@ -85,7 +85,7 @@ export interface DirectRequestAggregatorInterface extends utils.Interface {
       | "bytes32ToHexString"
       | "expirationTimeInSeconds"
       | "hashedResponseJobspec"
-      | "linkCostInJules"
+      | "linkCostInJuels"
       | "makeRequest"
       | "minGasForCallback"
       | "minResponses"
@@ -116,7 +116,7 @@ export interface DirectRequestAggregatorInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "linkCostInJules",
+    functionFragment: "linkCostInJuels",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -175,7 +175,7 @@ export interface DirectRequestAggregatorInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "linkCostInJules",
+    functionFragment: "linkCostInJuels",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -293,7 +293,7 @@ export interface DirectRequestAggregator extends BaseContract {
 
     hashedResponseJobspec(overrides?: CallOverrides): Promise<[string]>;
 
-    linkCostInJules(overrides?: CallOverrides): Promise<[BigNumber]>;
+    linkCostInJuels(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     makeRequest(
       callbackAddress: string,
@@ -359,7 +359,7 @@ export interface DirectRequestAggregator extends BaseContract {
 
   hashedResponseJobspec(overrides?: CallOverrides): Promise<string>;
 
-  linkCostInJules(overrides?: CallOverrides): Promise<BigNumber>;
+  linkCostInJuels(overrides?: CallOverrides): Promise<BigNumber>;
 
   makeRequest(
     callbackAddress: string,
@@ -425,7 +425,7 @@ export interface DirectRequestAggregator extends BaseContract {
 
     hashedResponseJobspec(overrides?: CallOverrides): Promise<string>;
 
-    linkCostInJules(overrides?: CallOverrides): Promise<BigNumber>;
+    linkCostInJuels(overrides?: CallOverrides): Promise<BigNumber>;
 
     makeRequest(
       callbackAddress: string,
@@ -509,7 +509,7 @@ export interface DirectRequestAggregator extends BaseContract {
 
     hashedResponseJobspec(overrides?: CallOverrides): Promise<BigNumber>;
 
-    linkCostInJules(overrides?: CallOverrides): Promise<BigNumber>;
+    linkCostInJuels(overrides?: CallOverrides): Promise<BigNumber>;
 
     makeRequest(
       callbackAddress: string,
@@ -570,7 +570,7 @@ export interface DirectRequestAggregator extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    linkCostInJules(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    linkCostInJuels(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     makeRequest(
       callbackAddress: string,

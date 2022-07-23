@@ -46,7 +46,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "_linkCostInJules",
+        name: "_linkCostInJuels",
         type: "uint256",
       },
       {
@@ -168,7 +168,7 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "linkCostInJules",
+    name: "linkCostInJuels",
     outputs: [
       {
         internalType: "uint256",
@@ -474,7 +474,7 @@ export class DirectRequestAggregator__factory extends ContractFactory {
     _unhashedResponseJobspec: BytesLike,
     _oracles: string[],
     _minResponses: BigNumberish,
-    _linkCostInJules: BigNumberish,
+    _linkCostInJuels: BigNumberish,
     _expirationTimeInSeconds: BigNumberish,
     _minGasForCallback: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -485,7 +485,7 @@ export class DirectRequestAggregator__factory extends ContractFactory {
       _unhashedResponseJobspec,
       _oracles,
       _minResponses,
-      _linkCostInJules,
+      _linkCostInJuels,
       _expirationTimeInSeconds,
       _minGasForCallback,
       overrides || {}
@@ -497,7 +497,7 @@ export class DirectRequestAggregator__factory extends ContractFactory {
     _unhashedResponseJobspec: BytesLike,
     _oracles: string[],
     _minResponses: BigNumberish,
-    _linkCostInJules: BigNumberish,
+    _linkCostInJuels: BigNumberish,
     _expirationTimeInSeconds: BigNumberish,
     _minGasForCallback: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -508,7 +508,7 @@ export class DirectRequestAggregator__factory extends ContractFactory {
       _unhashedResponseJobspec,
       _oracles,
       _minResponses,
-      _linkCostInJules,
+      _linkCostInJuels,
       _expirationTimeInSeconds,
       _minGasForCallback,
       overrides || {}

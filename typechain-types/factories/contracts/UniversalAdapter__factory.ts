@@ -132,7 +132,7 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "REQUEST_COST_IN_JULES",
+    name: "REQUEST_COST_IN_JUELS",
     outputs: [
       {
         internalType: "uint256",
