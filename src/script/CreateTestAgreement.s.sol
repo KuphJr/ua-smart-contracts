@@ -6,9 +6,9 @@ import {AgreementRegistry} from "../AgreementRegistry.sol";
 import {Agreement} from "../Agreement.sol";
 import {IUniversalAdapter} from "../interfaces/IUniversalAdapter.sol";
 import "chainlink/interfaces/LinkTokenInterface.sol";
-import {MockLinkToken} from "./MockLinkToken.sol";
+import {MockLinkToken} from "../test/mocks/MockLinkToken.sol";
 
-contract ContractScript is Script {
+contract CreateTestAgreement is Script {
     AgreementRegistry registry;
     Agreement agreement;
     LinkTokenInterface linkToken;

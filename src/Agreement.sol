@@ -15,7 +15,7 @@ contract Agreement is IAgreement, Owned {
   LinkTokenInterface private immutable linkToken;
   IUniversalAdapter private immutable universalAdapter;
   address private immutable agreementRegistry;
-  uint256 private immutable requestCost;
+  uint256 public immutable requestCost;
   uint256 public immutable agreementId;
   address private immutable redeemer_;
   uint256 public immutable deadline;
