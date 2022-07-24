@@ -7,8 +7,7 @@
       const goFundMe = await axios.get('https://www.gofundme.com/f/save-the-environment-fund')
       
       const donationsUSD = parseInt(
-        (/\"m-progress-meter-heading">(.*?)\</) // Extract current donation amount from div
-          .exec(goFundMe.data)[1]
+        (/\"m-progress-meter-heading">(.*?)\</).exec(goFundMe.data)[1] // Extract current donation amount from div
           .replace(/[\\D]/g, '') // Strip all non-numeric values
       )
       // TODO: get prices from 3 different data providers and then return median price

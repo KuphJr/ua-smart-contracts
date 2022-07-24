@@ -18,7 +18,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 10
+            runs: 1
           }
         }
       },
@@ -27,7 +27,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 10
+            runs: 1
           }
         }
       },
@@ -36,7 +36,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 10
+            runs: 1
           }
         }
       },
@@ -45,7 +45,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 10
+            runs: 1
           }
         }
       },
@@ -53,7 +53,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 10
+            runs: 1
           }
         }
       }
@@ -62,7 +62,7 @@ const config: HardhatUserConfig = {
   networks: {
     mumbai: {
       url: "https://dry-young-sun.matic-testnet.quiknode.pro/f0d9ee2313cc5813ca36460677985e066497f634/",
-      gasMultiplier: 10,
+      gasMultiplier: 20,
       accounts: [ process.env.WALLETKEY1 || '' ]
     },
     hardhat: {

@@ -21,6 +21,7 @@ async function main() {
     '0x5526B90295EcAbB23E4ce210511071843C8EE955'
   )
   const agreementRegistryAddress = (await ethers.provider.waitForTransaction(agreementRegistry.deployTransaction.hash)).contractAddress
+  //const agreementRegistry = await AgreementRegistry.attach()
   console.log('AgreementRegistry Address: ', agreementRegistryAddress);
 
   // CREATE
@@ -38,7 +39,7 @@ async function main() {
       agreementAddress: any,
       agreementData: any
     ) => {
-      console.log('Agreement created with address: ' + agreementAddress)
+      console.log('Agreement created with address: ' + agreementAddress + ' and id: ' + agreementId)
 
       console.log('NFT URI: ' + await agreementRegistry.tokenURI(agreementId))
       console.log('REDEEMING')
@@ -55,12 +56,11 @@ async function main() {
       const agreement = await Agreement.attach(agreementAddress)
       const LinkToken = await ethers.getContractFactory('LinkToken')
 
-      agreement.on('RequestFulfilled',
+      agreement.on('Fulfilled',
         async (
-          requestId: any,
           result: any
         ) => {
-          console.log(`Request id ${requestId} fulfilled with result ${result}`)
+          console.log(`Fulfilled with result ${result}`)
           console.log('NFT URI: ' + await agreementRegistry.tokenURI(agreementId))
         }
       )
@@ -76,7 +76,7 @@ async function main() {
     100,
     ethers.utils.defaultAbiCoder.encode(
       ['string', 'string', 'string[]', 'string[]', 'string'],
-      ['return BigInt(55)', '', [], [], '']
+      ['', 'bafybeiezwwxj54kiq2jg6umrzdmf3ryshooxbk6o6vf6lg4hc7qnwh7nyu', [], [], '']
     )
   )
   await ethers.provider.waitForTransaction(tx.hash)

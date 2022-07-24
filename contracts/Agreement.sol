@@ -15,41 +15,16 @@ contract Agreement is Owned {
   uint256 public immutable agreementId;
   uint256 public immutable deadline;
   bool public immutable soulbound;
-  States private state_;
-  string private js;
-  string private cid;
+  uint256 private state_; // 0 = PENDING, 1 = FULFILLED, 2 = CANCELLED, 3 = EXPIRED
+  string public js;
+  string public cid;
+  string private ref;
   string[] private requiredPrivateVars;
   string[] private requiredPublicVars;
-  string private ref;
-  uint256 public result;
   mapping(address => bool) public cancellations;
 
-  enum States {
-    PENDING,
-    FULFILLED,
-    CANCELLED,
-    EXPIRED
-  }
-
-  event AgreementFulfilled(
-    uint256 indexed agreementId
-  );
-
-  event AgreementCancelled(
-    uint256 indexed agreementId
-  );
-
-  event RequestSent(
-    bytes32 indexed requestId,
-    string js,
-    string cid,
-    string vars,
-    string ref
-  );
-
-  event RequestFulfilled(
-    bytes32 indexed requestId,
-    bytes32 result
+  event Fulfilled(
+    uint256 result
   );
 
   constructor (
@@ -68,7 +43,6 @@ contract Agreement is Owned {
     agreementId = _agreementId;
     deadline = _deadline;
     soulbound = _soulbound;
-    state_ = States.PENDING;
     (
       js,
       cid,
@@ -82,11 +56,8 @@ contract Agreement is Owned {
     string calldata _vars,
     string calldata _ref
   ) public returns (bytes32 universalAdapterRequestId) {
-    require(state() == States.PENDING, "INACTIVE");
-    require(msg.sender == ERC721(agreementRegistry).ownerOf(agreementId), "REDEEMER");
-    // If the redeemer provides their own private vars, they can use them.
-    // This prevents the contract owner from cancelling API keys and preventing
-    // the redeemer from getting the money they are owed.
+    require(state() == 0, "INACTIVE");
+    require(msg.sender == ERC721(agreementRegistry).ownerOf(agreementId), "");
     if (bytes(ref).length > 0) {
       ref = _ref;
     }
@@ -95,50 +66,44 @@ contract Agreement is Owned {
     bytes32 requestId = universalAdapter.makeRequest(
       this.fulfillRequest.selector, js, cid, _vars, ref
     );
-    emit RequestSent(
-      requestId, js, cid, _vars, ref
-    );
     return requestId;
   }
 
   function cancelAgreement() public {
-    require(state() == States.PENDING, "CANT_CANCEL");
+    require(state() == 0, "INACTIVE");
     address sender = msg.sender;
     address _owner = owner;
-    require(sender == _owner || sender == ERC721(agreementRegistry).ownerOf(agreementId), "NOT_ALLOWED");
+    require(sender == _owner || sender == ERC721(agreementRegistry).ownerOf(agreementId), "UNAUTH");
     cancellations[sender] = true;
     if (cancellations[_owner] && cancellations[ERC721(agreementRegistry).ownerOf(agreementId)]) {
-      state_ = States.CANCELLED;
-      emit AgreementCancelled(agreementId);
+      state_ = 2;
     }
   }
 
   function recoverFunds() public {
     require(msg.sender == owner, "NOT_OWNER");
-    require(state() != States.PENDING, "PENDING");
+    require(state() != 0, "INACTIVE");
     linkToken.transfer(msg.sender, linkToken.balanceOf(address(this)));
   }
 
-  function fulfillRequest(bytes32 requestId, bytes32 _result)
+  function fulfillRequest(bytes32, bytes32 _result)
     public onlyUniversalAdapter
   {
-    state_ = States.FULFILLED;
-    result = uint256(_result);
-    if (result > linkToken.balanceOf(address(this))) {
+    state_ = 1;
+    if (uint256(_result) > linkToken.balanceOf(address(this))) {
       linkToken.transfer(ERC721(agreementRegistry).ownerOf(agreementId), linkToken.balanceOf(address(this)));
     } else {
-      linkToken.transfer(ERC721(agreementRegistry).ownerOf(agreementId), result);
+      linkToken.transfer(ERC721(agreementRegistry).ownerOf(agreementId), uint256(_result));
       linkToken.transfer(owner, linkToken.balanceOf(address(this)));
     }
-    emit RequestFulfilled(requestId, _result);
-    emit AgreementFulfilled(agreementId);
+    emit Fulfilled(uint(_result));
   }
 
-  function state() public view returns(States _state) {
-    _state = state_ == States.FULFILLED
+  function state() public view returns(uint256 _state) {
+    _state = state_ == 1
       ? state_
       : block.timestamp > deadline // solhint-disable-line not-rely-on-time
-        ? States.EXPIRED
+        ? 3
         : state_;
   }
 

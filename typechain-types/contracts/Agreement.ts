@@ -4,7 +4,6 @@
 import type {
   BaseContract,
   BigNumber,
-  BigNumberish,
   BytesLike,
   CallOverrides,
   ContractTransaction,
@@ -31,12 +30,13 @@ export interface AgreementInterface extends utils.Interface {
     "agreementId()": FunctionFragment;
     "cancelAgreement()": FunctionFragment;
     "cancellations(address)": FunctionFragment;
+    "cid()": FunctionFragment;
     "deadline()": FunctionFragment;
     "fulfillRequest(bytes32,bytes32)": FunctionFragment;
+    "js()": FunctionFragment;
     "owner()": FunctionFragment;
     "recoverFunds()": FunctionFragment;
     "redeem(string,string)": FunctionFragment;
-    "result()": FunctionFragment;
     "setOwner(address)": FunctionFragment;
     "soulbound()": FunctionFragment;
     "state()": FunctionFragment;
@@ -47,12 +47,13 @@ export interface AgreementInterface extends utils.Interface {
       | "agreementId"
       | "cancelAgreement"
       | "cancellations"
+      | "cid"
       | "deadline"
       | "fulfillRequest"
+      | "js"
       | "owner"
       | "recoverFunds"
       | "redeem"
-      | "result"
       | "setOwner"
       | "soulbound"
       | "state"
@@ -70,11 +71,13 @@ export interface AgreementInterface extends utils.Interface {
     functionFragment: "cancellations",
     values: [string]
   ): string;
+  encodeFunctionData(functionFragment: "cid", values?: undefined): string;
   encodeFunctionData(functionFragment: "deadline", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "fulfillRequest",
     values: [BytesLike, BytesLike]
   ): string;
+  encodeFunctionData(functionFragment: "js", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "recoverFunds",
@@ -84,7 +87,6 @@ export interface AgreementInterface extends utils.Interface {
     functionFragment: "redeem",
     values: [string, string]
   ): string;
-  encodeFunctionData(functionFragment: "result", values?: undefined): string;
   encodeFunctionData(functionFragment: "setOwner", values: [string]): string;
   encodeFunctionData(functionFragment: "soulbound", values?: undefined): string;
   encodeFunctionData(functionFragment: "state", values?: undefined): string;
@@ -101,58 +103,38 @@ export interface AgreementInterface extends utils.Interface {
     functionFragment: "cancellations",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "cid", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "deadline", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "fulfillRequest",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "js", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "recoverFunds",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "redeem", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "result", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "setOwner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "soulbound", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "state", data: BytesLike): Result;
 
   events: {
-    "AgreementCancelled(uint256)": EventFragment;
-    "AgreementFulfilled(uint256)": EventFragment;
+    "Fulfilled(uint256)": EventFragment;
     "OwnerUpdated(address,address)": EventFragment;
-    "RequestFulfilled(bytes32,bytes32)": EventFragment;
-    "RequestSent(bytes32,string,string,string,string)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "AgreementCancelled"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "AgreementFulfilled"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Fulfilled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnerUpdated"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RequestFulfilled"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RequestSent"): EventFragment;
 }
 
-export interface AgreementCancelledEventObject {
-  agreementId: BigNumber;
+export interface FulfilledEventObject {
+  result: BigNumber;
 }
-export type AgreementCancelledEvent = TypedEvent<
-  [BigNumber],
-  AgreementCancelledEventObject
->;
+export type FulfilledEvent = TypedEvent<[BigNumber], FulfilledEventObject>;
 
-export type AgreementCancelledEventFilter =
-  TypedEventFilter<AgreementCancelledEvent>;
-
-export interface AgreementFulfilledEventObject {
-  agreementId: BigNumber;
-}
-export type AgreementFulfilledEvent = TypedEvent<
-  [BigNumber],
-  AgreementFulfilledEventObject
->;
-
-export type AgreementFulfilledEventFilter =
-  TypedEventFilter<AgreementFulfilledEvent>;
+export type FulfilledEventFilter = TypedEventFilter<FulfilledEvent>;
 
 export interface OwnerUpdatedEventObject {
   user: string;
@@ -164,32 +146,6 @@ export type OwnerUpdatedEvent = TypedEvent<
 >;
 
 export type OwnerUpdatedEventFilter = TypedEventFilter<OwnerUpdatedEvent>;
-
-export interface RequestFulfilledEventObject {
-  requestId: string;
-  result: string;
-}
-export type RequestFulfilledEvent = TypedEvent<
-  [string, string],
-  RequestFulfilledEventObject
->;
-
-export type RequestFulfilledEventFilter =
-  TypedEventFilter<RequestFulfilledEvent>;
-
-export interface RequestSentEventObject {
-  requestId: string;
-  js: string;
-  cid: string;
-  vars: string;
-  ref: string;
-}
-export type RequestSentEvent = TypedEvent<
-  [string, string, string, string, string],
-  RequestSentEventObject
->;
-
-export type RequestSentEventFilter = TypedEventFilter<RequestSentEvent>;
 
 export interface Agreement extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -226,13 +182,17 @@ export interface Agreement extends BaseContract {
 
     cancellations(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
+    cid(overrides?: CallOverrides): Promise<[string]>;
+
     deadline(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     fulfillRequest(
-      requestId: BytesLike,
+      arg0: BytesLike,
       _result: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    js(overrides?: CallOverrides): Promise<[string]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -246,8 +206,6 @@ export interface Agreement extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    result(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     setOwner(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -255,7 +213,9 @@ export interface Agreement extends BaseContract {
 
     soulbound(overrides?: CallOverrides): Promise<[boolean]>;
 
-    state(overrides?: CallOverrides): Promise<[number] & { _state: number }>;
+    state(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { _state: BigNumber }>;
   };
 
   agreementId(overrides?: CallOverrides): Promise<BigNumber>;
@@ -266,13 +226,17 @@ export interface Agreement extends BaseContract {
 
   cancellations(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
+  cid(overrides?: CallOverrides): Promise<string>;
+
   deadline(overrides?: CallOverrides): Promise<BigNumber>;
 
   fulfillRequest(
-    requestId: BytesLike,
+    arg0: BytesLike,
     _result: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  js(overrides?: CallOverrides): Promise<string>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -286,8 +250,6 @@ export interface Agreement extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  result(overrides?: CallOverrides): Promise<BigNumber>;
-
   setOwner(
     newOwner: string,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -295,7 +257,7 @@ export interface Agreement extends BaseContract {
 
   soulbound(overrides?: CallOverrides): Promise<boolean>;
 
-  state(overrides?: CallOverrides): Promise<number>;
+  state(overrides?: CallOverrides): Promise<BigNumber>;
 
   callStatic: {
     agreementId(overrides?: CallOverrides): Promise<BigNumber>;
@@ -304,13 +266,17 @@ export interface Agreement extends BaseContract {
 
     cancellations(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
+    cid(overrides?: CallOverrides): Promise<string>;
+
     deadline(overrides?: CallOverrides): Promise<BigNumber>;
 
     fulfillRequest(
-      requestId: BytesLike,
+      arg0: BytesLike,
       _result: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    js(overrides?: CallOverrides): Promise<string>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -322,29 +288,16 @@ export interface Agreement extends BaseContract {
       overrides?: CallOverrides
     ): Promise<string>;
 
-    result(overrides?: CallOverrides): Promise<BigNumber>;
-
     setOwner(newOwner: string, overrides?: CallOverrides): Promise<void>;
 
     soulbound(overrides?: CallOverrides): Promise<boolean>;
 
-    state(overrides?: CallOverrides): Promise<number>;
+    state(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   filters: {
-    "AgreementCancelled(uint256)"(
-      agreementId?: BigNumberish | null
-    ): AgreementCancelledEventFilter;
-    AgreementCancelled(
-      agreementId?: BigNumberish | null
-    ): AgreementCancelledEventFilter;
-
-    "AgreementFulfilled(uint256)"(
-      agreementId?: BigNumberish | null
-    ): AgreementFulfilledEventFilter;
-    AgreementFulfilled(
-      agreementId?: BigNumberish | null
-    ): AgreementFulfilledEventFilter;
+    "Fulfilled(uint256)"(result?: null): FulfilledEventFilter;
+    Fulfilled(result?: null): FulfilledEventFilter;
 
     "OwnerUpdated(address,address)"(
       user?: string | null,
@@ -354,30 +307,6 @@ export interface Agreement extends BaseContract {
       user?: string | null,
       newOwner?: string | null
     ): OwnerUpdatedEventFilter;
-
-    "RequestFulfilled(bytes32,bytes32)"(
-      requestId?: BytesLike | null,
-      result?: null
-    ): RequestFulfilledEventFilter;
-    RequestFulfilled(
-      requestId?: BytesLike | null,
-      result?: null
-    ): RequestFulfilledEventFilter;
-
-    "RequestSent(bytes32,string,string,string,string)"(
-      requestId?: BytesLike | null,
-      js?: null,
-      cid?: null,
-      vars?: null,
-      ref?: null
-    ): RequestSentEventFilter;
-    RequestSent(
-      requestId?: BytesLike | null,
-      js?: null,
-      cid?: null,
-      vars?: null,
-      ref?: null
-    ): RequestSentEventFilter;
   };
 
   estimateGas: {
@@ -389,13 +318,17 @@ export interface Agreement extends BaseContract {
 
     cancellations(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+    cid(overrides?: CallOverrides): Promise<BigNumber>;
+
     deadline(overrides?: CallOverrides): Promise<BigNumber>;
 
     fulfillRequest(
-      requestId: BytesLike,
+      arg0: BytesLike,
       _result: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    js(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -408,8 +341,6 @@ export interface Agreement extends BaseContract {
       _ref: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
-
-    result(overrides?: CallOverrides): Promise<BigNumber>;
 
     setOwner(
       newOwner: string,
@@ -433,13 +364,17 @@ export interface Agreement extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    cid(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     deadline(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     fulfillRequest(
-      requestId: BytesLike,
+      arg0: BytesLike,
       _result: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
+
+    js(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -452,8 +387,6 @@ export interface Agreement extends BaseContract {
       _ref: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
-
-    result(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setOwner(
       newOwner: string,

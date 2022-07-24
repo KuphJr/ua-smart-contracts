@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 
@@ -244,16 +243,8 @@ contract UniversalAdapter is ChainlinkClient {
         rounds[requestId].nodeIdsSortedByAnswer[rounds[requestId].unhashedResponseCount - indexOffset];
     }
     // add the nodeId at its correct postion to maintain order
-    console.log("inserting at position");
-    console.logUint(start);
     rounds[requestId].nodeIdsSortedByAnswer[start] = nodeId;
     rounds[requestId].unhashedResponseCount++;
-    console.log("PRINTING RESPONSES IN SORTED ORDER");
-    for (uint j = 0; j < rounds[requestId].unhashedResponseCount; j++) {
-      uint8 nodeIdInOrder = rounds[requestId].nodeIdsSortedByAnswer[j];
-      console.logUint(nodeIdInOrder);
-      console.log(uint(rounds[requestId].answers[nodeIdInOrder]));
-    }
   }
 
   function getMedianAndDistributeBonusReward(
@@ -288,9 +279,7 @@ contract UniversalAdapter is ChainlinkClient {
     }
     // pay a bonus to all oracles with an answer matching the median
     uint bonusReward = uint(REQUEST_COST_IN_JULES / 2) / numNodesWithMedian;
-    console.log("Logging nodes with the median answer");
     for (uint i = 0; i < numNodesWithMedian; i++) {
-      console.logUint(nodeIdsWithMedian[i]);
       balance[nodeIdsWithMedian[i]] += bonusReward;
     }
     return medianAnswer;
