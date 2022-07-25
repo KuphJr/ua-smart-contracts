@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "./interfaces/IUniversalAdapter.sol";
 import {Agreement} from "./Agreement.sol";
-import {BitPackedMap} from "./utils/BitPackedMap.sol";
 import {Strings} from "./utils/Strings.sol";
 import {LinkTokenInterface} from "chainlink/interfaces/LinkTokenInterface.sol";
 import {Base64} from "base64/base64.sol";
@@ -97,15 +96,10 @@ contract AgreementRegistry is ERC721, Owned {
                 "data:image/svg+xml;base64,",
                 Base64.encode(
                     bytes(
-                        BitPackedMap._renderSvg(
-                            // _generateBitmap(
-                            //     agreement
-                            // )
-                            bytes16(
-                                keccak256(
-                                    abi.encodePacked(
-                                        agreement
-                                    )
+                        _renderSvg(
+                            keccak256(
+                                abi.encodePacked(
+                                    agreement
                                 )
                             )
                         )
@@ -197,22 +191,30 @@ contract AgreementRegistry is ERC721, Owned {
         }
     }
 
-    // function _generateBitmap(Agreement agreement) internal view returns (bytes16 bitmap) {
-    //     string memory tmp;
-    //     uint256 bal = agreement.state() == Agreement.States.FULFILLED
-    //                             ? agreement.result()
-    //                             : linkToken.balanceOf(address(agreement));
-    //     {
-    //         string memory _id = BitPackedMap._uintToHexString(uint8(agreement.agreementId() % 256));
-    //         string memory _agreement = BitPackedMap._uintToHexString(uint8(uint256(uint160(address(agreement))) % 256));
-    //         string memory _balance = BitPackedMap._uintToHexString(uint8(bal % 256));
-    //         string memory _creator = BitPackedMap._uintToHexString(uint8(uint256(uint160(address(msg.sender))) % 256));
-    //         tmp = string(abi.encodePacked(_id, _id, _agreement, _agreement, _balance, _balance, _creator, _creator));
-    //     }
-    //     string memory _redeemer = BitPackedMap._uintToHexString(uint8(uint256(uint160(address(agreement.redeemer()))) % 256));
-    //     string memory _deadline = BitPackedMap._uintToHexString(uint8(agreement.deadline() % 256));
-    //     string memory _soul = BitPackedMap._uintToHexString(uint8(agreement.soulbound() ? 42 : 77));
-    //     string memory _state = BitPackedMap._uintToHexString(uint8(agreement.state()));
-    //     bitmap = bytes16(abi.encodePacked(tmp, _redeemer, _redeemer, _deadline, _deadline, _soul, _soul, _state, _state));
-    // }
+    function _renderSvg(bytes32 hash) internal pure returns (string memory svgString) {
+        svgString = string(abi.encodePacked(
+            "<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'>", 
+            string(abi.encodePacked("<rect fill='#", _fromCode(bytes4(hash)), "' width='100%' height='100%' />")),
+            "</svg>"
+        ));
+    }
+
+    function _toHexDigit(uint8 d) internal pure returns (bytes1) {
+        if (0 <= d && d <= 9) {
+            return bytes1(uint8(bytes1('0')) + d);
+        }
+        if (10 <= uint8(d) && uint8(d) <= 15) {
+            return bytes1(uint8(bytes1('a')) + d - 10);
+        }
+        revert();
+    }
+
+    function _fromCode(bytes4 code) internal pure returns (string memory) {
+        bytes memory result = new bytes(6);
+        for (uint i = 0; i < 3; ++i) {
+            result[2 * i] = _toHexDigit(uint8(code[i]) / 16);
+            result[2 * i + 1] = _toHexDigit(uint8(code[i]) % 16);
+        }
+        return string(result);
+    }
 }

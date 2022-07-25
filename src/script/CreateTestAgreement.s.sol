@@ -24,7 +24,7 @@ contract CreateTestAgreement is Script {
 
     function run() public {
         vm.broadcast();
-        agreement = registry.createAgreement(address(0xb0b), block.timestamp + 10_000, true, 100, abi.encode("", "", "", ""));
+        agreement = registry.createAgreement(address(0xb0b), block.timestamp + 10_000, true, 100, abi.encode("", "", "", "", ""));
         console.log(address(agreement));
         console.log(registry.tokenURI(0));
     }
