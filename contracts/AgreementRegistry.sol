@@ -23,8 +23,6 @@ contract AgreementRegistry is Owned, ERC721 {
     mapping(address => uint[]) public creatorAgreements;
     mapping(address => uint[]) public redeemerAgreements;
 
-    event AgreementCreated(uint256 indexed agreementId, address agreementContractAddress, Agreement agreement);
-
     constructor(
       LinkTokenInterface _linkToken,
       IUniversalAdapter _universalAdapter
@@ -39,10 +37,10 @@ contract AgreementRegistry is Owned, ERC721 {
         bool soulbound,
         uint256 maxPayout,
         bytes memory data
-    ) external returns (Agreement agreement) {
-        require(redeemer != address(0), "BAD_ADDR");
+    ) external returns (uint256 agreementId_) {
+        require(redeemer != address(0), "ADDR");
         // solhint-disable-next-line not-rely-on-time
-        require(deadline > block.timestamp, "BAD_DL");
+        require(deadline > block.timestamp, "DL");
         uint256 agreementId = ids++;
 
         // Use the CREATE2 opcode to deploy a new Agreement contract.
@@ -58,7 +56,7 @@ contract AgreementRegistry is Owned, ERC721 {
             );
         }
 
-        agreement = new Agreement{salt: salt}(
+        Agreement agreement = new Agreement{salt: salt}(
             linkToken,
             universalAdapter,
             address(this),
@@ -75,12 +73,11 @@ contract AgreementRegistry is Owned, ERC721 {
         redeemerAgreements[redeemer].push(agreementId);
 
         _safeMint(redeemer, agreementId);
-
-        emit AgreementCreated(agreementId, address(agreement), agreement);
+        return agreementId;
     }
 
     function tokenURI(uint256 id) public view override returns (string memory uri) {
-        require(_ownerOf[id] != address(0), "BAD_ID");
+        require(_ownerOf[id] != address(0), "ID");
         Agreement agreement = agreements[id];
 
         string memory _imageData = string(

@@ -19,11 +19,11 @@ contract Agreement is Owned {
   string public js;
   string public cid;
   string private ref;
-  string[] private requiredPrivateVars;
-  string[] private requiredPublicVars;
+  string public pubVars; // required public variables, separated by commas
+  string public priVars; // required private variables, separated by commas
   mapping(address => bool) public cancellations;
 
-  event Fulfilled(
+  event Filled(
     uint256 result
   );
 
@@ -46,17 +46,17 @@ contract Agreement is Owned {
     (
       js,
       cid,
-      requiredPublicVars,
-      requiredPrivateVars,
+      priVars,
+      pubVars,
       ref
-    ) = abi.decode(data, (string, string, string[], string[], string));
+    ) = abi.decode(data, (string, string, string, string, string));
   }
 
   function redeem( 
     string calldata _vars,
     string calldata _ref
   ) public returns (bytes32 universalAdapterRequestId) {
-    require(state() == 0, "INACTIVE");
+    require(state() == 0, "INACT");
     require(msg.sender == ERC721(agreementRegistry).ownerOf(agreementId), "");
     if (bytes(ref).length > 0) {
       ref = _ref;
@@ -70,10 +70,10 @@ contract Agreement is Owned {
   }
 
   function cancelAgreement() public {
-    require(state() == 0, "INACTIVE");
+    require(state() == 0, "INACT");
     address sender = msg.sender;
     address _owner = owner;
-    require(sender == _owner || sender == ERC721(agreementRegistry).ownerOf(agreementId), "UNAUTH");
+    require(sender == _owner || sender == ERC721(agreementRegistry).ownerOf(agreementId), "AUTH");
     cancellations[sender] = true;
     if (cancellations[_owner] && cancellations[ERC721(agreementRegistry).ownerOf(agreementId)]) {
       state_ = 2;
@@ -81,8 +81,8 @@ contract Agreement is Owned {
   }
 
   function recoverFunds() public {
-    require(msg.sender == owner, "NOT_OWNER");
-    require(state() != 0, "INACTIVE");
+    require(msg.sender == owner, "OWN");
+    require(state() != 0, "INACT");
     linkToken.transfer(msg.sender, linkToken.balanceOf(address(this)));
   }
 
@@ -96,7 +96,7 @@ contract Agreement is Owned {
       linkToken.transfer(ERC721(agreementRegistry).ownerOf(agreementId), uint256(_result));
       linkToken.transfer(owner, linkToken.balanceOf(address(this)));
     }
-    emit Fulfilled(uint(_result));
+    emit Filled(uint(_result));
   }
 
   function state() public view returns(uint256 _state) {

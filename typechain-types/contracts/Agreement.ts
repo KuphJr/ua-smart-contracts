@@ -35,6 +35,8 @@ export interface AgreementInterface extends utils.Interface {
     "fulfillRequest(bytes32,bytes32)": FunctionFragment;
     "js()": FunctionFragment;
     "owner()": FunctionFragment;
+    "priVars()": FunctionFragment;
+    "pubVars()": FunctionFragment;
     "recoverFunds()": FunctionFragment;
     "redeem(string,string)": FunctionFragment;
     "setOwner(address)": FunctionFragment;
@@ -52,6 +54,8 @@ export interface AgreementInterface extends utils.Interface {
       | "fulfillRequest"
       | "js"
       | "owner"
+      | "priVars"
+      | "pubVars"
       | "recoverFunds"
       | "redeem"
       | "setOwner"
@@ -79,6 +83,8 @@ export interface AgreementInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "js", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(functionFragment: "priVars", values?: undefined): string;
+  encodeFunctionData(functionFragment: "pubVars", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "recoverFunds",
     values?: undefined
@@ -111,6 +117,8 @@ export interface AgreementInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "js", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "priVars", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "pubVars", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "recoverFunds",
     data: BytesLike
@@ -121,20 +129,20 @@ export interface AgreementInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "state", data: BytesLike): Result;
 
   events: {
-    "Fulfilled(uint256)": EventFragment;
+    "Filled(uint256)": EventFragment;
     "OwnerUpdated(address,address)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "Fulfilled"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Filled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnerUpdated"): EventFragment;
 }
 
-export interface FulfilledEventObject {
+export interface FilledEventObject {
   result: BigNumber;
 }
-export type FulfilledEvent = TypedEvent<[BigNumber], FulfilledEventObject>;
+export type FilledEvent = TypedEvent<[BigNumber], FilledEventObject>;
 
-export type FulfilledEventFilter = TypedEventFilter<FulfilledEvent>;
+export type FilledEventFilter = TypedEventFilter<FilledEvent>;
 
 export interface OwnerUpdatedEventObject {
   user: string;
@@ -196,6 +204,10 @@ export interface Agreement extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
+    priVars(overrides?: CallOverrides): Promise<[string]>;
+
+    pubVars(overrides?: CallOverrides): Promise<[string]>;
+
     recoverFunds(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -240,6 +252,10 @@ export interface Agreement extends BaseContract {
 
   owner(overrides?: CallOverrides): Promise<string>;
 
+  priVars(overrides?: CallOverrides): Promise<string>;
+
+  pubVars(overrides?: CallOverrides): Promise<string>;
+
   recoverFunds(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -280,6 +296,10 @@ export interface Agreement extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<string>;
 
+    priVars(overrides?: CallOverrides): Promise<string>;
+
+    pubVars(overrides?: CallOverrides): Promise<string>;
+
     recoverFunds(overrides?: CallOverrides): Promise<void>;
 
     redeem(
@@ -296,8 +316,8 @@ export interface Agreement extends BaseContract {
   };
 
   filters: {
-    "Fulfilled(uint256)"(result?: null): FulfilledEventFilter;
-    Fulfilled(result?: null): FulfilledEventFilter;
+    "Filled(uint256)"(result?: null): FilledEventFilter;
+    Filled(result?: null): FilledEventFilter;
 
     "OwnerUpdated(address,address)"(
       user?: string | null,
@@ -331,6 +351,10 @@ export interface Agreement extends BaseContract {
     js(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    priVars(overrides?: CallOverrides): Promise<BigNumber>;
+
+    pubVars(overrides?: CallOverrides): Promise<BigNumber>;
 
     recoverFunds(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -377,6 +401,10 @@ export interface Agreement extends BaseContract {
     js(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    priVars(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    pubVars(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     recoverFunds(
       overrides?: Overrides & { from?: string | Promise<string> }

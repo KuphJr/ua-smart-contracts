@@ -16,12 +16,16 @@ async function main() {
   )
   // Deploy
   const AgreementRegistry = await ethers.getContractFactory("AgreementRegistry")
-  const agreementRegistry = await AgreementRegistry.deploy(
-    '0x326C977E6efc84E512bB9C30f76E30c160eD06FB',
-    '0x5526B90295EcAbB23E4ce210511071843C8EE955'
-  )
-  const agreementRegistryAddress = (await ethers.provider.waitForTransaction(agreementRegistry.deployTransaction.hash)).contractAddress
-  //const agreementRegistry = await AgreementRegistry.attach()
+
+
+  // const agreementRegistry = await AgreementRegistry.deploy(
+  //   '0x326C977E6efc84E512bB9C30f76E30c160eD06FB',
+  //   '0x5526B90295EcAbB23E4ce210511071843C8EE955'
+  // )
+  // const agreementRegistryAddress = (await ethers.provider.waitForTransaction(agreementRegistry.deployTransaction.hash)).contractAddress
+  const agreementRegistryAddress = '0x39bAa880921F0EEF6e0A1431E04aC8A41C2DD3a4'
+  const agreementRegistry = await AgreementRegistry.attach(agreementRegistryAddress)
+
   console.log('AgreementRegistry Address: ', agreementRegistryAddress);
 
   // CREATE
@@ -33,53 +37,47 @@ async function main() {
   await ethers.provider.waitForTransaction(tokenTx.hash)
   console.log('Agreement has been successfully funded')
 
-  agreementRegistry.on('AgreementCreated',
-    async (
-      agreementId: any,
-      agreementAddress: any,
-      agreementData: any
-    ) => {
-      console.log('Agreement created with address: ' + agreementAddress + ' and id: ' + agreementId)
-
-      console.log('NFT URI: ' + await agreementRegistry.tokenURI(agreementId))
-      console.log('REDEEMING')
-
-      console.log('NFT URI: ' + await agreementRegistry.tokenURI(agreementId))
-
-      //REDEEM
-      console.log('Sending LINK to pay for redeem')
-      const tokenTx = await linkToken.approve(agreementAddress, BigInt(100))
-      await ethers.provider.waitForTransaction(tokenTx.hash)
-      console.log('Redeem funding approved')
-
-      const Agreement = await ethers.getContractFactory("Agreement")
-      const agreement = await Agreement.attach(agreementAddress)
-      const LinkToken = await ethers.getContractFactory('LinkToken')
-
-      agreement.on('Fulfilled',
-        async (
-          result: any
-        ) => {
-          console.log(`Fulfilled with result ${result}`)
-          console.log('NFT URI: ' + await agreementRegistry.tokenURI(agreementId))
-        }
-      )
-      const tx = await agreement.redeem('', '')
-      await ethers.provider.waitForTransaction(tx.hash)
-    }
-  )
-
   const tx = await agreementRegistry.createAgreement(
     '0xB7aB5555BB8927BF16F8496da338a3033c12F8f3',
     BigInt('1858367000'),
     true,
     100,
     ethers.utils.defaultAbiCoder.encode(
-      ['string', 'string', 'string[]', 'string[]', 'string'],
-      ['', 'bafybeiezwwxj54kiq2jg6umrzdmf3ryshooxbk6o6vf6lg4hc7qnwh7nyu', [], [], '']
+      ['string', 'string', 'string', 'string', 'string'],
+      ['', 'bafybeiezwwxj54kiq2jg6umrzdmf3ryshooxbk6o6vf6lg4hc7qnwh7nyu', 'pub1,pub2', 'pri1,pri2', '']
     )
   )
   await ethers.provider.waitForTransaction(tx.hash)
+  const agreementId = tx.value
+
+  const agreementAddress = '0x' + JSON.parse(
+    '{' + await agreementRegistry.tokenURI(agreementId) + '"}'
+  ).address
+
+  console.log('Agreement created with address: ' + agreementAddress + ' and id: ' + agreementId)
+
+  console.log('NFT URI: ' + await agreementRegistry.tokenURI(agreementId))
+
+  //REDEEM
+  console.log('Sending LINK to pay for redeem')
+  const tokenTx2 = await linkToken.approve(ethers.utils.getAddress(agreementAddress), BigInt(100))
+  await ethers.provider.waitForTransaction(tokenTx2.hash)
+  console.log('Redeem funding approved')
+
+  const Agreement = await ethers.getContractFactory("Agreement")
+  const agreement = await Agreement.attach(agreementAddress)
+  console.log('public vars!!!!!! ' + await agreement.pubVars())
+
+  agreement.on('Filled',
+    async (
+      result: any
+    ) => {
+      console.log(`Fulfilled with result ${result}`)
+      console.log('NFT URI: ' + await agreementRegistry.tokenURI(agreementId))
+    }
+  )
+  const redeemTx = await agreement.redeem('', '')
+  await ethers.provider.waitForTransaction(redeemTx.hash)
 }
 
 main().catch((error) => {

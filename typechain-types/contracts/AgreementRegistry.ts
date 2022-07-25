@@ -189,32 +189,17 @@ export interface AgreementRegistryInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "AgreementCreated(uint256,address,address)": EventFragment;
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
     "OwnerUpdated(address,address)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "AgreementCreated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnerUpdated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
-
-export interface AgreementCreatedEventObject {
-  agreementId: BigNumber;
-  agreementContractAddress: string;
-  agreement: string;
-}
-export type AgreementCreatedEvent = TypedEvent<
-  [BigNumber, string, string],
-  AgreementCreatedEventObject
->;
-
-export type AgreementCreatedEventFilter =
-  TypedEventFilter<AgreementCreatedEvent>;
 
 export interface ApprovalEventObject {
   owner: string;
@@ -499,7 +484,7 @@ export interface AgreementRegistry extends BaseContract {
       maxPayout: BigNumberish,
       data: BytesLike,
       overrides?: CallOverrides
-    ): Promise<string>;
+    ): Promise<BigNumber>;
 
     creatorAgreements(
       arg0: string,
@@ -570,17 +555,6 @@ export interface AgreementRegistry extends BaseContract {
   };
 
   filters: {
-    "AgreementCreated(uint256,address,address)"(
-      agreementId?: BigNumberish | null,
-      agreementContractAddress?: null,
-      agreement?: null
-    ): AgreementCreatedEventFilter;
-    AgreementCreated(
-      agreementId?: BigNumberish | null,
-      agreementContractAddress?: null,
-      agreement?: null
-    ): AgreementCreatedEventFilter;
-
     "Approval(address,address,uint256)"(
       owner?: string | null,
       spender?: string | null,
