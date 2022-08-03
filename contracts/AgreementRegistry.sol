@@ -4,123 +4,152 @@ pragma solidity ^0.8.0;
 import "./interfaces/IUniversalAdapter.sol";
 import {Agreement} from "./Agreement.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
-import {Base64} from "base64-sol/base64.sol";
+import "@chainlink/contracts/src/v0.4/interfaces/ERC677Receiver.sol";
 import {Strings} from "./utils/Strings.sol";
 import {Owned} from "solmate/src/auth/Owned.sol";
 import {ERC721} from "solmate/src/tokens/ERC721.sol";
-import {BitPackedMap} from "./utils/BitPackedMap.sol";
 
 contract AgreementRegistry is Owned, ERC721 {
-    using Strings for address;
-    using Strings for string;
-    using Strings for uint256;
+  using Strings for address;
+  using Strings for string;
+  using Strings for uint256;
 
-    LinkTokenInterface private linkToken;
-    IUniversalAdapter private universalAdapter;
-    uint256 public ids;
-    mapping(address => uint256) private nonces;
-    Agreement[] public agreements;
-    mapping(address => uint[]) public creatorAgreements;
-    mapping(address => uint[]) public redeemerAgreements;
+  LinkTokenInterface private linkToken;
+  IUniversalAdapter private universalAdapter;
+  
+  uint256 public ids;
+  mapping(address => uint256) private nonces;
 
-    constructor(
-      LinkTokenInterface _linkToken,
-      IUniversalAdapter _universalAdapter
-    ) ERC721("Universal Adapter", "uApp") Owned(msg.sender) {
-        linkToken = _linkToken;
-        universalAdapter = _universalAdapter;
-    }
+  Agreement[] public agreements;
+  mapping(address => uint[]) private creatorAgreements;
+  mapping(address => uint[]) private redeemerAgreements;
 
-    function createAgreement(
-        address redeemer,
-        uint256 deadline,
-        bool soulbound,
-        uint256 maxPayout,
-        bytes memory data
-    ) external returns (uint256 agreementId_) {
-        require(redeemer != address(0), "ADDR");
-        // solhint-disable-next-line not-rely-on-time
-        require(deadline > block.timestamp, "DL");
-        uint256 agreementId = ids++;
+  event Created(address owner, uint256 id);
 
-        // Use the CREATE2 opcode to deploy a new Agreement contract.
-        // Unchecked as creator nonce cannot realistically overflow.
-        bytes32 salt;
-        unchecked {
-            salt = keccak256(
-                abi.encodePacked(
-                    msg.sender,
-                    redeemer,
-                    nonces[msg.sender]++
-                )
-            );
-        }
+  constructor(
+    LinkTokenInterface _linkToken,
+    IUniversalAdapter _universalAdapter
+  ) ERC721("Universal Adapter Protocol", "uApp") Owned(msg.sender) {
+    linkToken = _linkToken;
+    universalAdapter = _universalAdapter;
+  }
 
-        Agreement agreement = new Agreement{salt: salt}(
-            linkToken,
-            universalAdapter,
-            address(this),
-            agreementId,
-            msg.sender,
-            deadline,
-            soulbound,
-            data
-        );
-        linkToken.transferFrom(msg.sender, address(agreement), maxPayout);
 
-        agreements.push(agreement);
-        creatorAgreements[msg.sender].push(agreementId);
-        redeemerAgreements[redeemer].push(agreementId);
+  // This is the 'create' function.  It is triggered using transferAndCall() from the LINK token
+  function onTokenTransfer( // solhint-disable payable-fallback, no-complex-fallback
+    address sender,
+    uint256 value,
+    bytes calldata data
+  ) external returns (uint256 agreementId_) {
+    address redeemer;
+    uint256 deadline;
+    bool soulbound;
+    uint256 maxPayout;
+    bytes memory agreementData;
+    (
+      redeemer,
+      deadline,
+      soulbound,
+      maxPayout,
+      agreementData
+    ) = abi.decode(data, (address, uint256, bool, uint256, bytes));
+    require(msg.sender == address(linkToken), "NOT_LINK");
+    require(redeemer != address(0), "INVALID_ADDRESS");
+    require(value == maxPayout, "WRONG_AMOUNT");
+    // solhint-disable-next-line not-rely-on-time
+    require(deadline > block.timestamp, "INVALID_DEADLINE");
+    uint256 agreementId = ids++;
 
-        _safeMint(redeemer, agreementId);
-        return agreementId;
-    }
-
-    function tokenURI(uint256 id) public view override returns (string memory uri) {
-        require(_ownerOf[id] != address(0), "ID");
-        Agreement agreement = agreements[id];
-
-        string memory _imageData = string(
-            abi.encodePacked(
-                "data:image/svg+xml;base64,",
-                Base64.encode(
-                    bytes(
-                        BitPackedMap._renderSvg(
-                            // _generateBitmap(
-                            //     agreement
-                            // )
-                            bytes16(
-                                keccak256(
-                                    abi.encodePacked(
-                                        agreement
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        );
-        // solhint-disable quotes
-        uri = string(abi.encodePacked(
-          '"address":"', address(agreement).toString(),
-          '","balance":"', linkToken.balanceOf(address(agreement)).toString(),
-          '","creator":"', agreement.owner().toString(),
-          '","redeemer":"', _ownerOf[id].toString(),
-          '","soulbound":"', agreement.soulbound() ? "true" : "false",
-          '","state":"', agreement.state().toString(),
-          '","deadline":"', agreement.deadline().toString(),
-          '","image":"', _imageData
+    // Use the CREATE2 opcode to deploy a new Agreement contract.
+    // Unchecked as creator nonce cannot realistically overflow.
+    bytes32 salt;
+    unchecked {
+      salt = keccak256(abi.encodePacked(
+          sender,
+          nonces[sender]++
         ));
-        // solhint-enable quotes
     }
+    Agreement agreement = new Agreement{salt: salt}(
+      linkToken,
+      universalAdapter,
+      address(this),
+      agreementId,
+      sender,
+      deadline,
+      soulbound,
+      agreementData
+    );
+    agreements.push(agreement);
+    creatorAgreements[sender].push(agreementId);
+    redeemerAgreements[redeemer].push(agreementId);
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 id
-    ) public override {
-        require(!agreements[id].soulbound(), "BOUND");
-        super.transferFrom(from, to, id);
+    _safeMint(redeemer, agreementId);
+
+    emit Created(sender, agreementId);
+    return agreementId;
+}
+
+// gets the ids for all the agreements that have been created by the specified creator
+function getCreatorAgreements(address creator) public view returns(uint[] memory) {
+  return (creatorAgreements[creator]);
+}
+
+// gets the ids for all the agreements that can be redeemed for the specified redeemer
+function getRedeemerAgreements(address redeemer) public view returns(uint[] memory) {
+  return (redeemerAgreements[redeemer]);
+}
+
+// In order to read in JSON format, append { to the beginning and "} to the end of the URI string.
+function tokenURI(uint256 id) public view override returns (string memory uri) {
+  require(_ownerOf[id] != address(0), "INVALID_ID");
+  Agreement agreement = agreements[id];
+  // solhint-disable quotes
+  uri = string(abi.encodePacked(
+    '"address":"', address(agreement).toString(),
+    ',"agreementCode":', bytes(agreement.cid()).length > 0 ? agreement.cid() : agreement.js(),
+    '","balance":"', linkToken.balanceOf(address(agreement)).toString(),
+    '","creator":"', agreement.owner().toString(),
+    '","redeemer":"', _ownerOf[id].toString(),
+    '","soulbound":"', agreement.soulbound() ? "true" : "false",
+    '","state":"', agreement.state().toString(),
+    '","deadline":"', agreement.deadline().toString()
+  ));
+  // solhint-enable quotes
+}
+
+
+  // Even soulbound agreements can be burned
+  function burn(uint256 id) public {
+    Agreement agreement = agreements[id];
+    if (agreement.state() == 0) {
+      agreement.cancelAgreement(); 
     }
+    _burn(id);
+  }
+
+  // if soulbound, the following actions are not permitted by the redeemer (ie: NFT owner)
+  function transferFrom(
+      address from,
+      address to,
+      uint256 id
+  ) public override {
+      require(!agreements[id].soulbound(), "SOULBOUND");
+      super.transferFrom(from, to, id);
+  }
+
+  function transfer(
+      address to,
+      uint256 id
+  ) public override {
+      require(!agreements[id].soulbound(), "SOULBOUND");
+      super.transfer(to, id);
+  }
+
+  function approve(
+      address to,
+      uint256 id
+  ) public override {
+      require(!agreements[id].soulbound(), "SOULBOUND");
+      super.approve(to, id);
+  }
 }

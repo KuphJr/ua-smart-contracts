@@ -18,13 +18,13 @@ async function main() {
   const AgreementRegistry = await ethers.getContractFactory("AgreementRegistry")
 
 
-  // const agreementRegistry = await AgreementRegistry.deploy(
-  //   '0x326C977E6efc84E512bB9C30f76E30c160eD06FB',
-  //   '0x5526B90295EcAbB23E4ce210511071843C8EE955'
-  // )
-  // const agreementRegistryAddress = (await ethers.provider.waitForTransaction(agreementRegistry.deployTransaction.hash)).contractAddress
-  const agreementRegistryAddress = '0x39bAa880921F0EEF6e0A1431E04aC8A41C2DD3a4'
-  const agreementRegistry = await AgreementRegistry.attach(agreementRegistryAddress)
+  const agreementRegistry = await AgreementRegistry.deploy(
+    '0x326C977E6efc84E512bB9C30f76E30c160eD06FB',
+    '0x5526B90295EcAbB23E4ce210511071843C8EE955'
+  )
+  const agreementRegistryAddress = (await ethers.provider.waitForTransaction(agreementRegistry.deployTransaction.hash)).contractAddress
+  // const agreementRegistryAddress = '0x39bAa880921F0EEF6e0A1431E04aC8A41C2DD3a4'
+  // const agreementRegistry = await AgreementRegistry.attach(agreementRegistryAddress)
 
   console.log('AgreementRegistry Address: ', agreementRegistryAddress);
 

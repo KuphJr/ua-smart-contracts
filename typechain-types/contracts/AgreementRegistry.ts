@@ -32,14 +32,14 @@ export interface AgreementRegistryInterface extends utils.Interface {
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "createAgreement(address,uint256,bool,uint256,bytes)": FunctionFragment;
-    "creatorAgreements(address,uint256)": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
+    "getCreatorAgreements(address)": FunctionFragment;
+    "getRedeemerAgreements(address)": FunctionFragment;
     "ids()": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
     "name()": FunctionFragment;
     "owner()": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
-    "redeemerAgreements(address,uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256,bytes)": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
@@ -56,14 +56,14 @@ export interface AgreementRegistryInterface extends utils.Interface {
       | "approve"
       | "balanceOf"
       | "createAgreement"
-      | "creatorAgreements"
       | "getApproved"
+      | "getCreatorAgreements"
+      | "getRedeemerAgreements"
       | "ids"
       | "isApprovedForAll"
       | "name"
       | "owner"
       | "ownerOf"
-      | "redeemerAgreements"
       | "safeTransferFrom(address,address,uint256)"
       | "safeTransferFrom(address,address,uint256,bytes)"
       | "setApprovalForAll"
@@ -88,12 +88,16 @@ export interface AgreementRegistryInterface extends utils.Interface {
     values: [string, BigNumberish, boolean, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "creatorAgreements",
-    values: [string, BigNumberish]
-  ): string;
-  encodeFunctionData(
     functionFragment: "getApproved",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getCreatorAgreements",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getRedeemerAgreements",
+    values: [string]
   ): string;
   encodeFunctionData(functionFragment: "ids", values?: undefined): string;
   encodeFunctionData(
@@ -105,10 +109,6 @@ export interface AgreementRegistryInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "ownerOf",
     values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "redeemerAgreements",
-    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "safeTransferFrom(address,address,uint256)",
@@ -145,11 +145,15 @@ export interface AgreementRegistryInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "creatorAgreements",
+    functionFragment: "getApproved",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getApproved",
+    functionFragment: "getCreatorAgreements",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getRedeemerAgreements",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "ids", data: BytesLike): Result;
@@ -160,10 +164,6 @@ export interface AgreementRegistryInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "redeemerAgreements",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "safeTransferFrom(address,address,uint256)",
     data: BytesLike
@@ -191,12 +191,14 @@ export interface AgreementRegistryInterface extends utils.Interface {
   events: {
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
+    "Created(address,uint256)": EventFragment;
     "OwnerUpdated(address,address)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Created"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnerUpdated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
@@ -224,6 +226,14 @@ export type ApprovalForAllEvent = TypedEvent<
 >;
 
 export type ApprovalForAllEventFilter = TypedEventFilter<ApprovalForAllEvent>;
+
+export interface CreatedEventObject {
+  owner: string;
+  id: BigNumber;
+}
+export type CreatedEvent = TypedEvent<[string, BigNumber], CreatedEventObject>;
+
+export type CreatedEventFilter = TypedEventFilter<CreatedEvent>;
 
 export interface OwnerUpdatedEventObject {
   user: string;
@@ -297,16 +307,20 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    creatorAgreements(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
     getApproved(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[string]>;
+
+    getCreatorAgreements(
+      creator: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber[]]>;
+
+    getRedeemerAgreements(
+      redeemer: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber[]]>;
 
     ids(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -324,12 +338,6 @@ export interface AgreementRegistry extends BaseContract {
       id: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[string] & { owner: string }>;
-
-    redeemerAgreements(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
 
     "safeTransferFrom(address,address,uint256)"(
       from: string,
@@ -396,13 +404,17 @@ export interface AgreementRegistry extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  creatorAgreements(
-    arg0: string,
-    arg1: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   getApproved(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+  getCreatorAgreements(
+    creator: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber[]>;
+
+  getRedeemerAgreements(
+    redeemer: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber[]>;
 
   ids(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -417,12 +429,6 @@ export interface AgreementRegistry extends BaseContract {
   owner(overrides?: CallOverrides): Promise<string>;
 
   ownerOf(id: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-  redeemerAgreements(
-    arg0: string,
-    arg1: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
 
   "safeTransferFrom(address,address,uint256)"(
     from: string,
@@ -486,13 +492,17 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    creatorAgreements(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     getApproved(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+    getCreatorAgreements(
+      creator: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber[]>;
+
+    getRedeemerAgreements(
+      redeemer: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber[]>;
 
     ids(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -507,12 +517,6 @@ export interface AgreementRegistry extends BaseContract {
     owner(overrides?: CallOverrides): Promise<string>;
 
     ownerOf(id: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-    redeemerAgreements(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     "safeTransferFrom(address,address,uint256)"(
       from: string,
@@ -577,6 +581,9 @@ export interface AgreementRegistry extends BaseContract {
       approved?: null
     ): ApprovalForAllEventFilter;
 
+    "Created(address,uint256)"(owner?: null, id?: null): CreatedEventFilter;
+    Created(owner?: null, id?: null): CreatedEventFilter;
+
     "OwnerUpdated(address,address)"(
       user?: string | null,
       newOwner?: string | null
@@ -621,14 +628,18 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    creatorAgreements(
-      arg0: string,
-      arg1: BigNumberish,
+    getApproved(
+      arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getApproved(
-      arg0: BigNumberish,
+    getCreatorAgreements(
+      creator: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getRedeemerAgreements(
+      redeemer: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -645,12 +656,6 @@ export interface AgreementRegistry extends BaseContract {
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     ownerOf(id: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    redeemerAgreements(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     "safeTransferFrom(address,address,uint256)"(
       from: string,
@@ -721,14 +726,18 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    creatorAgreements(
-      arg0: string,
-      arg1: BigNumberish,
+    getApproved(
+      arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getApproved(
-      arg0: BigNumberish,
+    getCreatorAgreements(
+      creator: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getRedeemerAgreements(
+      redeemer: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -746,12 +755,6 @@ export interface AgreementRegistry extends BaseContract {
 
     ownerOf(
       id: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    redeemerAgreements(
-      arg0: string,
-      arg1: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
