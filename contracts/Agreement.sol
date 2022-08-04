@@ -5,8 +5,9 @@ import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 import {Owned} from "solmate/src/auth/Owned.sol";
 import {ERC721} from "solmate/src/tokens/ERC721.sol";
 import "./interfaces/IUniversalAdapter.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/ERC677ReceiverInterface.sol";
 
-contract Agreement is Owned {
+contract Agreement is Owned, ERC677ReceiverInterface {
   uint256 private constant REQUEST_COST = 100;
 
   LinkTokenInterface private immutable linkToken;
@@ -21,7 +22,6 @@ contract Agreement is Owned {
   string private ref;
   string public pubVars; // required public variables, separated by commas
   string public priVars; // required private variables, separated by commas
-  mapping(address => bool) public cancellations;
 
   event Filled(
     uint256 result
@@ -52,17 +52,26 @@ contract Agreement is Owned {
     ) = abi.decode(data, (string, string, string, string, string));
   }
 
-  function redeem( 
-    string calldata _vars,
-    string calldata _ref
-  ) public returns (bytes32 universalAdapterRequestId) {
-    require(state() == 0, "INACT");
-    require(msg.sender == ERC721(agreementRegistry).ownerOf(agreementId), "");
-    if (bytes(ref).length > 0) {
+  // this is the 'redeem' function
+  function onTokenTransfer( 
+    address sender,
+    uint amount,
+    bytes calldata data
+  ) external override {
+    require(state() == 0, "INACTIVE");
+    require(msg.sender == address(linkToken), "NOT_LINK");
+    require(amount == REQUEST_COST, "INCORRECT_AMOUNT");
+    require(sender == ERC721(agreementRegistry).ownerOf(agreementId), "");
+    string memory _vars;
+    string memory _ref;
+    (
+      _vars,
+      _ref
+    ) = abi.decode(data, (string, string));
+    if (bytes(_ref).length > 0) {
       ref = _ref;
     }
-    linkToken.transferFrom(msg.sender, address(this), REQUEST_COST);
-    linkToken.approve(address(universalAdapter), REQUEST_COST);
+    linkToken.approve(address(linkToken), REQUEST_COST);
     bytes32 requestId = universalAdapter.makeRequest(
       this.fulfillRequest.selector, js, cid, _vars, ref
     );
@@ -70,19 +79,16 @@ contract Agreement is Owned {
   }
 
   function cancelAgreement() public {
-    require(state() == 0, "INACT");
-    address sender = msg.sender;
-    address _owner = owner;
-    require(sender == _owner || sender == ERC721(agreementRegistry).ownerOf(agreementId), "AUTH");
-    cancellations[sender] = true;
-    if (cancellations[_owner] && cancellations[ERC721(agreementRegistry).ownerOf(agreementId)]) {
-      state_ = 2;
-    }
+    require(state() == 0, "INACTIVE");
+    require(msg.sender == ERC721(agreementRegistry).ownerOf(agreementId), "NOT_REDEEMER");
+    state_ = 2;
+    // transfer funds back to agreement creator
+    linkToken.transfer(owner, linkToken.balanceOf(address(this)));
   }
 
   function recoverFunds() public {
-    require(msg.sender == owner, "OWN");
-    require(state() != 0, "INACT");
+    require(msg.sender == owner, "NOT_CREATOR");
+    require(state() != 0, "ACTIVE");
     linkToken.transfer(msg.sender, linkToken.balanceOf(address(this)));
   }
 

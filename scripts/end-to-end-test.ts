@@ -33,7 +33,19 @@ async function main() {
   
   console.log('Funding agreement with LINK')
   const linkToken = await LinkToken.attach('0x326C977E6efc84E512bB9C30f76E30c160eD06FB')
-  const tokenTx = await linkToken.approve(agreementRegistryAddress, BigInt(200))
+  const abiCoder = new ethers.utils.AbiCoder()
+  const agreementData = abiCoder.encode(
+    ['string', 'string', 'string', 'string', 'string'],
+    ['', 'bafybeiezwwxj54kiq2jg6umrzdmf3ryshooxbk6o6vf6lg4hc7qnwh7nyu', 'pub1,pub2', 'pri1,pri2', '']
+  )
+  const tokenTx = await linkToken.transferAndCall(
+    agreementRegistryAddress,
+    BigInt(100),
+    abiCoder.encode(
+      ['address', 'uint', 'bool', 'uint', 'bytes'],
+      ['0xB7aB5555BB8927BF16F8496da338a3033c12F8f3', BigInt('1858367000'), true, 100, agreementData]
+    )
+  )
   await ethers.provider.waitForTransaction(tokenTx.hash)
   console.log('Agreement has been successfully funded')
 
@@ -42,10 +54,7 @@ async function main() {
     BigInt('1858367000'),
     true,
     100,
-    ethers.utils.defaultAbiCoder.encode(
-      ['string', 'string', 'string', 'string', 'string'],
-      ['', 'bafybeiezwwxj54kiq2jg6umrzdmf3ryshooxbk6o6vf6lg4hc7qnwh7nyu', 'pub1,pub2', 'pri1,pri2', '']
-    )
+
   )
   await ethers.provider.waitForTransaction(tx.hash)
   const agreementId = tx.value

@@ -4,16 +4,19 @@ pragma solidity ^0.8.0;
 import "./interfaces/IUniversalAdapter.sol";
 import {Agreement} from "./Agreement.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/ERC677ReceiverInterface.sol";
 import {Base64} from "base64-sol/base64.sol";
 import {Strings} from "./utils/Strings.sol";
 import {Owned} from "solmate/src/auth/Owned.sol";
 import {ERC721} from "solmate/src/tokens/ERC721.sol";
 import {BitPackedMap} from "./utils/BitPackedMap.sol";
 
-contract AgreementRegistry is Owned, ERC721 {
+contract AgreementRegistry is Owned, ERC721, ERC677ReceiverInterface {
     using Strings for address;
     using Strings for string;
     using Strings for uint256;
+
+    event Created(uint256 agreementId);
 
     LinkTokenInterface private linkToken;
     IUniversalAdapter private universalAdapter;
@@ -31,14 +34,26 @@ contract AgreementRegistry is Owned, ERC721 {
         universalAdapter = _universalAdapter;
     }
 
-    function createAgreement(
-        address redeemer,
-        uint256 deadline,
-        bool soulbound,
-        uint256 maxPayout,
-        bytes memory data
-    ) external returns (uint256 agreementId_) {
-        require(redeemer != address(0), "ADDR");
+    // This is the 'create' function
+    function onTokenTransfer(
+      address sender,
+      uint amount,
+      bytes calldata data
+    ) external override {
+        address redeemer;
+        uint256 deadline;
+        bool soulbound;
+        uint256 maxPayout;
+        bytes memory data;
+        (
+          address redeemer,
+          uint256 deadline,
+          bool soulbound,
+          uint256 maxPayout,
+          bytes memory agreementData          
+        ) = abi.decode(data (address, uint256, bool, uint256, bytes));
+        require(redeemer != address(0), "INVALID_REDEEMER");
+        require(amount == maxPayout, "INCORRECT_AMOUNT");
         // solhint-disable-next-line not-rely-on-time
         require(deadline > block.timestamp, "DL");
         uint256 agreementId = ids++;
@@ -49,9 +64,9 @@ contract AgreementRegistry is Owned, ERC721 {
         unchecked {
             salt = keccak256(
                 abi.encodePacked(
-                    msg.sender,
+                    sender,
                     redeemer,
-                    nonces[msg.sender]++
+                    nonces[sender]++
                 )
             );
         }
@@ -61,19 +76,18 @@ contract AgreementRegistry is Owned, ERC721 {
             universalAdapter,
             address(this),
             agreementId,
-            msg.sender,
+            sender,
             deadline,
             soulbound,
-            data
+            agreementData
         );
-        linkToken.transferFrom(msg.sender, address(agreement), maxPayout);
 
         agreements.push(agreement);
         creatorAgreements[msg.sender].push(agreementId);
         redeemerAgreements[redeemer].push(agreementId);
 
         _safeMint(redeemer, agreementId);
-        return agreementId;
+        emit Created(agreementId);
     }
 
     function tokenURI(uint256 id) public view override returns (string memory uri) {
