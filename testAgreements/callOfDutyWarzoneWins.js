@@ -3,7 +3,7 @@
     await (async () => {
       // This var would be an on-chain "public" var passed to the redeem function as a JSON object.
       // ie: agreement.redeem('{"matchid":"9126433122765225854"}', '')
-      const matchid = '9126433122765225854'
+      const matchid = '16892472564830060865'
     
       // This contract pays the redeemer for winning a Call of Duty Warzone match that occurred within the defined time window.
       // The redeemer must provide a match id where they or their team won first place upon redemption using the matchid variable.
@@ -14,19 +14,28 @@
       const START = '0000000000'
       const END =   '1958300000'
       const MAX_REWARD = BigInt('1000')
-
+      
       const axios = require('axios')
-      const result = await axios.get(`https://www.callofduty.com/api/papi-client/crm/cod/v2/title/mw/platform/battle/fullMatch/wz/${matchid}/it`)
+      let result
+      try {
+        result = await axios.get(`https://www.callofduty.com/api/papi-client/crm/cod/v2/title/mw/platform/battle/fullMatch/wz/${matchid}/it`)
+      } catch (error) {
+        return BigInt(error?.status ?? '111')
+      }
+      
       const players = result.data.data.allPlayers
-    
+      
       for (const player of players) {
         if (player.player.username == USER) {
           if (player.utcStartSeconds < START || player.utcStartSeconds > END)
-            throw Error('Invalid start time')
+            return BigInt(2)
+            //throw Error('Invalid start time')
           if (player.privateMatch)
-            throw Error('Private match not allowed')
+            return BigInt(3)
+            //throw Error('Private match not allowed')
           if (player.playerStats.teamPlacement != 1)
-            throw Error('Did not win')
+            return BigInt(4)
+            //throw Error('Did not win')
           let reward = MAX_REWARD
           if (player.mode.includes('duos'))
             reward = reward / BigInt(2)
@@ -37,7 +46,8 @@
           return BigInt(reward)
         }
       }
-      throw Error('Player not found')
+      return BigInt(1)
+      //throw Error('Player not found')
     // AGREEMENT CODE ENDS HERE
     })()
   )

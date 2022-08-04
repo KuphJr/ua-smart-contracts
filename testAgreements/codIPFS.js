@@ -4,17 +4,26 @@ const END =   '1958300000'
 const MAX_REWARD = BigInt('1000')
 
 const axios = require('axios')
-const result = await axios.get(`https://www.callofduty.com/api/papi-client/crm/cod/v2/title/mw/platform/battle/fullMatch/wz/${matchid}/it`)
+let result
+try {
+  result = await axios.get(`https://www.callofduty.com/api/papi-client/crm/cod/v2/title/mw/platform/battle/fullMatch/wz/${matchid}/it`)
+} catch (error) {
+  return BigInt(error?.status ?? '111')
+}
+
 const players = result.data.data.allPlayers
 
 for (const player of players) {
   if (player.player.username == USER) {
     if (player.utcStartSeconds < START || player.utcStartSeconds > END)
-      throw Error('Invalid start time')
+      return BigInt(2)
+      //throw Error('Invalid start time')
     if (player.privateMatch)
-      throw Error('Private match not allowed')
+      return BigInt(3)
+      //throw Error('Private match not allowed')
     if (player.playerStats.teamPlacement != 1)
-      throw Error('Did not win')
+      return BigInt(4)
+      //throw Error('Did not win')
     let reward = MAX_REWARD
     if (player.mode.includes('duos'))
       reward = reward / BigInt(2)
@@ -25,4 +34,5 @@ for (const player of players) {
     return BigInt(reward)
   }
 }
-throw Error('Player not found')
+return BigInt(1)
+//throw Error('Player not found')
