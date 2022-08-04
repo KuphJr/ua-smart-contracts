@@ -2,21 +2,21 @@
   console.log(
     await (async () => {
       // This var would be an on-chain "public" var passed to the redeem function as a JSON object.
-      // ie: agreement.redeem('{"MATCH_ID":"9126433122765225854"}', '')
-      const MATCH_ID = '9126433122765225854'
+      // ie: agreement.redeem('{"matchid":"9126433122765225854"}', '')
+      const matchid = '9126433122765225854'
     
       // This contract pays the redeemer for winning a Call of Duty Warzone match that occurred within the defined time window.
-      // The redeemer must provide a match id where they or their team won first place upon redemption using the MATCH_ID variable.
+      // The redeemer must provide a match id where they or their team won first place upon redemption using the matchid variable.
       // More is paid dending on the type of match won.  solo = full prize, duos = half prize, trios = one-third prize & quads = one fouth-prize
 
       // AGREEMENT CODE STARTS HERE
-      const USER = "Soloman Phoenix"
-      const START = '1658280000'
-      const END =   '1658300000'
+      const USER = "Ciaran"
+      const START = '0000000000'
+      const END =   '1958300000'
       const MAX_REWARD = BigInt('1000')
 
       const axios = require('axios')
-      const result = await axios.get(`https://www.callofduty.com/api/papi-client/crm/cod/v2/title/mw/platform/battle/fullMatch/wz/${MATCH_ID}/it`)
+      const result = await axios.get(`https://www.callofduty.com/api/papi-client/crm/cod/v2/title/mw/platform/battle/fullMatch/wz/${matchid}/it`)
       const players = result.data.data.allPlayers
     
       for (const player of players) {

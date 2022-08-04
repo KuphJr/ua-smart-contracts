@@ -6,7 +6,6 @@ import {Owned} from "solmate/src/auth/Owned.sol";
 import {ERC721} from "solmate/src/tokens/ERC721.sol";
 import "./interfaces/IUniversalAdapter.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/ERC677ReceiverInterface.sol";
-import "hardhat/console.sol";
 
 contract Agreement is Owned, ERC677ReceiverInterface {
   uint256 private constant REQUEST_COST = 100;
@@ -63,7 +62,6 @@ contract Agreement is Owned, ERC677ReceiverInterface {
     require(msg.sender == address(linkToken), "NOT_LINK");
     require(amount == REQUEST_COST, "INCORRECT_AMOUNT");
     require(sender == ERC721(agreementRegistry).ownerOf(agreementId), "NOT_REDEEMER");
-    console.log("got thru requires");
     string memory _vars;
     string memory _ref;
     (
@@ -73,10 +71,7 @@ contract Agreement is Owned, ERC677ReceiverInterface {
     if (bytes(_ref).length > 0) {
       ref = _ref;
     }
-    console.log("got thru decode");
-    console.logUint(linkToken.balanceOf(address(this)));
     linkToken.approve(address(universalAdapter), REQUEST_COST);
-    console.log("got thru approve");
     universalAdapter.makeRequest(
       this.fulfillRequest.selector, js, cid, _vars, ref
     );
