@@ -4,12 +4,12 @@ pragma solidity ^0.8.0;
 import "./interfaces/IUniversalAdapter.sol";
 import {Agreement} from "./Agreement.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
-import "@chainlink/contracts/src/v0.4/interfaces/ERC677Receiver.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/ERC677ReceiverInterface.sol";
 import {Strings} from "./utils/Strings.sol";
 import {Owned} from "solmate/src/auth/Owned.sol";
 import {ERC721} from "solmate/src/tokens/ERC721.sol";
 
-contract AgreementRegistry is Owned, ERC721 {
+contract AgreementRegistry is Owned, ERC721, ERC677ReceiverInterface {
   using Strings for address;
   using Strings for string;
   using Strings for uint256;
@@ -40,7 +40,7 @@ contract AgreementRegistry is Owned, ERC721 {
     address sender,
     uint256 value,
     bytes calldata data
-  ) external returns (uint256 agreementId_) {
+  ) external {
     address redeemer;
     uint256 deadline;
     bool soulbound;
@@ -59,7 +59,6 @@ contract AgreementRegistry is Owned, ERC721 {
     // solhint-disable-next-line not-rely-on-time
     require(deadline > block.timestamp, "INVALID_DEADLINE");
     uint256 agreementId = ids++;
-
     // Use the CREATE2 opcode to deploy a new Agreement contract.
     // Unchecked as creator nonce cannot realistically overflow.
     bytes32 salt;
@@ -69,6 +68,28 @@ contract AgreementRegistry is Owned, ERC721 {
           nonces[sender]++
         ));
     }
+    createAgreement(
+      sender,
+      salt,
+      agreementId,
+      redeemer,
+      deadline,
+      soulbound,
+      maxPayout,
+      agreementData
+    );
+  }
+
+  function createAgreement(
+    address sender,
+    bytes32 salt,
+    uint256 agreementId,
+    address redeemer,
+    uint256 deadline,
+    bool soulbound,
+    uint256 maxPayout,
+    bytes memory agreementData
+  ) internal {
     Agreement agreement = new Agreement{salt: salt}(
       linkToken,
       universalAdapter,
@@ -79,6 +100,7 @@ contract AgreementRegistry is Owned, ERC721 {
       soulbound,
       agreementData
     );
+    linkToken.transfer(address(agreement), maxPayout);
     agreements.push(agreement);
     creatorAgreements[sender].push(agreementId);
     redeemerAgreements[redeemer].push(agreementId);
@@ -86,7 +108,6 @@ contract AgreementRegistry is Owned, ERC721 {
     _safeMint(redeemer, agreementId);
 
     emit Created(sender, agreementId);
-    return agreementId;
 }
 
 // gets the ids for all the agreements that have been created by the specified creator
@@ -106,7 +127,7 @@ function tokenURI(uint256 id) public view override returns (string memory uri) {
   // solhint-disable quotes
   uri = string(abi.encodePacked(
     '"address":"', address(agreement).toString(),
-    ',"agreementCode":', bytes(agreement.cid()).length > 0 ? agreement.cid() : agreement.js(),
+    '","agreementCode":"', bytes(agreement.cid()).length > 0 ? agreement.cid() : agreement.js(),
     '","balance":"', linkToken.balanceOf(address(agreement)).toString(),
     '","creator":"', agreement.owner().toString(),
     '","redeemer":"', _ownerOf[id].toString(),
@@ -137,19 +158,15 @@ function tokenURI(uint256 id) public view override returns (string memory uri) {
       super.transferFrom(from, to, id);
   }
 
-  function transfer(
-      address to,
-      uint256 id
-  ) public override {
-      require(!agreements[id].soulbound(), "SOULBOUND");
-      super.transfer(to, id);
-  }
-
   function approve(
       address to,
       uint256 id
   ) public override {
       require(!agreements[id].soulbound(), "SOULBOUND");
       super.approve(to, id);
+  }
+
+  function setApprovalForAll(address operator, bool approved) public override { // solhint-disable no-unused-vars
+    require(false, "NOT_ALLOWED");
   }
 }

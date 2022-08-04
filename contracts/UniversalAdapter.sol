@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "hardhat/console.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 
@@ -10,19 +11,19 @@ contract UniversalAdapter is ChainlinkClient {
 
   uint constant public REQUEST_COST_IN_JULES = 100;
   // number of nodes allowed to send responses (This has been tested with a maximum of 48 nodes)
-  uint constant private NUMBER_OF_NODES = 5;
+  uint constant private NUMBER_OF_NODES = 16;
   // number of responses required to conclude a round (32 max for maximum gas efficency per response)
-  uint constant private RESPONSE_THRESHOLD = 3;
-  uint constant private BASE_REWARD = (REQUEST_COST_IN_JULES / 2) / NUMBER_OF_NODES;
+  uint constant private RESPONSE_THRESHOLD = 10;
+  uint constant private BASE_REWARD = (REQUEST_COST_IN_JULES / 2) / RESPONSE_THRESHOLD;
   uint constant private MIN_GAS_FOR_CALLBACK = 100000; //solhint-disable-line var-name-mixedcase
   uint40 constant private EXPIRATION_TIME_IN_SECONDS = 10000;
-  bytes32 constant private HASHED_RESPONSE_JOBSPEC = "134dc9324dcd4ec0a81161b5a1670242"; // make new jobspec
-  bytes32 constant private UNHASHED_RESPONSE_JOBSPEC = "c93c7da6ae604267be76f165870d12b0"; // make new jobspec
+  bytes32 constant private HASHED_RESPONSE_JOBSPEC = "134dc9324dcd4ec0a81161b5a1670242";
+  bytes32 constant private UNHASHED_RESPONSE_JOBSPEC = "c93c7da6ae604267be76f165870d12b0";
 
   event OracleRequest(
     bytes32 indexed specId,
     address requester,
-    uint requestId,
+    bytes32 requestId,
     uint256 payment,
     address callbackAddr,
     bytes4 callbackFunctionId,
@@ -43,55 +44,35 @@ contract UniversalAdapter is ChainlinkClient {
     mapping(uint8 => bytes32) answers;
   }
 
-  struct PublicVars {
-    string[] keys;
-    string[] values;
-  }
-
-  struct EncryptedPrivateVars {
-    string[] keys;
-    bytes[NUMBER_OF_NODES][] encryptedValuesByNodeId;
-  }
-
   // number of requests sent to the Universal Adapter
   uint private requestCount;
   // mapping from requestId to Round
-  mapping(uint => Round) private rounds;
+  mapping(bytes32 => Round) private rounds;
   // A nodeId is used to uniquely identify a node using only 1 byte
   mapping(address => uint8) private nodeIds;
   // mapping from nodeId to addres
   mapping(uint8 => address) private nodeAddresses;
-  // mapping from nodeId to address which receives payment
-  mapping(uint8 => address) private paymentCollectors;
-  // mapping from nodeAdmin address to nodeId for which the admin is authorized
-  mapping(address => uint8) private adminToNodeId;
-  mapping(uint8 => address) private nodeIdToAdmin;
-  // mapping from nodeId to the node's publicKey for encrypting EncryptedPrivateVars
-  mapping(uint8 => bytes) public nodePublicKeys;
-  // mapping from a voteHash to the number of votes in favor of swapping a node
-  mapping(bytes32 => bool[NUMBER_OF_NODES]) public swapVotes;
+  // mapping from a nodeId to the withdrawable LINK balance
+  mapping(uint8 => uint) public balance;
+  // mapping from msg.sender to the nodeId from which the withdrawer can collect payment
+  mapping(address => uint8) private withdrawableAccount;
 
   constructor(
     address _link,
-    address[] memory _nodeAddresses,
-    address[] memory _paymentCollectors,
-    address[] memory _nodeAdmins,
-    bytes[] memory _publicKeys
+    address[] memory nodes,
+    address[] memory paymentCollectors
   ) {
-    require(_nodeAddresses.length < 255, "too many");
+    require(nodes.length < 255, "too many");
     require(
-      _nodeAddresses.length == NUMBER_OF_NODES &&
-      _paymentCollectors.length == NUMBER_OF_NODES &&
-      _publicKeys.length == NUMBER_OF_NODES,
+      nodes.length == NUMBER_OF_NODES &&
+      paymentCollectors.length == NUMBER_OF_NODES,
       "wrong array length"
     );
-    for (uint8 i = 0; i < _nodeAddresses.length; i++) {
+    for (uint8 i = 0; i < nodes.length; i++) {
       uint8 nodeId = i + 1;
-      nodeIds[_nodeAddresses[i]] = nodeId;
-      adminToNodeId[_nodeAdmins[i]] = nodeId;
-      nodeIdToAdmin[nodeId] = _nodeAdmins[i];
-      nodeAddresses[nodeId] = _nodeAddresses[i];
-      paymentCollectors[nodeId] = _paymentCollectors[i];
+      nodeIds[nodes[i]] = nodeId;
+      nodeAddresses[nodeId] = nodes[i];
+      withdrawableAccount[paymentCollectors[i]] = nodeId;
     }
     setChainlinkToken(_link);
     linkToken = LinkTokenInterface(_link);
@@ -99,11 +80,12 @@ contract UniversalAdapter is ChainlinkClient {
 
   function makeRequest(
     bytes4 callbackFunctionId,
-    string memory source,
-    bytes32 checksum,
-    PublicVars memory publicVars,
-    EncryptedPrivateVars memory privateVars
-  ) external returns (uint _requestId) {
+    string calldata js,
+    string calldata cid,
+    string calldata vars,
+    string calldata ref
+  )
+  external returns (bytes32 _requestId) {
     linkToken.transferFrom(msg.sender, address(this), REQUEST_COST_IN_JULES);
     Chainlink.Request memory request;
     request = buildChainlinkRequest(
@@ -111,31 +93,43 @@ contract UniversalAdapter is ChainlinkClient {
       address(this),
       this.respondWithHashedAnswer.selector
     );
-    request.add("s", source);
-    request.addUint("c", uint(checksum));
-    request.addBytes("u", abi.encode(publicVars));
-    request.addBytes("r", abi.encode(privateVars));
+    request.addBytes("req", abi.encodePacked(msg.sender));
+    if (bytes(js).length != 0) {
+      request.add("js", js);
+    }
+    else if (bytes(cid).length != 0) {
+      request.add("cid", cid);
+    }
+    if (bytes(vars).length != 0) {
+      request.add("vars", vars);
+    }
+    if (bytes(ref).length != 0) {
+      request.add("ref", ref);
+    }
     return sendOracleRequest(callbackFunctionId, request);
   }
 
   function sendOracleRequest(
     bytes4 callbackFunctionId,
     Chainlink.Request memory request
-  ) internal returns (uint _requestId) {
+  ) internal returns (bytes32 _requestId) {
+    // TODO do we actually need to do keccak and get a hash or can we use requestCount as the requestID
+    //bytes32 requestId = keccak256(abi.encodePacked(msg.sender, requestCount));
     requestCount++;
-    rounds[requestCount].callbackAddress = msg.sender;
-    rounds[requestCount].callbackFunctionId = callbackFunctionId;
+    bytes32 requestId = bytes32(requestCount);
+    rounds[requestId].callbackAddress = msg.sender;
+    rounds[requestId].callbackFunctionId = callbackFunctionId;
     // solhint-disable-next-line not-rely-on-time
     uint40 expiration = EXPIRATION_TIME_IN_SECONDS + uint40(block.timestamp);
-    rounds[requestCount].expirationTime = expiration;
-    emit OracleRequest(HASHED_RESPONSE_JOBSPEC, msg.sender, requestCount, 0,
+    rounds[requestId].expirationTime = expiration;
+    emit OracleRequest(HASHED_RESPONSE_JOBSPEC, msg.sender, requestId, 0,
       msg.sender, callbackFunctionId, uint(expiration), 1, request.buf.buf
     );
-    return requestCount;
+    return requestId;
   }
 
   function respondWithHashedAnswer(
-    uint requestId,
+    bytes32 requestId,
     bytes8 hashedAnswer
   ) external {
     require(
@@ -156,12 +150,10 @@ contract UniversalAdapter is ChainlinkClient {
     if (rounds[requestId].hashedResponseCount == RESPONSE_THRESHOLD) {
       requestUnhashedAnswers(requestId);
     }
-    // pay the responder their base reward
-    linkToken.transfer(paymentCollectors[nodeId], BASE_REWARD);
   }
 
   function requestUnhashedAnswers(
-    uint requestId
+    bytes32 requestId
   ) internal {
     Chainlink.Request memory request;
     request = buildChainlinkRequest(
@@ -176,13 +168,12 @@ contract UniversalAdapter is ChainlinkClient {
   }
 
   function respondWithUnhashedAnswer(
-    uint requestId,
+    bytes32 requestId,
     bytes32 salt,
     bytes32 answer
   ) external returns (bool isSuccessful) {
     require(rounds[requestId].expirationTime != 0, "too late");
-    // solhint-disable-next-line not-rely-on-time
-    if (rounds[requestId].expirationTime < block.timestamp) {
+    if (rounds[requestId].expirationTime < block.timestamp) { // solhint-disable-line not-rely-on-time
       delete rounds[requestId];
       return false;
     }
@@ -190,18 +181,20 @@ contract UniversalAdapter is ChainlinkClient {
     require(rounds[requestId].hashedResponseCount >= RESPONSE_THRESHOLD, "too soon");
     // verify the answer matches the hashedAnswer
     require(
-      bytes32(keccak256(abi.encodePacked(uint(answer) + uint(salt))))
-      & 0x000000000000000000000000000000000000000000000000ffffffffffffffff
+      bytes32(keccak256(abi.encodePacked(uint(answer) + uint(salt)))) & 0x000000000000000000000000000000000000000000000000ffffffffffffffff
       == bytes32(rounds[requestId].hashedAnswers[nodeId - 1]) >> 192,
       "hash doesn't match"
     );
     // delete the hashedAnswer to prevent a duplicate response
     delete rounds[requestId].hashedAnswers[nodeId - 1];
     insertAnswerInOrder(requestId, answer);
+    // pay the responder their base reward
+    balance[nodeIds[msg.sender]] += BASE_REWARD;
     // if the response threshold has been reached,
     // get the median answer, distribute bonuse rewards and execute callback
     if (rounds[requestId].unhashedResponseCount == RESPONSE_THRESHOLD) {
       // calculate the median
+      // TODO get printout of answer array (must be done off-chain) to check that insertAnswerInOrder works
       bytes32 medianAnswer = getMedianAndDistributeBonusReward(requestId);
       // clean up
       address callbackAddress = rounds[requestId].callbackAddress;
@@ -223,7 +216,7 @@ contract UniversalAdapter is ChainlinkClient {
 
   // logic is faulty
   function insertAnswerInOrder(
-    uint requestId,
+    bytes32 requestId,
     bytes32 answer
   ) internal {
     uint8 nodeId = nodeIds[msg.sender];
@@ -246,18 +239,25 @@ contract UniversalAdapter is ChainlinkClient {
       middle = start + (end - start) / 2;
     }
     // shift the rest of the array forward by one index
-    uint responders = rounds[requestId].unhashedResponseCount;
-    for (uint indexOffset = 1; indexOffset <= (responders - start); indexOffset++) {
-      rounds[requestId].nodeIdsSortedByAnswer[responders - indexOffset + 1] =
-        rounds[requestId].nodeIdsSortedByAnswer[responders - indexOffset];
+    for (uint indexOffset = 1; indexOffset <= (rounds[requestId].unhashedResponseCount - start); indexOffset++) {
+      rounds[requestId].nodeIdsSortedByAnswer[rounds[requestId].unhashedResponseCount - indexOffset + 1] =
+        rounds[requestId].nodeIdsSortedByAnswer[rounds[requestId].unhashedResponseCount - indexOffset];
     }
     // add the nodeId at its correct postion to maintain order
+    console.log("inserting at position");
+    console.logUint(start);
     rounds[requestId].nodeIdsSortedByAnswer[start] = nodeId;
     rounds[requestId].unhashedResponseCount++;
+    console.log("PRINTING RESPONSES IN SORTED ORDER");
+    for (uint j = 0; j < rounds[requestId].unhashedResponseCount; j++) {
+      uint8 nodeIdInOrder = rounds[requestId].nodeIdsSortedByAnswer[j];
+      console.logUint(nodeIdInOrder);
+      console.log(uint(rounds[requestId].answers[nodeIdInOrder]));
+    }
   }
 
   function getMedianAndDistributeBonusReward(
-    uint requestId
+    bytes32 requestId
   ) internal returns (bytes32 median) {
     uint medianIndex = RESPONSE_THRESHOLD / 2;
     uint8 medianNodeId = rounds[requestId].nodeIdsSortedByAnswer[medianIndex];
@@ -287,65 +287,17 @@ contract UniversalAdapter is ChainlinkClient {
       }
     }
     // pay a bonus to all oracles with an answer matching the median
-    // totalRewardPool = requestCost - baseReward * numberOfHashedResponses
-    uint bonusReward = uint(
-      (REQUEST_COST_IN_JULES - BASE_REWARD * rounds[requestId].hashedResponseCount)
-      / numNodesWithMedian
-    );
+    uint bonusReward = uint(REQUEST_COST_IN_JULES / 2) / numNodesWithMedian;
+    console.log("Logging nodes with the median answer");
     for (uint i = 0; i < numNodesWithMedian; i++) {
-      linkToken.transfer(paymentCollectors[nodeIdsWithMedian[i]], bonusReward);
+      console.logUint(nodeIdsWithMedian[i]);
+      balance[nodeIdsWithMedian[i]] += bonusReward;
     }
     return medianAnswer;
   }
 
-  // vote to swap a node for another node.  When RESPONSE_THRESHOLD number of identical votes are recieved,
-  // the node is swapped
-  function voteToSwap(
-    uint8 nodeId,
-    address newNodeAddress,
-    address newPaymentCollector,
-    address newAdmin,
-    bytes calldata publicKey
-  ) public onlyNodeAdmins returns (bool swapOccurred) {
-    bytes32 voteHash = keccak256(abi.encodePacked(nodeId, newPaymentCollector, newNodeAddress, publicKey));
-    require(swapVotes[voteHash][adminToNodeId[msg.sender]-1] == false, "Only one vote");
-    // minus one because nodeIds start at 1 index and arrays start with a zero index
-    swapVotes[voteHash][adminToNodeId[msg.sender]-1] = true;
-    uint numVotes = 0;
-    for (uint i = 0; i < NUMBER_OF_NODES; i++) {
-      if (swapVotes[voteHash][i]) {
-        numVotes++;
-      }
-    }
-    if (numVotes == RESPONSE_THRESHOLD) {
-      // delete mapping from nodeAddress to nodeId so the old node is no longer allowed to respond
-      delete nodeIds[nodeAddresses[nodeId]];
-      // delete admin so it no longer has authorization to perform actions
-      delete adminToNodeId[nodeIdToAdmin[nodeId]];
-      nodeIdToAdmin[nodeId] = newAdmin;
-      adminToNodeId[newAdmin] = nodeId;
-      nodeIds[newNodeAddress] = nodeId;
-      nodeAddresses[nodeId] = newNodeAddress;
-      paymentCollectors[nodeId] = newPaymentCollector;
-      nodePublicKeys[nodeId] = publicKey;
-      delete swapVotes[voteHash];
-      return true;
-    }
-    return false;
-  }
-
-  function setPublicKey(bytes calldata publicKey) public onlyNodeAdmins {
-    nodePublicKeys[adminToNodeId[msg.sender]] = publicKey;
-  }
-
-  function setNodeAddress(address newNodeAddress) public onlyNodeAdmins {
-    delete nodeIds[nodeAddresses[adminToNodeId[msg.sender]]];
-    nodeIds[newNodeAddress] = adminToNodeId[msg.sender];
-    nodeAddresses[adminToNodeId[msg.sender]] = newNodeAddress;
-  }
-
-  modifier onlyNodeAdmins {
-    require(adminToNodeId[msg.sender] != 0, "Unauthorized");
-    _;
+  function withdrawEarnings()
+  external {
+    linkToken.transfer(msg.sender, balance[withdrawableAccount[msg.sender]]);
   }
 }

@@ -4,6 +4,7 @@
 import type {
   BaseContract,
   BigNumber,
+  BigNumberish,
   BytesLike,
   CallOverrides,
   ContractTransaction,
@@ -29,16 +30,15 @@ export interface AgreementInterface extends utils.Interface {
   functions: {
     "agreementId()": FunctionFragment;
     "cancelAgreement()": FunctionFragment;
-    "cancellations(address)": FunctionFragment;
     "cid()": FunctionFragment;
     "deadline()": FunctionFragment;
     "fulfillRequest(bytes32,bytes32)": FunctionFragment;
     "js()": FunctionFragment;
+    "onTokenTransfer(address,uint256,bytes)": FunctionFragment;
     "owner()": FunctionFragment;
     "priVars()": FunctionFragment;
     "pubVars()": FunctionFragment;
     "recoverFunds()": FunctionFragment;
-    "redeem(string,string)": FunctionFragment;
     "setOwner(address)": FunctionFragment;
     "soulbound()": FunctionFragment;
     "state()": FunctionFragment;
@@ -48,16 +48,15 @@ export interface AgreementInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "agreementId"
       | "cancelAgreement"
-      | "cancellations"
       | "cid"
       | "deadline"
       | "fulfillRequest"
       | "js"
+      | "onTokenTransfer"
       | "owner"
       | "priVars"
       | "pubVars"
       | "recoverFunds"
-      | "redeem"
       | "setOwner"
       | "soulbound"
       | "state"
@@ -71,10 +70,6 @@ export interface AgreementInterface extends utils.Interface {
     functionFragment: "cancelAgreement",
     values?: undefined
   ): string;
-  encodeFunctionData(
-    functionFragment: "cancellations",
-    values: [string]
-  ): string;
   encodeFunctionData(functionFragment: "cid", values?: undefined): string;
   encodeFunctionData(functionFragment: "deadline", values?: undefined): string;
   encodeFunctionData(
@@ -82,16 +77,16 @@ export interface AgreementInterface extends utils.Interface {
     values: [BytesLike, BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "js", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "onTokenTransfer",
+    values: [string, BigNumberish, BytesLike]
+  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(functionFragment: "priVars", values?: undefined): string;
   encodeFunctionData(functionFragment: "pubVars", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "recoverFunds",
     values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "redeem",
-    values: [string, string]
   ): string;
   encodeFunctionData(functionFragment: "setOwner", values: [string]): string;
   encodeFunctionData(functionFragment: "soulbound", values?: undefined): string;
@@ -105,10 +100,6 @@ export interface AgreementInterface extends utils.Interface {
     functionFragment: "cancelAgreement",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "cancellations",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "cid", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "deadline", data: BytesLike): Result;
   decodeFunctionResult(
@@ -116,6 +107,10 @@ export interface AgreementInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "js", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "onTokenTransfer",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "priVars", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "pubVars", data: BytesLike): Result;
@@ -123,7 +118,6 @@ export interface AgreementInterface extends utils.Interface {
     functionFragment: "recoverFunds",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "redeem", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "setOwner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "soulbound", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "state", data: BytesLike): Result;
@@ -188,8 +182,6 @@ export interface Agreement extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    cancellations(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
-
     cid(overrides?: CallOverrides): Promise<[string]>;
 
     deadline(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -202,6 +194,13 @@ export interface Agreement extends BaseContract {
 
     js(overrides?: CallOverrides): Promise<[string]>;
 
+    onTokenTransfer(
+      sender: string,
+      amount: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     priVars(overrides?: CallOverrides): Promise<[string]>;
@@ -209,12 +208,6 @@ export interface Agreement extends BaseContract {
     pubVars(overrides?: CallOverrides): Promise<[string]>;
 
     recoverFunds(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    redeem(
-      _vars: string,
-      _ref: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -236,8 +229,6 @@ export interface Agreement extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  cancellations(arg0: string, overrides?: CallOverrides): Promise<boolean>;
-
   cid(overrides?: CallOverrides): Promise<string>;
 
   deadline(overrides?: CallOverrides): Promise<BigNumber>;
@@ -250,6 +241,13 @@ export interface Agreement extends BaseContract {
 
   js(overrides?: CallOverrides): Promise<string>;
 
+  onTokenTransfer(
+    sender: string,
+    amount: BigNumberish,
+    data: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   owner(overrides?: CallOverrides): Promise<string>;
 
   priVars(overrides?: CallOverrides): Promise<string>;
@@ -257,12 +255,6 @@ export interface Agreement extends BaseContract {
   pubVars(overrides?: CallOverrides): Promise<string>;
 
   recoverFunds(
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  redeem(
-    _vars: string,
-    _ref: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -280,8 +272,6 @@ export interface Agreement extends BaseContract {
 
     cancelAgreement(overrides?: CallOverrides): Promise<void>;
 
-    cancellations(arg0: string, overrides?: CallOverrides): Promise<boolean>;
-
     cid(overrides?: CallOverrides): Promise<string>;
 
     deadline(overrides?: CallOverrides): Promise<BigNumber>;
@@ -294,6 +284,13 @@ export interface Agreement extends BaseContract {
 
     js(overrides?: CallOverrides): Promise<string>;
 
+    onTokenTransfer(
+      sender: string,
+      amount: BigNumberish,
+      data: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     owner(overrides?: CallOverrides): Promise<string>;
 
     priVars(overrides?: CallOverrides): Promise<string>;
@@ -301,12 +298,6 @@ export interface Agreement extends BaseContract {
     pubVars(overrides?: CallOverrides): Promise<string>;
 
     recoverFunds(overrides?: CallOverrides): Promise<void>;
-
-    redeem(
-      _vars: string,
-      _ref: string,
-      overrides?: CallOverrides
-    ): Promise<string>;
 
     setOwner(newOwner: string, overrides?: CallOverrides): Promise<void>;
 
@@ -336,8 +327,6 @@ export interface Agreement extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    cancellations(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
     cid(overrides?: CallOverrides): Promise<BigNumber>;
 
     deadline(overrides?: CallOverrides): Promise<BigNumber>;
@@ -350,6 +339,13 @@ export interface Agreement extends BaseContract {
 
     js(overrides?: CallOverrides): Promise<BigNumber>;
 
+    onTokenTransfer(
+      sender: string,
+      amount: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     priVars(overrides?: CallOverrides): Promise<BigNumber>;
@@ -357,12 +353,6 @@ export interface Agreement extends BaseContract {
     pubVars(overrides?: CallOverrides): Promise<BigNumber>;
 
     recoverFunds(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    redeem(
-      _vars: string,
-      _ref: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -383,11 +373,6 @@ export interface Agreement extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    cancellations(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     cid(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     deadline(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -400,6 +385,13 @@ export interface Agreement extends BaseContract {
 
     js(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    onTokenTransfer(
+      sender: string,
+      amount: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     priVars(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -407,12 +399,6 @@ export interface Agreement extends BaseContract {
     pubVars(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     recoverFunds(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    redeem(
-      _vars: string,
-      _ref: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

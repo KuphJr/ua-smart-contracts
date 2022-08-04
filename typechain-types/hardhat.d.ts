@@ -57,6 +57,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ENSInterface__factory>;
     getContractFactory(
+      name: "ERC677ReceiverInterface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC677ReceiverInterface__factory>;
+    getContractFactory(
       name: "LinkTokenInterface",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.LinkTokenInterface__factory>;
@@ -172,6 +176,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.ENSInterface>;
+    getContractAt(
+      name: "ERC677ReceiverInterface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC677ReceiverInterface>;
     getContractAt(
       name: "LinkTokenInterface",
       address: string,

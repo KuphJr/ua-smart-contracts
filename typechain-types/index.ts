@@ -30,6 +30,8 @@ export type { ChainlinkRequestInterface } from "./@chainlink/contracts/src/v0.8/
 export { ChainlinkRequestInterface__factory } from "./factories/@chainlink/contracts/src/v0.8/interfaces/ChainlinkRequestInterface__factory";
 export type { ENSInterface } from "./@chainlink/contracts/src/v0.8/interfaces/ENSInterface";
 export { ENSInterface__factory } from "./factories/@chainlink/contracts/src/v0.8/interfaces/ENSInterface__factory";
+export type { ERC677ReceiverInterface } from "./@chainlink/contracts/src/v0.8/interfaces/ERC677ReceiverInterface";
+export { ERC677ReceiverInterface__factory } from "./factories/@chainlink/contracts/src/v0.8/interfaces/ERC677ReceiverInterface__factory";
 export type { LinkTokenInterface } from "./@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface";
 export { LinkTokenInterface__factory } from "./factories/@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface__factory";
 export type { OperatorInterface } from "./@chainlink/contracts/src/v0.8/interfaces/OperatorInterface";

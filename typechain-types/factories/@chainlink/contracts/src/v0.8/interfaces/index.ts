@@ -3,6 +3,7 @@
 /* eslint-disable */
 export { ChainlinkRequestInterface__factory } from "./ChainlinkRequestInterface__factory";
 export { ENSInterface__factory } from "./ENSInterface__factory";
+export { ERC677ReceiverInterface__factory } from "./ERC677ReceiverInterface__factory";
 export { LinkTokenInterface__factory } from "./LinkTokenInterface__factory";
 export { OperatorInterface__factory } from "./OperatorInterface__factory";
 export { OracleInterface__factory } from "./OracleInterface__factory";

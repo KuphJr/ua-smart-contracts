@@ -3,6 +3,7 @@
 /* eslint-disable */
 export type { ChainlinkRequestInterface } from "./ChainlinkRequestInterface";
 export type { ENSInterface } from "./ENSInterface";
+export type { ERC677ReceiverInterface } from "./ERC677ReceiverInterface";
 export type { LinkTokenInterface } from "./LinkTokenInterface";
 export type { OperatorInterface } from "./OperatorInterface";
 export type { OracleInterface } from "./OracleInterface";
