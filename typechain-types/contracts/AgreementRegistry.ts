@@ -492,7 +492,10 @@ export interface AgreementRegistry extends BaseContract {
 
     burn(id: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
-    createAgreement(data: BytesLike, overrides?: CallOverrides): Promise<void>;
+    createAgreement(
+      data: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
     getApproved(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 

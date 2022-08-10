@@ -36,7 +36,7 @@ contract AgreementRegistry is Owned, ERC721 {
   // This is the 'create' function.  It is triggered using transferAndCall() from the LINK token
   function createAgreement(
     bytes calldata data
-  ) external payable {
+  ) public payable returns(address) {
     address redeemer;
     uint256 deadline;
     bool soulbound;
@@ -63,7 +63,7 @@ contract AgreementRegistry is Owned, ERC721 {
           nonces[msg.sender]++
         ));
     }
-    createAgreement(
+    address agreementAddress = createAgreement(
       salt,
       agreementId,
       redeemer,
@@ -72,6 +72,7 @@ contract AgreementRegistry is Owned, ERC721 {
       maxPayout,
       agreementData
     );
+    return agreementAddress;
   }
 
   function createAgreement(
@@ -82,7 +83,7 @@ contract AgreementRegistry is Owned, ERC721 {
     bool soulbound,
     uint256 maxPayout,
     bytes memory agreementData
-  ) internal {
+  ) internal returns(address) {
     Agreement agreement = new Agreement{salt: salt}(
       linkToken,
       universalAdapter,
@@ -101,6 +102,7 @@ contract AgreementRegistry is Owned, ERC721 {
     _safeMint(redeemer, agreementId);
 
     emit Created(msg.sender, agreementId);
+    return address(agreement);
 }
 
 // gets the ids for all the agreements that have been created by the specified creator
