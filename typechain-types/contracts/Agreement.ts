@@ -125,10 +125,12 @@ export interface AgreementInterface extends utils.Interface {
   events: {
     "Filled(uint256)": EventFragment;
     "OwnerUpdated(address,address)": EventFragment;
+    "Received(address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Filled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnerUpdated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Received"): EventFragment;
 }
 
 export interface FilledEventObject {
@@ -148,6 +150,17 @@ export type OwnerUpdatedEvent = TypedEvent<
 >;
 
 export type OwnerUpdatedEventFilter = TypedEventFilter<OwnerUpdatedEvent>;
+
+export interface ReceivedEventObject {
+  arg0: string;
+  arg1: BigNumber;
+}
+export type ReceivedEvent = TypedEvent<
+  [string, BigNumber],
+  ReceivedEventObject
+>;
+
+export type ReceivedEventFilter = TypedEventFilter<ReceivedEvent>;
 
 export interface Agreement extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -318,6 +331,9 @@ export interface Agreement extends BaseContract {
       user?: string | null,
       newOwner?: string | null
     ): OwnerUpdatedEventFilter;
+
+    "Received(address,uint256)"(arg0?: null, arg1?: null): ReceivedEventFilter;
+    Received(arg0?: null, arg1?: null): ReceivedEventFilter;
   };
 
   estimateGas: {

@@ -17,34 +17,33 @@ async function main() {
 
   // Deploy
   const AgreementRegistry = await ethers.getContractFactory("AgreementRegistry")
-  // const agreementRegistry = await AgreementRegistry.deploy(
-  //   '0x326C977E6efc84E512bB9C30f76E30c160eD06FB',
-  //   '0x5526B90295EcAbB23E4ce210511071843C8EE955'
-  // )
-  // const agreementRegistryAddress = (await ethers.provider.waitForTransaction(agreementRegistry.deployTransaction.hash)).contractAddress
-  const agreementRegistryAddress = '0xf85D6c15aF61ff960063fa7Cc648313Ba6b4E233'
-  const agreementRegistry = await AgreementRegistry.attach(agreementRegistryAddress)
+  const agreementRegistry = await AgreementRegistry.deploy(
+    '0x326C977E6efc84E512bB9C30f76E30c160eD06FB',
+    '0x5526B90295EcAbB23E4ce210511071843C8EE955'
+  )
+  const agreementRegistryAddress = (await ethers.provider.waitForTransaction(agreementRegistry.deployTransaction.hash)).contractAddress
+  // const agreementRegistryAddress = '0xf85D6c15aF61ff960063fa7Cc648313Ba6b4E233'
+  // const agreementRegistry = await AgreementRegistry.attach(agreementRegistryAddress)
 
   console.log('AgreementRegistry Address: ', agreementRegistryAddress);
 
   // CREATE
   
-  console.log('Calling LINK.transferAndCall() to create agreement')
-  const linkToken = await LinkToken.attach('0x326C977E6efc84E512bB9C30f76E30c160eD06FB')
+  console.log('Funding and creating agreement')
   const abiCoder = new ethers.utils.AbiCoder()
   const agreementData = abiCoder.encode(
     ['string', 'string', 'string', 'string', 'string'],
     ['', 'bafybeiezwwxj54kiq2jg6umrzdmf3ryshooxbk6o6vf6lg4hc7qnwh7nyu', 'pub1,pub2', 'pri1,pri2', '']
   )
-  const tokenTx = await linkToken.transferAndCall(
-    agreementRegistryAddress,
-    BigInt(100),
+  const createTx = await agreementRegistry.createAgreement(
     abiCoder.encode(
       ['address', 'uint', 'bool', 'uint', 'bytes'],
-      ['0xB7aB5555BB8927BF16F8496da338a3033c12F8f3', BigInt('1858367000'), true, 100, agreementData]
-    )
+      ['0xB7aB5555BB8927BF16F8496da338a3033c12F8f3', BigInt('1958367000'), true, BigInt('100000000000000000'), agreementData]
+    ), {
+      value: BigInt('100000000000000000')
+    }
   )
-  await ethers.provider.waitForTransaction(tokenTx.hash)
+  await ethers.provider.waitForTransaction(createTx.hash)
   console.log('Agreement has been successfully funded & created')
   agreementRegistry.on('Created', async (creatorAddress, agreementId) => {
     console.log(await agreementRegistry.tokenURI(agreementId))
@@ -55,7 +54,7 @@ async function main() {
     console.log('NFT URI: ' + await agreementRegistry.tokenURI(agreementId))
 
   //REDEEM
-
+  const linkToken = await LinkToken.attach('0x326C977E6efc84E512bB9C30f76E30c160eD06FB')
   console.log('Calling transferAndCall to redeem agreement')
   const tokenTx2 = await linkToken.transferAndCall(
     ethers.utils.getAddress(agreementAddress),

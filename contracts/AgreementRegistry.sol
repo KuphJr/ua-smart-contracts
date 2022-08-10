@@ -4,12 +4,11 @@ pragma solidity ^0.8.0;
 import "./interfaces/IUniversalAdapter.sol";
 import {Agreement} from "./Agreement.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/ERC677ReceiverInterface.sol";
 import {Strings} from "./utils/Strings.sol";
 import {Owned} from "solmate/src/auth/Owned.sol";
 import {ERC721} from "solmate/src/tokens/ERC721.sol";
 
-contract AgreementRegistry is Owned, ERC721, ERC677ReceiverInterface {
+contract AgreementRegistry is Owned, ERC721 {
   using Strings for address;
   using Strings for string;
   using Strings for uint256;
@@ -34,13 +33,10 @@ contract AgreementRegistry is Owned, ERC721, ERC677ReceiverInterface {
     universalAdapter = _universalAdapter;
   }
 
-
   // This is the 'create' function.  It is triggered using transferAndCall() from the LINK token
-  function onTokenTransfer( // solhint-disable payable-fallback, no-complex-fallback
-    address sender,
-    uint256 value,
+  function createAgreement(
     bytes calldata data
-  ) external {
+  ) external payable {
     address redeemer;
     uint256 deadline;
     bool soulbound;
@@ -53,9 +49,8 @@ contract AgreementRegistry is Owned, ERC721, ERC677ReceiverInterface {
       maxPayout,
       agreementData
     ) = abi.decode(data, (address, uint256, bool, uint256, bytes));
-    require(msg.sender == address(linkToken), "NOT_LINK");
     require(redeemer != address(0), "INVALID_ADDRESS");
-    require(value == maxPayout, "WRONG_AMOUNT");
+    require(msg.value == maxPayout, "WRONG_AMOUNT");
     // solhint-disable-next-line not-rely-on-time
     require(deadline > block.timestamp, "INVALID_DEADLINE");
     uint256 agreementId = ids++;
@@ -64,12 +59,11 @@ contract AgreementRegistry is Owned, ERC721, ERC677ReceiverInterface {
     bytes32 salt;
     unchecked {
       salt = keccak256(abi.encodePacked(
-          sender,
-          nonces[sender]++
+          msg.sender,
+          nonces[msg.sender]++
         ));
     }
     createAgreement(
-      sender,
       salt,
       agreementId,
       redeemer,
@@ -81,7 +75,6 @@ contract AgreementRegistry is Owned, ERC721, ERC677ReceiverInterface {
   }
 
   function createAgreement(
-    address sender,
     bytes32 salt,
     uint256 agreementId,
     address redeemer,
@@ -95,19 +88,19 @@ contract AgreementRegistry is Owned, ERC721, ERC677ReceiverInterface {
       universalAdapter,
       address(this),
       agreementId,
-      sender,
+      msg.sender,
       deadline,
       soulbound,
       agreementData
     );
-    linkToken.transfer(address(agreement), maxPayout);
+    payable(address(agreement)).transfer(maxPayout);
     agreements.push(agreement);
-    creatorAgreements[sender].push(agreementId);
+    creatorAgreements[msg.sender].push(agreementId);
     redeemerAgreements[redeemer].push(agreementId);
 
     _safeMint(redeemer, agreementId);
 
-    emit Created(sender, agreementId);
+    emit Created(msg.sender, agreementId);
 }
 
 // gets the ids for all the agreements that have been created by the specified creator

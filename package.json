@@ -37,9 +37,11 @@
     "typescript": "^4.6.4"
   },
   "dependencies": {
+    "@types/crypto-js": "^4.1.1",
     "axios": "^0.27.2",
     "base64-sol": "^1.1.0",
     "crypto": "^1.0.1",
+    "crypto-js": "^4.1.1",
     "solc": "^0.8.15",
     "solmate": "^6.5.0"
   }

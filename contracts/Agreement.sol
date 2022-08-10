@@ -23,9 +23,9 @@ contract Agreement is Owned, ERC677ReceiverInterface {
   string public pubVars; // required public variables, separated by commas
   string public priVars; // required private variables, separated by commas
 
-  event Filled(
-    uint256 result
-  );
+  event Received(address, uint);
+
+  event Filled(uint256 result);
 
   constructor (
     LinkTokenInterface _linkToken,
@@ -50,6 +50,10 @@ contract Agreement is Owned, ERC677ReceiverInterface {
       pubVars,
       ref
     ) = abi.decode(data, (string, string, string, string, string));
+  }
+
+  receive() external payable {
+    emit Received(msg.sender, msg.value);
   }
 
   // this is the 'redeem' function
@@ -82,24 +86,23 @@ contract Agreement is Owned, ERC677ReceiverInterface {
     require(msg.sender == ERC721(agreementRegistry).ownerOf(agreementId), "NOT_REDEEMER");
     state_ = 2;
     // transfer funds back to agreement creator
-    linkToken.transfer(owner, linkToken.balanceOf(address(this)));
+    payable(owner).transfer(address(this).balance);
   }
 
   function recoverFunds() public {
-    require(msg.sender == owner, "NOT_CREATOR");
     require(state() != 0, "ACTIVE");
-    linkToken.transfer(msg.sender, linkToken.balanceOf(address(this)));
+    payable(owner).transfer(address(this).balance);
   }
 
   function fulfillRequest(bytes32, bytes32 _result)
     public onlyUniversalAdapter
   {
     state_ = 1;
-    if (uint256(_result) > linkToken.balanceOf(address(this))) {
-      linkToken.transfer(ERC721(agreementRegistry).ownerOf(agreementId), linkToken.balanceOf(address(this)));
+    if (uint256(_result) > address(this).balance) {
+      payable(ERC721(agreementRegistry).ownerOf(agreementId)).transfer(address(this).balance);
     } else {
-      linkToken.transfer(ERC721(agreementRegistry).ownerOf(agreementId), uint256(_result));
-      linkToken.transfer(owner, linkToken.balanceOf(address(this)));
+      payable(ERC721(agreementRegistry).ownerOf(agreementId)).transfer(uint256(_result));
+      payable(owner).transfer(address(this).balance);
     }
     emit Filled(uint(_result));
   }

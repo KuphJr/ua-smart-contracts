@@ -9,6 +9,7 @@ import type {
   CallOverrides,
   ContractTransaction,
   Overrides,
+  PayableOverrides,
   PopulatedTransaction,
   Signer,
   utils,
@@ -32,13 +33,13 @@ export interface AgreementRegistryInterface extends utils.Interface {
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "burn(uint256)": FunctionFragment;
+    "createAgreement(bytes)": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
     "getCreatorAgreements(address)": FunctionFragment;
     "getRedeemerAgreements(address)": FunctionFragment;
     "ids()": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
     "name()": FunctionFragment;
-    "onTokenTransfer(address,uint256,bytes)": FunctionFragment;
     "owner()": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
@@ -57,13 +58,13 @@ export interface AgreementRegistryInterface extends utils.Interface {
       | "approve"
       | "balanceOf"
       | "burn"
+      | "createAgreement"
       | "getApproved"
       | "getCreatorAgreements"
       | "getRedeemerAgreements"
       | "ids"
       | "isApprovedForAll"
       | "name"
-      | "onTokenTransfer"
       | "owner"
       | "ownerOf"
       | "safeTransferFrom(address,address,uint256)"
@@ -87,6 +88,10 @@ export interface AgreementRegistryInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
   encodeFunctionData(functionFragment: "burn", values: [BigNumberish]): string;
   encodeFunctionData(
+    functionFragment: "createAgreement",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getApproved",
     values: [BigNumberish]
   ): string;
@@ -104,10 +109,6 @@ export interface AgreementRegistryInterface extends utils.Interface {
     values: [string, string]
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "onTokenTransfer",
-    values: [string, BigNumberish, BytesLike]
-  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "ownerOf",
@@ -145,6 +146,10 @@ export interface AgreementRegistryInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "burn", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "createAgreement",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getApproved",
     data: BytesLike
   ): Result;
@@ -162,10 +167,6 @@ export interface AgreementRegistryInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "onTokenTransfer",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
   decodeFunctionResult(
@@ -307,6 +308,11 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    createAgreement(
+      data: BytesLike,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     getApproved(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -331,13 +337,6 @@ export interface AgreementRegistry extends BaseContract {
     ): Promise<[boolean]>;
 
     name(overrides?: CallOverrides): Promise<[string]>;
-
-    onTokenTransfer(
-      sender: string,
-      value: BigNumberish,
-      data: BytesLike,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -407,6 +406,11 @@ export interface AgreementRegistry extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  createAgreement(
+    data: BytesLike,
+    overrides?: PayableOverrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   getApproved(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
   getCreatorAgreements(
@@ -428,13 +432,6 @@ export interface AgreementRegistry extends BaseContract {
   ): Promise<boolean>;
 
   name(overrides?: CallOverrides): Promise<string>;
-
-  onTokenTransfer(
-    sender: string,
-    value: BigNumberish,
-    data: BytesLike,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -495,6 +492,8 @@ export interface AgreementRegistry extends BaseContract {
 
     burn(id: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
+    createAgreement(data: BytesLike, overrides?: CallOverrides): Promise<void>;
+
     getApproved(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
     getCreatorAgreements(
@@ -516,13 +515,6 @@ export interface AgreementRegistry extends BaseContract {
     ): Promise<boolean>;
 
     name(overrides?: CallOverrides): Promise<string>;
-
-    onTokenTransfer(
-      sender: string,
-      value: BigNumberish,
-      data: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -634,6 +626,11 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    createAgreement(
+      data: BytesLike,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     getApproved(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -658,13 +655,6 @@ export interface AgreementRegistry extends BaseContract {
     ): Promise<BigNumber>;
 
     name(overrides?: CallOverrides): Promise<BigNumber>;
-
-    onTokenTransfer(
-      sender: string,
-      value: BigNumberish,
-      data: BytesLike,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -735,6 +725,11 @@ export interface AgreementRegistry extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    createAgreement(
+      data: BytesLike,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     getApproved(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -759,13 +754,6 @@ export interface AgreementRegistry extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    onTokenTransfer(
-      sender: string,
-      value: BigNumberish,
-      data: BytesLike,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
