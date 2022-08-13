@@ -123,7 +123,7 @@ function tokenURI(uint256 id) public view override returns (string memory uri) {
   uri = string(abi.encodePacked(
     '"address":"', address(agreement).toString(),
     '","agreementCode":"', bytes(agreement.cid()).length > 0 ? agreement.cid() : agreement.js(),
-    '","balance":"', linkToken.balanceOf(address(agreement)).toString(),
+    '","balance":"', address(agreement).balance.toString(),
     '","creator":"', agreement.owner().toString(),
     '","redeemer":"', _ownerOf[id].toString(),
     '","soulbound":"', agreement.soulbound() ? "true" : "false",

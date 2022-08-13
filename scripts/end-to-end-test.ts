@@ -40,7 +40,7 @@ async function main() {
       ['address', 'uint', 'bool', 'uint', 'bytes'],
       ['0xB7aB5555BB8927BF16F8496da338a3033c12F8f3', BigInt('1958367000'), true, BigInt('100000000000000000'), agreementData]
     ), {
-      value: BigInt('100000000000000000')
+      value: ethers.utils.parseEther('0.1')
     }
   )
   await ethers.provider.waitForTransaction(createTx.hash)
