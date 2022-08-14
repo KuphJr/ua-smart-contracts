@@ -4,7 +4,8 @@ import { ethers } from 'hardhat'
 async function main() {
   const LinkToken = await ethers.getContractFactory('LinkToken')
   const UniversalAdapter = await ethers.getContractFactory("UniversalAdapter")
-  const universalAdapter = await UniversalAdapter.attach('0x5526B90295EcAbB23E4ce210511071843C8EE955')
+  const universalAdapterAddress = '0xb5c38c69cB3eb4108c92e9c19Ed43E71E0BeaAaE'
+  const universalAdapter = await UniversalAdapter.attach(universalAdapterAddress)//'0x5526B90295EcAbB23E4ce210511071843C8EE955')
 
   universalAdapter.on(
     'OracleRequest',
@@ -19,7 +20,7 @@ async function main() {
   const AgreementRegistry = await ethers.getContractFactory("AgreementRegistry")
   const agreementRegistry = await AgreementRegistry.deploy(
     '0x326C977E6efc84E512bB9C30f76E30c160eD06FB',
-    '0x5526B90295EcAbB23E4ce210511071843C8EE955'
+    universalAdapterAddress
   )
   const agreementRegistryAddress = (await ethers.provider.waitForTransaction(agreementRegistry.deployTransaction.hash)).contractAddress
   // const agreementRegistryAddress = '0xf85D6c15aF61ff960063fa7Cc648313Ba6b4E233'
@@ -27,8 +28,7 @@ async function main() {
 
   console.log('AgreementRegistry Address: ', agreementRegistryAddress);
 
-  // CREATE
-  
+  // CREATE  
   console.log('Funding and creating agreement')
   const abiCoder = new ethers.utils.AbiCoder()
   const agreementData = abiCoder.encode(
