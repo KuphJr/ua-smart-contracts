@@ -3,3 +3,4 @@ forge-std/=lib/forge-std/src/
 base64/=lib/base64/
 chainlink/=lib/chainlink-brownie-contracts/contracts/src/v0.8/
 @solmate/=lib/solmate/src/
+hot-chain-svg/=lib/hot-chain-svg/contracts/

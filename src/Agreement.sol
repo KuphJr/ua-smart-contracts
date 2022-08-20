@@ -88,7 +88,7 @@ contract Agreement is IAgreement, Owned {
     ) = abi.decode(data, (string, string, string[], string[], string));
   }
 
-  function makeRequest( 
+  function redeem( 
     string calldata _vars,
     string calldata _ref
   ) public override returns (bytes32 universalAdapterRequestId) {

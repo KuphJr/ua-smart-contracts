@@ -44,7 +44,7 @@ contract CreateAgreement is Script {
         );
         vm.startBroadcast(redeemer);
         linkToken.approve(address(agreement), agreement.requestCost());
-        agreement.makeRequest("", "");
+        agreement.redeem("", "");
         vm.stopBroadcast();
     }
 }

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 interface IAgreement {
-    function makeRequest(
+    function redeem(
         string calldata _vars,
         string calldata _ref
     ) external returns (bytes32);
