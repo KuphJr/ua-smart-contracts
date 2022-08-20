@@ -22,7 +22,7 @@ contract CreateAgreement is Script {
         maxPayout = 200;
 
         vm.startBroadcast();
-        registry = new AgreementRegistry(linkToken, adapter, 100);
+        registry = new AgreementRegistry(linkToken, adapter);
         linkToken.approve(address(registry), maxPayout);
         vm.stopBroadcast();
     }

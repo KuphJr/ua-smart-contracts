@@ -17,7 +17,7 @@ contract CreateTestAgreement is Script {
         vm.startBroadcast();
         MockLinkToken mockLinkToken = new MockLinkToken();
         linkToken = LinkTokenInterface(address(mockLinkToken));
-        registry = new AgreementRegistry(LinkTokenInterface(linkToken), IUniversalAdapter(address(1337)), 100);
+        registry = new AgreementRegistry(LinkTokenInterface(linkToken), IUniversalAdapter(address(1337)));
         linkToken.approve(address(registry), type(uint256).max);
         vm.stopBroadcast();
     }
